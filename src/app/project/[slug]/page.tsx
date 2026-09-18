@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects";
 import { Tag } from "@/components/ui";
@@ -50,6 +51,25 @@ export default async function ProjectDetail({
       <p className="mt-8 text-lg leading-relaxed text-muted">
         {project.brief}
       </p>
+
+      {project.images && project.images.length > 0 && (
+        <div className="mt-8 space-y-4">
+          {project.images.map((src) => (
+            <div
+              key={src}
+              className="overflow-hidden rounded-2xl border border-border"
+            >
+              <Image
+                src={src}
+                alt={project.title}
+                width={1400}
+                height={900}
+                className="h-auto w-full"
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="mt-8 grid gap-6 rounded-2xl border border-border bg-surface p-6 sm:grid-cols-2">
         <div>

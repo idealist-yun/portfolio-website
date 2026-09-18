@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { projects, allDomains, allPhases, type Domain, type Phase } from "@/data/projects";
 import { Tag, Card } from "@/components/ui";
 
@@ -52,6 +53,17 @@ export default function ProjectGrid() {
         {filtered.map((p) => (
           <Link key={p.slug} href={`/project/${p.slug}`} className="group block">
             <Card>
+              {p.images && p.images[0] && (
+                <div className="-mx-6 -mt-6 mb-4 aspect-[16/9] overflow-hidden rounded-t-2xl border-b border-border">
+                  <Image
+                    src={p.images[0]}
+                    alt={p.title}
+                    width={800}
+                    height={450}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
               <div className="flex items-start justify-between gap-3">
                 <span
                   className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${phaseStyle[p.phase]}`}

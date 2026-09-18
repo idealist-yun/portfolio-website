@@ -19,6 +19,7 @@ export type Project = {
   phase: Phase;
   domains: Domain[];
   brief: string;
+  images?: string[];
   role: string;
   outcome: string[];
   sections: Section[];
@@ -34,6 +35,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Startup & Venture"],
+    images: ["/images/projects/undergraduate-works.jpg"],
     brief:
       "Founded and ran a student strategy-consulting club after a professor's design-thinking class reframed how I saw my own future.",
     role: "Founder & President",
@@ -73,6 +75,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Public Sector"],
+    images: ["/images/projects/mcst-public-communication.jpg"],
     brief:
       "Designed and ran a 3-day participatory co-design lab that turned qualitative citizen data into a communication strategy — later recognized as an OECD Best Practice.",
     role: "Data analysis, visualization, and student-team management",
@@ -111,6 +114,7 @@ export const projects: Project[] = [
     location: "Injae, Korea",
     phase: "Basic",
     domains: ["Military"],
+    images: ["/images/projects/military-3d-battlefield-mapping.jpg"],
     brief:
       "Turned a dense-forest front-line area no one could read from 2D maps into a physical clay terrain model and 3D-mapped training tool, ahead of a live defense operation.",
     role: "Company Commander, operational planning",
@@ -148,6 +152,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Military"],
+    images: ["/images/projects/veterans-reintegration.jpg"],
     brief:
       "Built employment and healthcare support infrastructure for 3,561 discharging ROTC officers, from scratch, as founding president.",
     role: "Founder & President",
@@ -181,6 +186,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Disability & Healthcare"],
+    images: ["/images/projects/saihst-hospital-metaverse.jpg"],
     brief:
       "Designed UI/UX for a hospital super app and prototyped a collaborative, gamified rehabilitation service for Samsung Seoul Hospital's long-stay patients.",
     role: "UI/UX design, service prototyping",
@@ -217,6 +223,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Disability & Healthcare"],
+    images: ["/images/projects/disability-as-market.jpg"],
     brief:
       "The essay where I first argued disability should be approached as a market-expansion strategy, not only a welfare issue — the direct origin of my thesis and my current research direction.",
     role: "Author; later, field researcher at NRC",
@@ -288,6 +295,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Data-Driven",
     domains: ["Retail & Consumer"],
+    images: ["/images/projects/starfield-existing-branch.jpg"],
     brief:
       "My first SDI Lab project — quantified mall-branch 'fandom' from Instagram and card data to guide new F&B brand placement.",
     role: "Data analysis, visualization, social-media collection & NLP (early role: assisting a senior teammate while learning to code)",
@@ -325,6 +333,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Data-Driven",
     domains: ["Corporate Strategy", "Retail & Consumer"],
+    images: ["/images/projects/samsung-brand-fandom.jpg"],
     brief:
       "Gave Samsung's appliance executives their first quantitative read on why they felt they were losing brand-power ground to LG.",
     role: "Data analysis, visualization",
@@ -361,6 +370,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Data-Driven",
     domains: ["Corporate Strategy", "Retail & Consumer"],
+    images: ["/images/projects/samsung-lifelog-minifridge.jpg"],
     brief:
       "Mapped daily household behavior onto real floor plans to find where a new mini-fridge line actually belonged in people's homes.",
     role: "Data analysis, visualization (joined in the project's later stage)",
@@ -392,6 +402,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Data-Driven",
     domains: ["Corporate Strategy", "Retail & Consumer"],
+    images: ["/images/projects/samsung-raemian-metaverse.jpg"],
     brief:
       "Designed metaverse resident services for a premium apartment brand by combining housing-quality theory with Prof. Choi Jae-bung's 'Phono Sapiens' model.",
     role: "Service scenario development, prototyping, student-team mentoring",
@@ -421,6 +432,7 @@ export const projects: Project[] = [
     location: "Changwon, Korea",
     phase: "Data-Driven",
     domains: ["Retail & Consumer"],
+    images: ["/images/projects/starfield-new-branch-1.jpg"],
     brief:
       "Predicted who would actually shop a not-yet-built mall branch, and what they'd want, from card and demographic data alone.",
     role: "Demographic analysis, persona design",
@@ -451,6 +463,7 @@ export const projects: Project[] = [
     location: "Korea",
     phase: "Data-Driven",
     domains: ["Retail & Consumer"],
+    images: ["/images/projects/starfield-new-branch-2.jpg"],
     brief:
       "A second new-branch prediction project, this time pairing the quantitative model with direct persona interviews.",
     role: "Demographic analysis, persona design",
@@ -489,6 +502,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "AI-Driven",
     domains: ["Public Sector", "Robotics & AI"],
+    images: ["/images/projects/vip-concierge-robot-1.jpg", "/images/projects/vip-concierge-robot-2.jpg", "/images/projects/vip-concierge-robot-3.jpg"],
     brief:
       "Turned a royal-court induction ceremony from the Joseon dynasty into the interaction design for three serving robots greeting VIP guests — not on my resume, only surfaced once I audited this site.",
     role: "Service design, human-robot interaction design, cross-lab coordination",
@@ -528,6 +542,7 @@ export const projects: Project[] = [
     location: "Weihai, China / Seoul, Korea",
     phase: "AI-Driven",
     domains: ["Robotics & AI", "Corporate Strategy"],
+    images: ["/images/projects/manufacturing-worker-training-ai-1.jpg", "/images/projects/manufacturing-worker-training-ai-2.jpg"],
     brief:
       "Digitizing workers instead of machines, in a labor-intensive process too manual for a traditional digital twin — now an AI tool that pinpoints exactly where a finished wire harness went wrong.",
     role: "Overall research design and supervision (co-research with a labmate handling implementation and authorship)",

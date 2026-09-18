@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   research,
   statusOrder,
@@ -55,6 +56,17 @@ export default function ResearchList() {
                     className="group block"
                   >
                     <Card>
+                      {item.images && item.images[0] && (
+                        <div className="-mx-6 -mt-6 mb-4 aspect-[16/9] overflow-hidden rounded-t-2xl border-b border-border">
+                          <Image
+                            src={item.images[0]}
+                            alt={item.title}
+                            width={800}
+                            height={450}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      )}
                       <div className="flex flex-wrap items-start justify-between gap-3">
                         <h3 className="font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
                           {item.title} <span className="text-accent">→</span>

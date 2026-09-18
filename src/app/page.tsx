@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { profile } from "@/data/profile";
 import { Eyebrow } from "@/components/ui";
 
@@ -78,6 +79,27 @@ export default function Home() {
             where social innovation, human behavior, and complex service
             needs intersect.
           </p>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-14">
+        <h2 className="font-serif text-2xl font-semibold text-foreground">
+          About Me
+        </h2>
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">
+          Beyond my work, I enjoy traveling, playing the piano, running, and
+          reading — moments that help me reset, think clearly, and stay
+          creative. I also love meeting new people and connecting with
+          others, so I genuinely look forward to the day our paths cross.
+        </p>
+        <div className="mt-8 overflow-hidden rounded-2xl border border-border">
+          <Image
+            src="/images/about-collage.png"
+            alt="Snapshots of Yun traveling, surfing, playing piano, and running a marathon"
+            width={1520}
+            height={744}
+            className="w-full h-auto"
+          />
         </div>
       </section>
 

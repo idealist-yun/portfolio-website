@@ -31,7 +31,7 @@ export const research: ResearchItem[] = [
     venue: "Master's Thesis, Sungkyunkwan University",
     date: "Jun. 2025",
     topics: ["Disability & Accessibility"],
-    images: ["/images/research/disability-persona-augmentation.jpg"],
+    images: ["/images/cards/disability-persona-augmentation.jpg", "/images/research/disability-persona-augmentation.jpg"],
     summary:
       "Augmented 9 real caregiver interviews into 2,400 synthetic profiles and simulated daily-living support needs for people with developmental disabilities across 11 ADL/IADL scenarios — a reusable framework for a domain where data is always scarce.",
     sections: [
@@ -63,6 +63,7 @@ export const research: ResearchItem[] = [
     venue: "Korean Academy of Military Social Welfare",
     date: "Dec. 2024",
     topics: ["Military & HR"],
+    images: ["/images/cards/military-life-cycle-pattern.jpg"],
     summary:
       "Interviewed 18 high-performing soldiers to derive a 5-stage military life-cycle model — grounded in my own experience commanding 60+ personnel and managing HR as a company commander.",
     sections: [
@@ -281,7 +282,7 @@ export const research: ResearchItem[] = [
     status: "Planned",
     collaborators: "with a Seoul National University HCI master's collaborator",
     topics: ["Military & HR"],
-    images: ["/images/research/wargame-simulation.jpg"],
+    images: ["/images/cards/wargame-simulation.jpg", "/images/research/wargame-simulation.jpg"],
     summary:
       "Scaling the HR simulation from unit to operation — the concept directly behind the 3D battlefield-mapping project I ran as a company commander.",
     sections: [

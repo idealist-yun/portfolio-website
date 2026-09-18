@@ -1,0 +1,107 @@
+import Link from "next/link";
+import { profile } from "@/data/profile";
+import { Eyebrow } from "@/components/ui";
+
+const entryPoints = [
+  {
+    href: "/research",
+    label: "Research",
+    body: "Published work and an ongoing research pipeline on disability, simulation, and AI agents — for labs and collaborators.",
+  },
+  {
+    href: "/project",
+    label: "Project",
+    body: "Case studies across retail, healthcare, public sector, and military — evidence of applied strategic design work.",
+  },
+  {
+    href: "/resume",
+    label: "Resume & Contact",
+    body: "Full career history, downloadable resume, and how to reach me.",
+  },
+];
+
+export default function Home() {
+  return (
+    <div className="mx-auto max-w-5xl px-6">
+      <section className="pt-20 pb-16 sm:pt-28 sm:pb-20">
+        <Eyebrow>{profile.affiliation}</Eyebrow>
+        <h1 className="mt-4 max-w-3xl font-serif text-4xl font-semibold leading-[1.15] tracking-tight text-foreground sm:text-5xl">
+          At the intersection of design, data, and human possibility.
+        </h1>
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+          I&apos;m {profile.name} ({profile.handle}) — a strategic designer
+          committed to bridging business innovation with social impact. I
+          define myself as a data-driven strategic designer, and I&apos;m
+          working toward becoming an AI-driven strategic designer &amp;
+          entrepreneur.
+        </p>
+      </section>
+
+      <section className="grid gap-6 border-t border-border py-14 sm:grid-cols-3">
+        {[
+          { label: "Basic", body: "Design thinking, internalized through consulting and service-design engagements across retail, public sector, and finance." },
+          { label: "Data-Driven", body: "Quantitative persona modeling and behavioral analysis — extracting actionable insight from real usage and assessment data." },
+          { label: "AI-Driven", body: "AI personas and simulation environments to pre-validate service strategies before they reach the real world." },
+        ].map((phase) => (
+          <div key={phase.label}>
+            <p className="font-serif text-xl font-semibold text-accent">
+              {phase.label}
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-muted">
+              {phase.body}
+            </p>
+          </div>
+        ))}
+      </section>
+
+      <section className="border-t border-border py-14">
+        <div className="max-w-3xl space-y-5 text-base leading-relaxed text-muted">
+          <p>
+            Since childhood, I have carried a question shaped by my younger
+            brother&apos;s developmental disability:{" "}
+            <span className="text-foreground">
+              &ldquo;How can we meaningfully improve the lives of people with
+              disabilities?&rdquo;
+            </span>{" "}
+            That question led me to explore whether data-driven scientific
+            methods and service-design frameworks could create sustainable
+            solutions in disability contexts.
+          </p>
+          <p>
+            The culmination of this inquiry so far was my graduate thesis on
+            data-driven disability persona augmentation — analyzing and
+            simulating the daily-living performance of people with
+            developmental disabilities through a structured, computational
+            approach. I&apos;m now extending that work into an AI-agent
+            simulation testbed at Penn, and applying the same
+            persona-and-simulation framework beyond disability, to any field
+            where social innovation, human behavior, and complex service
+            needs intersect.
+          </p>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-14">
+        <h2 className="font-serif text-2xl font-semibold text-foreground">
+          Where to go next
+        </h2>
+        <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          {entryPoints.map((e) => (
+            <Link
+              key={e.href}
+              href={e.href}
+              className="group block rounded-2xl border border-border bg-surface p-6 transition-colors hover:border-accent"
+            >
+              <p className="font-serif text-lg font-semibold text-foreground group-hover:text-accent">
+                {e.label} →
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                {e.body}
+              </p>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}

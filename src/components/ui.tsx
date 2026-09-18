@@ -62,7 +62,7 @@ export function Tag({
 
 export function Card({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-6 shadow-[0_1px_2px_rgba(28,30,33,0.04)]">
+    <div className="h-full rounded-2xl border border-border bg-surface p-6 shadow-[0_1px_2px_rgba(28,30,33,0.04)] transition-colors group-hover:border-accent">
       {children}
     </div>
   );

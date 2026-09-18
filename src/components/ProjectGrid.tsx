@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { projects, allDomains, allPhases, type Domain, type Phase } from "@/data/projects";
 import { Tag, Card } from "@/components/ui";
 
@@ -49,35 +50,32 @@ export default function ProjectGrid() {
 
       <div className="grid gap-5 sm:grid-cols-2">
         {filtered.map((p) => (
-          <Card key={p.slug}>
-            <div className="flex items-start justify-between gap-3">
-              <span
-                className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${phaseStyle[p.phase]}`}
-              >
-                {p.phase}
-              </span>
-              <span className="text-xs text-muted">{p.period}</span>
-            </div>
-            <h3 className="mt-3 font-serif text-lg font-semibold leading-snug text-foreground">
-              {p.title}
-            </h3>
-            <p className="mt-1 text-sm text-muted">
-              {p.org} · {p.location}
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-muted">
-              {p.summary}
-            </p>
-            <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed text-muted">
-              {p.bullets.map((b, i) => (
-                <li key={i}>{b}</li>
-              ))}
-            </ul>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {p.domains.map((d) => (
-                <Tag key={d}>{d}</Tag>
-              ))}
-            </div>
-          </Card>
+          <Link key={p.slug} href={`/project/${p.slug}`} className="group block">
+            <Card>
+              <div className="flex items-start justify-between gap-3">
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${phaseStyle[p.phase]}`}
+                >
+                  {p.phase}
+                </span>
+                <span className="text-xs text-muted">{p.period}</span>
+              </div>
+              <h3 className="mt-3 font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
+                {p.title} <span className="text-accent">→</span>
+              </h3>
+              <p className="mt-1 text-sm text-muted">
+                {p.org} · {p.location}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                {p.summary}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {p.domains.map((d) => (
+                  <Tag key={d}>{d}</Tag>
+                ))}
+              </div>
+            </Card>
+          </Link>
         ))}
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   research,
   statusOrder,
@@ -48,38 +49,37 @@ export default function ResearchList() {
               </h2>
               <div className="mt-6 space-y-5">
                 {items.map((item) => (
-                  <Card key={item.slug}>
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <h3 className="font-serif text-lg font-semibold leading-snug text-foreground">
-                        {item.title}
-                      </h3>
-                      <span
-                        className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusStyle[item.status]}`}
-                      >
-                        {item.status}
-                      </span>
-                    </div>
-                    {(item.venue || item.date) && (
-                      <p className="mt-1 text-sm text-muted">
-                        {[item.venue, item.date].filter(Boolean).join(" · ")}
+                  <Link
+                    key={item.slug}
+                    href={`/research/${item.slug}`}
+                    className="group block"
+                  >
+                    <Card>
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <h3 className="font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
+                          {item.title} <span className="text-accent">→</span>
+                        </h3>
+                        <span
+                          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusStyle[item.status]}`}
+                        >
+                          {item.status}
+                        </span>
+                      </div>
+                      {(item.venue || item.date) && (
+                        <p className="mt-1 text-sm text-muted">
+                          {[item.venue, item.date].filter(Boolean).join(" · ")}
+                        </p>
+                      )}
+                      <p className="mt-3 text-sm leading-relaxed text-muted">
+                        {item.summary}
                       </p>
-                    )}
-                    <p className="mt-3 text-sm leading-relaxed text-muted">
-                      {item.summary}
-                    </p>
-                    {item.bullets && (
-                      <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed text-muted">
-                        {item.bullets.map((b, i) => (
-                          <li key={i}>{b}</li>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {item.topics.map((t) => (
+                          <Tag key={t}>{t}</Tag>
                         ))}
-                      </ul>
-                    )}
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {item.topics.map((t) => (
-                        <Tag key={t}>{t}</Tag>
-                      ))}
-                    </div>
-                  </Card>
+                      </div>
+                    </Card>
+                  </Link>
                 ))}
               </div>
             </div>

@@ -48,14 +48,46 @@ export default async function ProjectDetail({
       </p>
 
       <p className="mt-8 text-lg leading-relaxed text-muted">
-        {project.summary}
+        {project.brief}
       </p>
 
-      <ul className="mt-8 list-disc space-y-3 pl-5 text-base leading-relaxed text-muted">
-        {project.bullets.map((b, i) => (
-          <li key={i}>{b}</li>
+      <div className="mt-8 grid gap-6 rounded-2xl border border-border bg-surface p-6 sm:grid-cols-2">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
+            My Role
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-foreground">
+            {project.role}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
+            Outcome
+          </p>
+          <ul className="mt-2 list-disc space-y-1 pl-4 text-sm leading-relaxed text-foreground">
+            {project.outcome.map((o, i) => (
+              <li key={i}>{o}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="mt-10 space-y-8">
+        {project.sections.map((s, i) => (
+          <div key={i}>
+            <h2 className="font-serif text-xl font-semibold text-foreground">
+              {s.heading}
+            </h2>
+            <div className="mt-3 space-y-3">
+              {s.body.map((p, j) => (
+                <p key={j} className="text-base leading-relaxed text-muted">
+                  {p}
+                </p>
+              ))}
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
 
       <div className="mt-10 flex flex-wrap gap-2">
         {project.domains.map((d) => (

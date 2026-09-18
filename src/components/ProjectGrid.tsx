@@ -67,7 +67,7 @@ export default function ProjectGrid() {
                 {p.org} · {p.location}
               </p>
               <p className="mt-3 text-sm leading-relaxed text-muted">
-                {p.summary}
+                {p.brief}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {p.domains.map((d) => (

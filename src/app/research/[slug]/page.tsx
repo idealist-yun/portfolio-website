@@ -48,28 +48,30 @@ export default async function ResearchDetail({
         {item.title}
       </h1>
 
+      {item.collaborators && (
+        <p className="mt-2 text-sm italic text-muted">{item.collaborators}</p>
+      )}
+
       <p className="mt-8 text-lg leading-relaxed text-muted">
         {item.summary}
       </p>
 
-      {item.bullets && (
-        <ul className="mt-8 list-disc space-y-3 pl-5 text-base leading-relaxed text-muted">
-          {item.bullets.map((b, i) => (
-            <li key={i}>{b}</li>
-          ))}
-        </ul>
-      )}
-
-      {item.link && (
-        <a
-          href={item.link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-8 inline-block rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent/90"
-        >
-          View publication →
-        </a>
-      )}
+      <div className="mt-10 space-y-8">
+        {item.sections.map((s, i) => (
+          <div key={i}>
+            <h2 className="font-serif text-xl font-semibold text-foreground">
+              {s.heading}
+            </h2>
+            <div className="mt-3 space-y-3">
+              {s.body.map((p, j) => (
+                <p key={j} className="text-base leading-relaxed text-muted">
+                  {p}
+                </p>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
 
       <div className="mt-10 flex flex-wrap gap-2">
         {item.topics.map((t) => (

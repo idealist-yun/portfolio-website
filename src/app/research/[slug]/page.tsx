@@ -98,6 +98,17 @@ export default async function ResearchDetail({
           <Tag key={t}>{t}</Tag>
         ))}
       </div>
+
+      {item.note && (
+        <div className="mt-10 rounded-xl border border-warm/40 bg-warm/5 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
+            Editorial note (for review)
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            {item.note}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

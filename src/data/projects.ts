@@ -23,13 +23,14 @@ export type Project = {
   role: string;
   outcome: string[];
   sections: Section[];
+  note?: string;
 };
 
 export const projects: Project[] = [
   // ---------------- BASIC ----------------
   {
     slug: "undergraduate-works",
-    title: "Undergraduate Works — Founding GRU",
+    title: "Undergraduate Works",
     org: "GRU (Start-up Strategic Consulting Club), Sungkyunkwan University",
     period: "2020 – 2021",
     location: "Seoul, Korea",
@@ -37,39 +38,45 @@ export const projects: Project[] = [
     domains: ["Startup & Venture"],
     images: ["/images/cards/undergraduate-works.jpg", "/images/projects/undergraduate-works.jpg"],
     brief:
-      "Founded and ran a student strategy-consulting club after a professor's design-thinking class reframed how I saw my own future.",
-    role: "Founder & President",
+      "After being introduced to design thinking, founded a student club to practice and apply design-thinking methodologies in real projects.",
+    role: "President, Team leader",
     outcome: [
-      "Ran consulting engagements for four early-stage startups across education, travel-tech, co-living, and micro-mobility",
-      "Rebuilt the club's curriculum, HR system, and org structure from scratch; it became an officially approved university club and is still running, five+ years later",
-      "Placed in three undergraduate competitions, including 3rd Prize at the Mirae Asset Financial Big Data Festival",
+      "Enhanced design-thinking capabilities across diverse domains, including finance, beauty, travel, and home appliances.",
     ],
     sections: [
       {
         heading: "Why",
         body: [
-          "I started university without a clear sense of direction. That changed when a professor introduced me to design thinking and pushed me to think like an outlier instead of chasing universal relevance. I began trying to actively design who I wanted to become, and the first thing I did with that energy was found a service-design club — GRU — to practice design thinking on real problems.",
+          "“To achieve universal relevance, you must think from the perspective of the majority, but true innovation happens when you think as an outlier. Become an outlier. Innovation begins there.”",
+          "When I first entered university, I had no idea how to live my life. It was a journey of constantly seeking ways to design my future self.",
+          "That all changed when I met a professor who introduced me to design thinking. He encouraged me to become an outlier. For the first time, I began to envision my future self—a Designated Persona—and I committed myself fully to shaping it. From that point on, my undergraduate years became an intense yet enjoyable journey.",
+          "Driven by a desire to strengthen my design thinking skills, I actively sought out opportunities. The very first thing I did was organize a service-design club called GRU, bringing together students who shared an interest in design thinking.",
         ],
       },
       {
         heading: "What",
         body: [
-          "GRU ran strategy-consulting projects for startups across industries: a content-based business model for an education startup, an app-service plan for a travel-tech company, a community festival for a co-living/co-working startup, and a character-based branding ecosystem for a shared e-scooter company.",
-          "I rebuilt the club end to end — a new education curriculum, a member-selection and HR process, and an operating structure (HR/ops/finance teams) — because I felt the most important part of design thinking, prototyping and testing, was routinely skipped in real consulting work. I redesigned the program so each semester ran strategy through mid-terms, prototyping between mid-terms and finals, and a final client presentation — a complete cycle every term, three client companies per semester.",
-          "Alongside GRU, I worked on toy projects: a subscription model linking Samsung's Bespoke Qooker to food-delivery services (2nd Prize, Samsung Home Appliance competition — left off my resume since it was a coursework project), an NLP-based stock search/recommendation feature for a mobile trading app (3rd Prize, Mirae Asset Financial Big Data Festival), and an antibacterial handle-sanitizing device for shared bicycles during COVID (2nd Prize, SKKU Design Competition).",
-        ],
-      },
-      {
-        heading: "What stuck",
-        body: [
-          "Bringing my club work and consulting projects to my professor for feedback, over and over, built the relationship that later got me directly into SDI Lab — see the National Rehabilitation Center and Ministry of Culture, Sports and Tourism projects below. GRU's curriculum and org structure are still recognizable in the club's handoff documents today.",
+          "With GRU, we conducted strategy consulting projects for startups across various industries:",
+          "Designed content-based business models for an education startup",
+          "Planned an app service for a travel-tech startup",
+          "Organized a community festival for a co-living / co-working startup",
+          "Proposed a character-based branding ecosystem for a shared e-scooter company",
+          "These achievements helped GRU gain official recognition as a university-approved club. Since then, it has continued for more than five consecutive years, with new students carrying forward the organization and its mission.",
+          "If you'd like to explore more of GRU's work: skku-startup-gru.net, Instagram @skku_gru",
+          "Beyond GRU, I also worked on multiple toy projects throughout my undergraduate years. These ranged from designing new services for Samsung Bespoke and developing public health solutions, to creating mobile securities applications and customer loyalty services for small businesses.",
+          "Among the projects that received awards, the following stand out:",
+          "Samsung Home Appliance Award (1st Place): Designed a new subscription service and business model linking the Samsung Qooker to food-delivery ecosystems.",
+          "Mirae Asset Securities Challenge (3rd Place): Developed an NLP-based easy search and stock-recommendation feature for a mobile trading system (MTS).",
+          "Sungkyunkwan University Design Competition (2nd Place): Designed and prototyped a public-hygiene solution: an antibacterial handle-sanitizing device for shared bicycles during COVID-19.",
+          "Through these diverse experiences, I steadily strengthened my capabilities in design thinking, learning how to frame problems, generate solutions, and prototype ideas across different domains.",
         ],
       },
     ],
+    note: "Vault correction (not yet applied here): the Samsung Home Appliance Award was actually 2nd place, and was deliberately left off the resume as a coursework project.",
   },
   {
     slug: "mcst-public-communication",
-    title: "Public Communication Strategy Design",
+    title: "Ministry of Culture, Sports and Tourism - Public Communication Strategy Design",
     org: "Ministry of Culture, Sports and Tourism (via SDI Lab, GRU students)",
     period: "2021",
     location: "Seoul, Korea",
@@ -77,38 +84,48 @@ export const projects: Project[] = [
     domains: ["Public Sector"],
     images: ["/images/cards/mcst-public-communication.jpg", "/images/projects/mcst-public-communication.jpg"],
     brief:
-      "Designed and ran a 3-day participatory co-design lab that turned qualitative citizen data into a communication strategy — later recognized as an OECD Best Practice.",
-    role: "Data analysis, visualization, and student-team management",
+      "Operation of a participatory policy communication lab and monitoring group for digital government branding",
+    role: "Data Analysis, Visualization, and student management and operation",
     outcome: [
-      "Selected as an OECD Best Practice in Open Government and Public Communication",
-      "A student from the monitoring group was invited to present the results directly to the OECD",
-      "The ministry now actively produces citizen-oriented content (e.g., character-based formats) and reports meaningfully better public response than before",
+      "In the case of participatory government activities by the monitoring group, results showed high levels of digital literacy and satisfaction among citizens",
+      "Evidence was gathered supporting the need for ongoing education based on data-driven evidence and an understanding of data context.",
+      "The initiative was selected as an OECD best practice, leading to an actual presentation.",
     ],
     sections: [
       {
         heading: "Goal",
         body: [
-          "Under OECD's 'Open Government' framing, public communication needs to shift from one-way persuasion to two-way, symmetrical participation. My professor's project — which I helped staff by bringing in GRU students I managed directly — set out to design and test an educational strategy for that shift, working with the Ministry's own communication staff.",
+          "Under the OECD models of 'Open Government' and 'Public Communication,' public governance needs to shift from a one-way, asymmetric communication aimed at persuading citizens, to a two-way, symmetrical mode of participation and collaboration. We proposed and tested an educational strategy framework to strengthen these capabilities.",
+        ],
+      },
+      {
+        heading: "Research Model",
+        body: [
+          "To design the educational model, we researched the fundamental concepts, principles, and policies of OECD's open government and public communication. Based on this, we reinterpreted the six key innovation strategies for public communication in future governments, as outlined by OECD, into an educational strategy to realize the values of open government policies.",
         ],
       },
       {
         heading: "Process",
         body: [
-          "We ran a participatory living lab pairing ministry officials with a student monitoring group. Using 100 pre-analyzed government social-media posts, each tagged with hidden context metadata, participants ran a timed card-sorting exercise — 100 down to 50, 30, then 10 images — choosing the ones that felt most meaningful for a given macro-theme like carbon neutrality.",
-          "Revealing the hidden tags behind the final 10 images let officials see, empirically, how citizens actually interpret their messaging — instead of guessing. Over the following two days, officials and students used that context to co-create new promotional material together.",
+          "To apply and test the reinterpreted educational strategy framework, we planned to operate a participatory living lab for public officials engaged in public communication tasks. To facilitate experimentation with citizen engagement, we decided to organize a student monitoring group consisting of individuals in their early 20s. In this process, I involved the club I managed, 'GRU,' in the experiment. Consequently, I also took responsibility for the overall management of the students.",
+          "To design the experiment, we analyzed exploratory context data by utilizing promotional materials previously posted on the government's social media platforms. Based on this analysis, we redefined hashtags to reflect the intended context that the government aimed to convey during the communication process and assigned them to each promotional material. Through this process, we successfully quantified qualitative data.",
+          "The student monitoring group and public officials collaboratively conducted an experiment in the participatory living lab to redesign government promotional content. They performed card sorting on 100 government promotional materials with pre-designed context data, selecting those deemed meaningful. The context data of the selected cards were then analyzed using social network analysis to extract the contexts of information that are meaningfully conveyed to citizens.",
+          "The student monitoring group and public officials collaboratively created new government promotional materials based on the visualized context data.",
+          "As a result of citizens directly participating in and communicating during the production process, the outcomes received overall feedback highlighting improved clarity and better information delivery compared to previous materials. Furthermore, a subsequent citizen satisfaction survey demonstrated significant positive outcomes.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "A follow-up citizen satisfaction survey showed a clear improvement in clarity and communication quality. The methodology was presented to the OECD as a best-practice case, and the same format was later reused for a TikTok-focused project aimed at high-school students.",
+          "This educational model was recognized as one of the best examples of OECD's Open Government and Public Communication initiatives. As a result, one of the student monitoring group members was invited to present these achievements.",
+          "Furthermore, based on this education and experimentation, the Ministry of Culture, Sports, and Tourism is actively producing citizen-oriented and participatory content, such as those utilizing characters, and has received significantly better responses compared to previous efforts.",
         ],
       },
     ],
   },
   {
     slug: "military-3d-battlefield-mapping",
-    title: "3D Battlefield Mapping for a Front-Line Defense Operation",
+    title: "Military - 3D Battlefield Mapping",
     org: "ROKA, KCTC Exercise",
     period: "2022",
     location: "Injae, Korea",
@@ -116,37 +133,41 @@ export const projects: Project[] = [
     domains: ["Military"],
     images: ["/images/cards/military-3d-battlefield-mapping.jpg", "/images/projects/military-3d-battlefield-mapping.jpg"],
     brief:
-      "Turned a dense-forest front-line area no one could read from 2D maps into a physical clay terrain model and 3D-mapped training tool, ahead of a live defense operation.",
-    role: "Company Commander, operational planning",
+      "Trained soldiers on terrain and implemented a 3D map for war games to ensure the success of the base defense operation during the KCTC exercise.",
+    role: "Company Commander, responsible for operational planning",
     outcome: [
-      "6-day operation, 15 simulated ambushes encountered",
-      "Executed a deception command-post role for the neighboring brigade during the final defense operation",
-      "33% survival rate against a tank assault, attributed directly to terrain-familiarization training",
+      "Implemented a terrain prototype and conducted training through digitization and visualization using 3D mapping.",
+      "In a war game simulations, effectively improved the survival rate during operations.",
     ],
     sections: [
       {
         heading: "Problem",
         body: [
-          "Trench placement and coordinated response depended on soldiers actually understanding the terrain — dense forest that foot reconnaissance alone couldn't teach, and 2D operational maps most soldiers couldn't read fluently. Without that shared mental model, predicting enemy infiltration routes and reacting together was close to impossible.",
+          "To ensure the success of the border defense operation, it was crucial to carefully select the positions for soldiers' trenches and provide training to enable coordinated responses.",
+          "The surrounding terrain is a dense forest, making it difficult for soldiers to familiarize themselves with the area through simple foot reconnaissance.",
+          "Since the soldiers were not familiar with map reading, especially with 2D maps, it was challenging for them to understand the operational maps.",
+          "Therefore, it was essential to help the soldiers understand the terrain and imagine potential enemy infiltration routes and movement, in order to increase their chances of survival.",
         ],
       },
       {
         heading: "Process",
         body: [
-          "During pre-operation prep, I ran foot reconnaissance and built a clay terrain prototype to choose trench locations and likely infiltration routes. I then digitized that into a 3D map and used it to run simulation-based training on expected enemy movement and response — the digitized materials themselves couldn't be photographed under military regulations.",
+          "During the pre-operation preparation period, I conducted a foot reconnaissance and created a prototype using clay to select trench locations and potential enemy infiltration routes. Through 3D mapping and digitization, I visualized the terrain for the soldiers, providing simulation-based training on expected enemy movements and response strategies.",
+          "* The digitalized materials could not be photographed due to military regulations",
         ],
       },
       {
         heading: "Result",
         body: [
-          "Across the 6-day operation we handled 15 ambush scenarios, and in the final defense operation acted as a deception command post for the nearby brigade. Despite a tank assault, terrain-familiarization training got us a 33% survival rate. This is the direct, lived origin of the war-game simulation concept I'm now developing on the Research side.",
+          "During the 6-day operation, we encountered 15 ambushes. In the final defense operation, we executed a deceptive command post role for the nearby brigade command center.",
+          "Thanks to the terrain familiarization training using the terrain model, we were able to respond effectively. Despite the tank assault, we achieved a 33% survival rate.",
         ],
       },
     ],
   },
   {
     slug: "veterans-reintegration",
-    title: "Supporting Systems for Veterans' Social Reintegration",
+    title: "Military - Supporting System for Veterans and Former Officers' Social Reintegration",
     org: "Federation of Korea ROTC 60th Officer",
     period: "2022 – Present",
     location: "Seoul, Korea",
@@ -154,33 +175,38 @@ export const projects: Project[] = [
     domains: ["Military"],
     images: ["/images/cards/veterans-reintegration.jpg", "/images/projects/veterans-reintegration.jpg"],
     brief:
-      "Built employment and healthcare support infrastructure for 3,561 discharging ROTC officers, from scratch, as founding president.",
-    role: "Founder & President",
+      "Provided a service for supporting employment, healthcare, and other resources to assist the social reintegration of ROTC veterans.",
+    role: "President, responsible for policy development and organizational governance",
     outcome: [
-      "Represent 3,561 ROTC 60th officers",
-      "Joint job fair with Shinhan Financial Group; recruitment partnerships with KB Kookmin Bank and E-Land",
-      "Hospital partnerships offering discharged officers and their families 15–20% discounts across ophthalmology, dermatology, plastic surgery, and dentistry",
-      "A rolling recruitment pool with small/mid-size companies run by senior discharged officers",
+      "Promoted and enhanced discharge officer recruitment programs in collaboration with major corporations",
+      "Hosted a job fair in partnership with Shinhan Financial group",
+      "Activated a rolling recruitment pool with mid-sized and small enterprises, for discharged officers",
+      "Secured hospital partnership services for discharged officers and their families",
     ],
     sections: [
       {
         heading: "Problem",
         body: [
-          "ROTC officers discharge around age 26–28 — exactly when peers are deep into job hunting — but years of military focus leave most unprepared to compete. That's worse for those on front-line postings, where managing real provocations leaves no time to prepare for civilian life. Alumni networks like this used to exist and mostly don't anymore.",
+          "ROTC officers typically enlist at ages 24–26 and discharge at ages 26–28, which coincides with the typical period for young adults entering the workforce.",
+          "However, due to their focus on military service, they are often unprepared for job searching and face challenges in competing with others who have been preparing for employment.",
+          "This issue is especially prevalent among officers deployed to frontline positions, where enemy provocations, managing their threats, and overseeing unit operations make it difficult to prepare for post-service life.",
+          "While recruitment programs for veterans existed in the past, such programs are now rare, necessitating support mechanisms for their reintegration into civilian careers.",
         ],
       },
       {
-        heading: "What I built",
+        heading: "Result",
         body: [
-          "As founding president of the Federation of Korea ROTC 60th Officer, I partnered with companies like E-Land and KB Kookmin Bank to activate recruitment programs for discharged officers, and organized a joint job fair with Shinhan Financial Group across their banking, card, and insurance divisions.",
-          "I also built healthcare partnerships — cold-emailing hospitals directly to secure discount agreements for officers and their families — and, with senior officers who now run their own companies, set up an ongoing recruitment pool for discharging members at small and mid-size firms.",
+          "As the founder and president of the Federation of Korea ROTC 60th Officers, representing 3,651 officers of the ROTC 60th, I collaborated with organizations such as E-land and KB Kookmin Bank to promote and activate recruitment programs for discharged officers. Also, I led collaboration with senior discharged officers to create a continuous recruitment pool for companies they operate.",
+          "Specifically, in partnership with Shinhan Financial Group, organized a joint job fair by consulting with various departments, including banking, cards, and insurance.",
+          "In addition, I also established partnerships with hospitals to offer benefits to discharged officers and their families, securing agreements with healthcare providers.",
         ],
       },
     ],
+    note: "Vault correction (not yet applied here): the real number is 3,561, not 3,651 — a digit-transposition typo on the original site.",
   },
   {
     slug: "saihst-hospital-metaverse",
-    title: "App-Based Rehabilitation & Welfare Services for Hospitalized Patients",
+    title: "Hospital – Planning App-Based Services and Contents for Hospitalized Patients",
     org: "SAIHST · Samsung Advanced Institute of Health Science & Technology",
     period: "2024 – 2025",
     location: "Seoul, Korea",
@@ -188,36 +214,42 @@ export const projects: Project[] = [
     domains: ["Disability & Healthcare"],
     images: ["/images/cards/saihst-hospital-metaverse.jpg", "/images/projects/saihst-hospital-metaverse.jpg"],
     brief:
-      "Designed UI/UX for a hospital super app and prototyped a collaborative, gamified rehabilitation service for Samsung Seoul Hospital's long-stay patients.",
-    role: "UI/UX design, service prototyping",
+      "By using metaverse service, planning rehabilitation and welfare-oriented services, especially collaborative artwork, for hospitalized patients.",
+    role: "UI/UX Design, Service Prototyping",
     outcome: [
-      "Full UI/UX for an integrated hospital super app, planned for a 2025 launch",
-      "A collaborative artwork rehabilitation concept scoped for inclusion in the same app",
+      "The super app is scheduled for launch in 2025",
+      "The collaborative artwork service is also planned to be integrated into the super app",
     ],
     sections: [
       {
         heading: "Problem",
         body: [
-          "Consistent movement is essential to post-surgery rehabilitation, but patients rarely do it voluntarily and there was no real way to track their progress. Long, solitary hospital stays also weigh on how patients experience the hospital itself — and existing welfare services were hard to discover and use while unwell.",
+          "Consistent exercise is essential for rehabilitation after patient admission and surgery, yet patients often do not engage in it voluntarily, and there is a lack of systems to measure rehabilitation progress.",
+          "The monotonous and solitary time patients endure during their hospital stay can also influence the hospital's overall image.",
+          "Although many services are provided for patient welfare, it is challenging for patients to explore and utilize these services during their hospital stay due to their health conditions.",
         ],
       },
       {
         heading: "Process",
         body: [
-          "I interviewed patients to map rehab schedules, daily routines, and movement patterns, then categorized existing hospital services into an app-based structure with a domain for measuring patient activity. For rehab itself, I prototyped a collaborative-artwork concept in Unity and Magma: patients find tags placed around the hospital as they move (rehab framed as a treasure hunt), each tag yielding a puzzle piece, and pieces from multiple patients combine into one shared artwork.",
+          "Conducted patient interviews to understand rehabilitation schedules, daily routines, and movement patterns",
+          "Categorized hospital-provided services and implement them into app-based service",
+          "Designed a domain capable of measuring patient activity levels",
+          "Develop and implement programs to promote and enhance patient rehabilitation, with a focus on UI/UX design",
+          "Prototype a collaborative artwork service on the metaverse using tools such as Unity and Magma",
         ],
       },
       {
         heading: "Result",
         body: [
-          "The project closed at the concept-and-prototype stage rather than full implementation, with the super app itself planned for a 2025 launch and the artwork service discussed as additional content for it.",
+          "Developing UI/UX design for an integrated hospital service experience, with collaborative artwork services being discussed as additional content. The project is still ongoing.",
         ],
       },
     ],
   },
   {
     slug: "disability-as-market",
-    title: "Disability Service Design: What I Truly Wish to Carve Out",
+    title: "Disability Service Design: What I Truly Wish to Carve Out!",
     org: "Personal research essay + National Rehabilitation Center fieldwork",
     period: "2023 – 2024",
     location: "Seoul, Korea",
@@ -225,31 +257,42 @@ export const projects: Project[] = [
     domains: ["Disability & Healthcare"],
     images: ["/images/cards/disability-as-market.jpg", "/images/projects/disability-as-market.jpg"],
     brief:
-      "The essay where I first argued disability should be approached as a market-expansion strategy, not only a welfare issue — the direct origin of my thesis and my current research direction.",
-    role: "Author; later, field researcher at NRC",
+      "Participated in a research initiative led by the National Rehabilitation Center, focusing on disability progression in an aging society. I later extended this work by connecting it to a graduate-level hackathon project at Sungkyunkwan University.",
+    role: "Research Assistant",
     outcome: [
-      "Published as a chapter in a 2023 cross-disciplinary social-trends book",
-      "Directly shaped the National Rehabilitation Center fieldwork, which became my graduate thesis",
+      "Developed daily-life Customer Journey Maps (CJMs) for three disability groups—developmental disabilities, stroke, and spinal cord injuries—and designed solution concepts based on these insights.",
+      "This project later evolved into my graduate thesis.",
     ],
     sections: [
       {
         heading: "Beginning",
         body: [
-          "My younger sibling's developmental disability made 'how do we meaningfully improve the lives of people with disabilities' a mission for me early on. Studying service design and business convinced me this belongs in the market, not only in welfare — and broadened into a wider interest in designing for the vulnerable.",
-          "In 2023 I contributed a chapter to a publication project bringing together graduate students from law, statistics, biotech, and service design, each writing on trends in their own field. I argued for reframing disability as a market-expansion strategy rather than only a welfare category — and, in the same piece, predicted the AirPods 4 would add hearing-aid functionality, which later happened in a similar direction.",
+          "Due to my younger sibling's developmental disability, I defined it as my mission to address issues such as improving the lives of people with disabilities and alleviating the guilt felt by their families. Through studying service design and business, I came to believe that these issues should be approached within the realm of the market. Over time, various experiences broadened my perspective to include designing for the vulnerable as a whole.",
+          "While contemplating how to integrate service design with disability-related fields in my career, I had the opportunity in 2023 to participate in a publication project. This project brought together graduate students from diverse fields, including law, statistics, biotechnology, and service design, to discuss social trends within their respective disciplines.",
+          "In my contribution, I explored the concept of approaching disability not merely from a welfare perspective, but as a market expansion strategy. Through this process, I refined my perspective and, in particular, predicted that the newly released AirPods 4 would incorporate hearing aid functionality.",
         ],
       },
       {
-        heading: "The framework",
+        heading: "Assumption",
         body: [
-          "I read traditional disability approaches through the Kano model: Must-be Quality (dissatisfaction if unmet) maps to Universal Design; One-dimensional Quality (satisfaction scales with performance) maps to Assistive Technology. What was missing was the Attractive Quality layer — value beyond raw performance — which I placed squarely in service design's territory, and the one genuinely strategic, market-facing lever.",
-          "The Bradley Timepiece — a tactile watch for blind users, funded via a $600K Kickstarter in 2013 — is the case I kept coming back to: 98% of its sales now come from non-disabled customers. It's the clearest example I know of a disability-specific need becoming a mainstream want.",
+          "Based on this idea, I developed a hypothesis grounded in the Kano model. When interpreting traditional approaches to disability through the lens of the Kano model, I found that Must-be Quality, which refers to the minimum requirements that cause dissatisfaction if unmet, can be associated with Universal Design. Similarly, One-dimensional Quality, where satisfaction increases proportionally with performance improvement, aligns with Assistive Technology.",
+          "Ultimately, I realized the need for something that had been previously overlooked—an element that provides satisfaction beyond mere performance and serves as an attractive factor. I concluded that this corresponds to the domain of service design, which offers a strategic approach within the market.",
         ],
       },
       {
-        heading: "Testing it",
+        heading: "Example: Bradley Timepiece",
         body: [
-          "To test the hypothesis, I joined an internal National Rehabilitation Center project observing and interviewing people with developmental disabilities, stroke, and spinal cord injuries about their daily needs. My role there included commercialization strategy for proposed technologies and exploring how they might extend to non-disabled users — and this fieldwork is what turned directly into my graduate thesis on data-driven disability personas.",
+          "The Bradley Timepiece is a tactile luxury watch designed to meet the needs of individuals with visual impairments, allowing them to “feel” the time through movable ball bearings. Inspired by the drawbacks of conventional talking watches, which often draw unwanted attention in public spaces, the Bradley introduces an innovative “touchable watch” concept.",
+          "This project began with a successful Kickstarter campaign in 2013, raising $600,000 in its initial funding. Since then, the company has continued to thrive, with 98% of its sales coming from non-disabled customers. This serves as an excellent example of transforming the needs of individuals with disabilities into the wants of the general market.",
+        ],
+      },
+      {
+        heading: "My Trial",
+        body: [
+          "Based on this hypothesis, I participated in an internal project at the Korean National Rehabilitation Center to better understand the daily lives and needs of individuals with disabilities.",
+          "The project involved observing and interviewing individuals with developmental disabilities, stroke, and spinal cord injuries. By applying the service design process, we identified their needs and worked on selecting and developing technologies to address their challenges.",
+          "In this project, I was responsible for strategizing the commercialization of the proposed technologies and products, as well as exploring their potential expansion to non-disabled users.",
+          "Building on the success of the project, I planned and hosted a hackathon in collaboration with Sungkyunkwan University and the Korea National Rehabilitation Center. Through these ongoing activities, I continue to seek solutions in the fields of service design for individuals with disabilities and the broader design for the vulnerable.",
         ],
       },
     ],
@@ -284,12 +327,13 @@ export const projects: Project[] = [
         ],
       },
     ],
+    note: "Not on the old Framer site — no case-study page existed for this one. Content sourced from the Obsidian vault interview instead.",
   },
 
   // ---------------- DATA-DRIVEN ----------------
   {
     slug: "starfield-existing-branch",
-    title: "Data-Driven Branding for Existing Starfield Branches",
+    title: "Shinesegae Starfield - Data-driven Service Design for Existing Mega-Shopping Mall Branches",
     org: "Shinsegae Starfield (via SDI Lab)",
     period: "2021",
     location: "Seoul, Korea",
@@ -297,37 +341,52 @@ export const projects: Project[] = [
     domains: ["Retail & Consumer"],
     images: ["/images/cards/starfield-existing-branch.jpg", "/images/projects/starfield-existing-branch.jpg"],
     brief:
-      "My first SDI Lab project — quantified mall-branch 'fandom' from Instagram and card data to guide new F&B brand placement.",
-    role: "Data analysis, visualization, social-media collection & NLP (early role: assisting a senior teammate while learning to code)",
+      "Analyzed crowd characteristics at existing Starfield locations to design a new journey with F&B experiences",
+    role: "Data Analysis, Visualization, Social Media data collection and NLP",
     outcome: [
-      "Identified F&B brands to strengthen brand image at existing malls",
-      "Proposed route guidance integrating those brands into existing customer journeys",
-      "Strategies adopted and actively implemented at existing branches",
+      "Identified prominent F&B brands to enhance the shopping mall's brand image",
+      "Proposed route guidance by integrating the selected F&B brands into the existing key customer journeys",
     ],
     sections: [
       {
-        heading: "Research model",
+        heading: "Goal",
         body: [
-          "We combined four frameworks: graph theory to treat mall 'fandom' as a collective, data-driven behavior rather than an individual-level trait (a Networking Persona model, scored on Average Degree, Average Weighted Degree, and Modularity); a growth-model analysis to track how networking patterns shift over time; Aaker's Brand Personality Model applied to social-media hashtags per branch and brand; and process mining to reconstruct actual customer journeys, including F&B stops.",
+          "As the client aimed to actively incorporate F&B brands in their existing malls, it became necessary to quantify customers' existing shopping mall experiences, journey patterns, and customer characteristics for each mall to design tailored services.",
+        ],
+      },
+      {
+        heading: "Research Model",
+        body: [
+          "We utilized four research frameworks in this project: Graph Theory, Networking Persona, Brand Personality, and Process Mining.",
+          "First, by using network-graph theory, we defined fandom behavior in shopping mall spaces as subjective and collective activities from a data-driven perspective. The Networking Persona model transitioned traditional service design personas, analyzed at an individual level, into collective-level personas.",
+          "To analyze networking personas with graph theory, we used three key metrics: Average Degree, Average Weighted Degree, and Modularity. Average Degree indicates how many brands a specific customer is connected to — more diverse brand visits result in a higher number of connections, and the line weight represents cumulative spending by the customer at each brand. Average Weighted Degree shows that when customers frequently and heavily spend at specific brands, cluster density increases, reflecting stronger customer-brand connections. Modularity measures how closely brands are grouped based on customer usage — higher modularity indicates closer connections between brand clusters, revealing patterns such as the Diderot Effect and hidden brand linkages.",
+          "Second, the Networking Persona model was categorized into four strategies: Independent, Distributed, Integrated, and Centralized. To track the evolution of consumer networking patterns over time, we employed a growth model analysis to analyze temporal changes.",
+          "Third, customer preferences and loyalty vary by shopping mall branch. To evaluate this, we applied Aaker's Brand Personality Model. By aggregating social media hashtags related to each branch and brand, we assessed customer experiences based on the five dimensions of brand personality. This analysis identifies the brand personalities preferred at each branch, enabling strategic brand replacements.",
+          "Fourth, by using process mining techniques, we identified key customer journeys for each branch. By segmenting customers, we examined their specific journeys and tailored strategies accordingly. This approach facilitates redesigning customer journeys to enhance overall experiences.",
         ],
       },
       {
         heading: "Process",
         body: [
-          "I crawled Instagram data from real Starfield visitors and classified photos/hashtags into a brand-personality framework, then extended the analysis to card-transaction data for network personas and process mining. This was my first lab project and I was still learning to code — a teammate led the technical implementation while I supported and learned alongside them.",
+          "In order to analyze the customer experience in our client's shopping malls, we conducted an analysis of core brand clusters and the relationships between in-mall brands and customer purchases by using Power BI.",
+          "As a result, the changes over time at each branch were analyzed and categorized based on their characteristics using the Networking Persona model. This allowed us to identify the tendency of customers at each shopping mall to gravitate toward specific brands over time.",
+          "To analyze the emotions customers associate with the shopping mall, social media data was collected and processed using NLP techniques. The preprocessed data was categorized according to the Brand Personality domain, enabling the quantification of the personality traits customers attribute to each branch and specific brands.",
+          "Additionally, process mining was used to analyze customer movement paths at each mall branch. Process mining was conducted at the customer segment level, allowing us to examine key journey paths, including F&B experiences.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "The combined customer-characteristic, expectation, and movement-path data let us define target personas per branch, select the F&B brands they'd respond to, and propose guidance and CX strategies to integrate them into existing customer journeys — adopted and running at existing branches.",
+          "The compiled information on customer characteristics, expectations, and movement paths for each branch was used to identify key target personas and their preferences. Based on these personas, we selected the brands they seek and proposed guidance strategies and CX enhancement strategies to integrate these brands into the existing customer journey.",
+          "The proposed strategies were adopted and are now being actively implemented at existing branches.",
         ],
       },
     ],
+    note: "Early lab-project role: I was still learning to code at this point, and mostly assisted a senior teammate who led the technical implementation.",
   },
   {
     slug: "samsung-brand-fandom",
-    title: "Brand Fandom Analysis: Samsung vs. Competitor",
+    title: "Samsung - Brand Fandom Analysis Between Samsung and Competitor",
     org: "Samsung Electronics, Household Appliance Division (via SDI Lab)",
     period: "2022 – 2024",
     location: "Seoul, Korea",
@@ -335,36 +394,47 @@ export const projects: Project[] = [
     domains: ["Corporate Strategy", "Retail & Consumer"],
     images: ["/images/cards/samsung-brand-fandom.jpg", "/images/projects/samsung-brand-fandom.jpg"],
     brief:
-      "Gave Samsung's appliance executives their first quantitative read on why they felt they were losing brand-power ground to LG.",
-    role: "Data analysis, visualization",
+      "Consulting on Samsung Electronics' Branding Strategy Through a Comparative Analysis of Home Appliance Branding Strategies with Competitors",
+    role: "Data Analysis, Visualization",
     outcome: [
-      "Defined standardized brand-personality metrics where previously only sales data existed",
-      "Segmented customers into a Fan/Owner matrix with tailored conversion strategies",
+      "Identified the factors necessary to transform customers into fans and owners",
+      "Proposed branding strategies based on the findings",
     ],
     sections: [
       {
         heading: "Goal",
         body: [
-          "Samsung's appliance executives sensed they were losing branding ground to LG but had no quantitative way to evaluate branding performance — only sales figures. The brief was to define standardized metrics for brand status and competitiveness.",
+          "There were no quantitative metrics to evaluate the branding performance of our client; relying solely on sales data to assess the effectiveness of their branding. In this context, we aimed to define standardized metrics to understand the company's branding status and enhance its competitiveness.",
+        ],
+      },
+      {
+        heading: "Research Model",
+        body: [
+          "To quantify the branding status, we selected Aaker's Brand Personality Model as a framework. We collected speech data from online discussions about the client and competitor's products and brands, preprocessed the data, and reclassified it into the domains of brand personality. This allowed us to establish metrics for quantifying customer perceptions of the brand according to branding theory.",
+          "Rather than stopping at quantitative evaluation, we used social network analysis to propose strategies utilizing brand personality based on graph theory. In this process, the source node represented the social network source where the discussions occurred, while the target node was assigned values from the preprocessed data mapped to brand personality traits. Consequently, the edges reflected the frequency of customer mentions about the brand or product, representing the marketing power of the brand.",
         ],
       },
       {
         heading: "Process",
         body: [
-          "I crawled and cleaned online community discussion data for both brands, classified it against Aaker's Brand Personality Model, and ran social network analysis where the source node was the discussion origin and edges reflected mention frequency — a proxy for marketing power. I then segmented customers into a 2×2 Fan/Owner matrix and used process mining to surface frequently mentioned keyword sequences per brand and segment.",
+          "In order to assess the branding performance of our client and its main competitor, I crawled and collected verbal data from online communities regarding products and brands of the two firms. Using the data, we conducted data cleansing to filter meaningful consumer-generated data, excluding advertisements, comparisons, and price inquiries.",
+          "Then we analyzed the texts for each brand and quantitatively compared them based on their brand personalities. By using Social Network Analysis, we identified and analyzed consumer clusters and their characteristics (e.g., key emotions, active communities), providing tailored marketing strategies.",
+          "Then, we classified customer verbal data into a 2x2 matrix based on their favorability: Fan & Owner, and analyzed the characteristics of each category. Through this, we were able to not only classify each verbal source into brand personality domains but also examine them in detail based on whether the customer was a fan or an owner of the specific product or brand.",
+          "Additionally, we used process mining to process verbal data. Through this, we identified frequently mentioned keywords and their sequences for each brand and product. Furthermore, we observed differing patterns based on whether the customer was a fan or an owner.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "We proposed a strategy to convert customers into both Fans and Owners, tailored to each segment's dominant brand personality and language. This analysis fed a separate paper by a senior PhD labmate ('Brand Fandom Dynamic Analysis Framework Based on Customer Data in Online Communities') — I contributed as an undergraduate researcher without formal co-authorship.",
+          "Based on these insights, we proposed a strategy to ultimately convert all customers into both Fans and Owners. This strategy includes using key brand personalities and online verbal sources specific to each group, as well as utilizing the keywords and their sequences mentioned for each product and brand.",
         ],
       },
     ],
+    note: "Vault addition (not on the original page): this analysis fed a separate paper by a senior PhD labmate, 'Brand Fandom Dynamic Analysis Framework Based on Customer Data in Online Communities' — I contributed as an undergraduate researcher without formal co-authorship.",
   },
   {
     slug: "samsung-lifelog-minifridge",
-    title: "Life-Log Analysis for a New Mini-Fridge Product Line",
+    title: "Samsung - Life-log Analysis for New Product Service Planning",
     org: "Samsung Electronics, Household Appliance Division (via SDI Lab)",
     period: "2022 – 2024",
     location: "Seoul, Korea",
@@ -372,31 +442,44 @@ export const projects: Project[] = [
     domains: ["Corporate Strategy", "Retail & Consumer"],
     images: ["/images/cards/samsung-lifelog-minifridge.jpg", "/images/projects/samsung-lifelog-minifridge.jpg"],
     brief:
-      "Mapped daily household behavior onto real floor plans to find where a new mini-fridge line actually belonged in people's homes.",
-    role: "Data analysis, visualization (joined in the project's later stage)",
+      "Analyzed the current usage of home appliances and customer lifestyles to develop a scenario for Samsung Affiliate A's new product",
+    role: "Data Analysis, Visualization",
     outcome: [
-      "Persona-specific placement and subscription strategies for the mini-fridge line",
-      "e.g., runners → sports drinks/energy bars; wine drinkers → curated alcohol — each tied to a specific room",
+      "Analyzed customer daily lives using social network analysis, process mining, and heatmaps, and proposed service designs for customer products based on these insights",
     ],
     sections: [
       {
-        heading: "Goal & process",
+        heading: "Goal",
         body: [
-          "The goal was straightforward: grow sales of the client's new mini-fridge. I joined after personas and preferred brands were already defined from earlier analysis, so my job was quantifying how customers actually live inside their homes — where, and how their days move.",
-          "Participants kept diaries of when, where, and what they did at home. I used social network analysis to define key household domains (kitchen, living room, etc.) and process mining, per persona, to trace weekday/weekend routines — how long they stayed where, and in what sequence — then overlaid both on real home floor plans.",
+          "There was a need to increase the sales volume of the client's new product, the mini-fridge.",
+        ],
+      },
+      {
+        heading: "Research Model",
+        body: [
+          "As I joined the project in its later stages, personas and their preferred services and brands had already been identified through data analysis. Therefore, I focused on quantifying the daily living patterns of customers within their households to determine where the proposed products and services could integrate into their routines. To achieve this, I aimed to visualize the data using social network analysis and process mining.",
+        ],
+      },
+      {
+        heading: "Process",
+        body: [
+          "Participants in the experiment were asked to keep a diary documenting 'when,' 'where,' and 'what' activities they performed within their homes during daily life. Using these completed life-logs, we conducted data analysis and visualization.",
+          "Through network analysis, we were able to gain clear insights into where and what actions participants performed. Based on this, we redefined key domains within the home (e.g., kitchen, living room).",
+          "Additionally, process mining was conducted for each previously identified persona to examine their activities during weekdays and weekends. This allowed us to determine where they spent their time, how long they stayed in each location, and in what sequence, thereby identifying patterns in their daily routines.",
+          "By combining these two analyses and visualizing the results on an actual home environment blueprint, we were able to clearly represent the daily patterns of individuals with greater clarity.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "The visualized patterns let us propose service scenarios placing the product directly into each persona's routine — for example, a runner's fridge stocked with sports drinks and energy bars, or a wine enthusiast's fridge positioned and stocked accordingly.",
+          "The results were reviewed for each persona, and service scenarios were created and proposed to integrate our products and services into their daily patterns.",
         ],
       },
     ],
   },
   {
     slug: "samsung-raemian-metaverse",
-    title: "Metaverse Digital-Twin Prototyping for a Luxury Residence",
+    title: "Samsung - Metaverse-Based Service Prototyping for Digital Twin",
     org: "Raemian, Samsung C&T (via SDI Lab)",
     period: "2022 – 2024",
     location: "Seoul, Korea",
@@ -404,29 +487,44 @@ export const projects: Project[] = [
     domains: ["Corporate Strategy", "Retail & Consumer"],
     images: ["/images/cards/samsung-raemian-metaverse.jpg", "/images/projects/samsung-raemian-metaverse.jpg"],
     brief:
-      "Designed metaverse resident services for a premium apartment brand by combining housing-quality theory with Prof. Choi Jae-bung's 'Phono Sapiens' model.",
-    role: "Service scenario development, prototyping, student-team mentoring",
-    outcome: [
-      "Three prototyped and demoed scenarios: a digital flea market using parking space, an event-based walking experience, and community-center information sharing",
-    ],
+      "Identified metaverse services for residents through hyper-local data and a meta-analysis of Raemian, a Korean apartment brand.",
+    role: "Service scenario development, service prototyping, and student management and operation",
+    outcome: ["Prototype development and demonstration for the client"],
     sections: [
       {
-        heading: "Goal & research model",
+        heading: "Goal",
         body: [
-          "For a premium residential brand, value beyond land and construction cost needed to come from an expansive digital-twin experience for residents. I combined prior research on residential-quality factors with Prof. Choi Jae-bung's Phono Sapiens model to design a content strategy, then plotted housing-related verbal data on a heatmap — architecture-based factors on one axis, Phono Sapiens factors on the other.",
+          "In order to achieve value expansion through spatial expansion, our client needed to provide an expansive digital twin experience to offer premium services tailored to the residents of B, a high-end luxury residential facility.",
         ],
       },
       {
-        heading: "Process & result",
+        heading: "Research Model",
         body: [
-          "I mentored an undergraduate team building the prototypes on Zepeto and Unity — developing scenarios myself and guiding the student who led implementation — then used my GRU network to run prototype evaluations and produce demo videos: a digital flea market using parking space, an event-based walking experience, and a community-center information-sharing scenario.",
+          "To develop a content strategy for the metaverse, two theories combining technology and humanities were applied. First, we used prior studies on factors determining apartment residential quality to identify key qualitative elements to consider. Second, we applied Professor Jae-bung Choi's 'Phono Sapiens' model to determine how to satisfy the digital generation.",
+        ],
+      },
+      {
+        heading: "Process",
+        body: [
+          "To achieve this, residential-related data was collected to analyze people's housing needs. Verbal data related to housing was preprocessed and reclassified based on architecture-based factors and phono-sapiens factors. The redefined data was visualized on a heatmap, with the X-axis representing architecture-based factors and the Y-axis representing phono-sapiens factors.",
+          "Then analyzed their correlation, grouped the main contexts, defined user needs, and reinterpreted them based on resident context to derive the final scenario. Based on the derived scenario, developed service prototypes using metaverse platforms (e.g., Zepeto, Unity).",
+          "In this process, the project was carried out with a team of undergraduates, and I participated as a mentor guiding the student leading the project. I utilized specialized student industry-academia clubs (e.g., GRU) to evaluate the prototype and create demonstration videos.",
+        ],
+      },
+      {
+        heading: "Result",
+        body: [
+          "As a result, videos were produced for each service scenario.",
+          "Scenario #1. Prototype for a digital flea market utilizing parking space",
+          "Scenario #2. Planning of an event-based walking experience",
+          "Scenario #3. Utilizing community center for information dissemination",
         ],
       },
     ],
   },
   {
     slug: "starfield-new-branch-1",
-    title: "Predicting Customer Personas for a New Starfield Branch (#1)",
+    title: "Shinesegae Starfield - Data-Driven Service Design for Newly Emerging Branch #1",
     org: "Shinsegae Starfield (via SDI Lab)",
     period: "2021 – 2025",
     location: "Changwon, Korea",
@@ -434,30 +532,45 @@ export const projects: Project[] = [
     domains: ["Retail & Consumer"],
     images: ["/images/cards/starfield-new-branch-1.jpg", "/images/projects/starfield-new-branch-1.jpg"],
     brief:
-      "Predicted who would actually shop a not-yet-built mall branch, and what they'd want, from card and demographic data alone.",
-    role: "Demographic analysis, persona design",
+      "Consulting on predicting customer characteristics for a newly planned Starfield location and proposing corresponding services based on these predictions.",
+    role: "Demography analysis, persona design",
     outcome: [
-      "Six representative personas across four clusters",
-      "Seven service strategies proposed and adopted into the branch's operating strategy while it was still under construction",
+      "Analyzed the characteristics of expected visitors",
+      "Designed expected visit locations for each customer persona, and developed strategies accordingly",
     ],
     sections: [
       {
-        heading: "Research model & process",
+        heading: "Goal",
         body: [
-          "With no branch open yet to observe, I combined social network analysis of customer card data with public demographic, mobility, and geography data — using the SQAM model to classify and define collective behavior at the planned site. This surfaced six representative personas across four clusters, and social-media post density pinpointed likely hot spots, which I reclassified under SQAM and cross-referenced against which persona-purposes drove visits to each location type — for instance, heavy 'Queue'-type visits tied to daily-convenience purposes.",
+          "As the client plans to establish a new location in Changwon, there was a need for brand-specific designs for the in-mall stores tailored to the local residents of the area.",
+        ],
+      },
+      {
+        heading: "Research Model",
+        body: [
+          "To define customer personas based on data, Network Analysis was chosen as the primary method to identify and select clusters visualized based on Network Graph Theory. Also, to analyze the demographics of Location #1, the SQAM model, which classifies and defines collective behavior, was applied.",
+        ],
+      },
+      {
+        heading: "Process",
+        body: [
+          "By integrating Social Network Analysis of customer credit card data with demographic insights from public population, mobility, and geography data, we identified six representative personas from four clusters for Location #1. Subsequently, the number of posts on social media was analyzed to identify hot spots within Location #1.",
+          "The identified locations were reclassified based on the SQAM model.",
+          "Using customer movement data, an analysis was conducted to determine which customers frequently visit specific locations for each type of collective behavior. For each location in the SQAM model, we analyzed the destinations frequently visited by customers based on their purposes. As a result, we identified that customers in Location #1 exhibit specific collective behaviors based on their purposes, including major visits to 'Queue' type locations for daily convenience purposes.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "From this, we designed the location types and services each persona would expect and proposed seven service strategies — adopted into the operating strategy for the branch while it was still under construction.",
+          "Using these insights, we designed the types of locations and services expected by each persona.",
+          "Based on this, seven service strategies were proposed and adopted into the operational strategy of the currently under-construction Location #1.",
         ],
       },
     ],
   },
   {
     slug: "starfield-new-branch-2",
-    title: "Predicting Customer Personas for a New Starfield Branch (#2)",
+    title: "Shinesegae Starfield - Data-Driven Service Design for Newly Emerging Branch #2",
     org: "Shinsegae Starfield (via SDI Lab)",
     period: "2021 – 2025",
     location: "Korea",
@@ -465,29 +578,41 @@ export const projects: Project[] = [
     domains: ["Retail & Consumer"],
     images: ["/images/cards/starfield-new-branch-2.jpg", "/images/projects/starfield-new-branch-2.jpg"],
     brief:
-      "A second new-branch prediction project, this time pairing the quantitative model with direct persona interviews.",
-    role: "Demographic analysis, persona design",
+      "Consulting on predicting customer characteristics for a newly planning Starfield location and proposing corresponding services based on these predictions.",
+    role: "Demographic analysis, Persona design",
     outcome: [
-      "Four personas derived from nine identified commercial districts",
-      "Proposed CX strategies adopted and now running at the newly opened branch",
+      "Analyzed the characteristics of expected visitors",
+      "Designed expected visit locations for each customer persona, and developed strategies accordingly",
     ],
     sections: [
       {
-        heading: "Research model",
+        heading: "Goal",
         body: [
-          "Unlike the first new-branch project, this one paired quantitative persona definition (who, how, and what attitude) with qualitative interviews, structured around the SQAM model and psychographic scales from prior research.",
+          "As the client plans to establish a new branch in location #2, there was a need for brand-specific designs for the in-mall stores tailored to the local residents of the area.",
+        ],
+      },
+      {
+        heading: "Research Model",
+        body: [
+          "To design services, a research model was developed based on answers to four key questions. Through quantitative data analysis, our team aimed to define Who, How, and What Attitude to identify key personas in Location #2. We then conducted interviews with representative individuals from each persona to determine what they would want from Starfield branch #2.",
+          "The interview framework was built based on the SQAM model and psychographic variable scales derived from prior research. Using this framework, our team classified places customers visit in Location #2 and their reasons for visiting, providing insights into what customers want from Starfield.",
         ],
       },
       {
         heading: "Process",
         body: [
-          "Using mobility and social-post data, I identified nine key commercial districts around the site, then consolidated them into three larger district types and derived four district-based personas. I interviewed representative participants for each — where they go, what they do there, why — coded the results against SQAM, and reclassified the experience descriptions using psychographic scales, visualized on a heatmap to surface an integrated persona of the area's residents.",
+          "To define personas, our team first analyzed the key commercial districts in Location #2. Using mobility data, we identified the areas with the highest foot traffic. Subsequently we analyzed the number of posts on social network services to pinpoint the hot spots within Location #2. Additionally, insights from demographic data analysis were incorporated, resulting in the identification of nine key commercial districts.",
+          "Detailed analysis of the characteristics of nine commercial areas was conducted, and they were reclassified into three large-scale commercial districts based on common features.",
+          "Through this, four personas based on the local commercial districts were identified.",
+          "Based on the analysis of four representative personas, we selected interview participants tailored to each persona and conducted interviews. The interview questions included details about the places they frequently visit, their activities and purposes at those places, and their motivations.",
+          "The interview results were coded, and the visited locations were reclassified according to the SQAM model. Additionally, the descriptions of their experiences at each type of location were reclassified using psychographic variable scales. By visualizing these findings on a heatmap with X and Y axes, we were able to identify an integrated persona of Location #2 residents and determine, based on a theoretical model, which places and experiences are valued by each persona.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "The resulting customer-experience strategies were adopted and are actively running at the newly opened branch.",
+          "With these insights, we proposed tailored customer experience strategies for each persona.",
+          "The proposed strategies were adopted and are now being actively implemented at the newly opened Starfield Branch #2.",
         ],
       },
     ],
@@ -496,7 +621,7 @@ export const projects: Project[] = [
   // ---------------- AI-DRIVEN ----------------
   {
     slug: "vip-concierge-robot",
-    title: "VIP Concierge Robot: Service Design for a Presidential Office",
+    title: "VIP Concierge Robot: Service Design for Premium Guest Experience",
     org: "Sungkyunkwan University President's Office (via SDI Lab)",
     period: "Oct. 2024 – Jun. 2025",
     location: "Seoul, Korea",
@@ -504,39 +629,54 @@ export const projects: Project[] = [
     domains: ["Public Sector", "Robotics & AI"],
     images: ["/images/cards/vip-concierge-robot.jpg", "/images/projects/vip-concierge-robot-1.jpg", "/images/projects/vip-concierge-robot-2.jpg", "/images/projects/vip-concierge-robot-3.jpg"],
     brief:
-      "Turned a royal-court induction ceremony from the Joseon dynasty into the interaction design for three serving robots greeting VIP guests — not on my resume, only surfaced once I audited this site.",
-    role: "Service design, human-robot interaction design, cross-lab coordination",
+      "Commissioned by the President of Sungkyunkwan University to design a service and robotic interaction system for guest reception within the presidential office.",
+    role: "Service Design, Human–Robot Interaction Design",
     outcome: [
-      "Three serving robots deployed and in active operation in the President's Office",
-      "Became the clearest 'wow point' of the guest experience there",
-      "Sparked my ongoing interest in human-robot interaction as a research direction",
+      "Three serving robots were successfully deployed and are currently in operation, delivering high guest satisfaction.",
     ],
     sections: [
       {
-        heading: "How it reached me",
+        heading: "Goal",
         body: [
-          "Prof. Choi Jae-bung (the Phono Sapiens theorist behind the Raemian metaverse project, and concurrently SKKU's vice president) had the university president's request routed through him to my advisor, and from there to me. I led overall service design; SKKU's Mechanical Engineering robotics lab handled the physical robot build.",
+          "To create a serving-robot system for the President's Office at Sungkyunkwan University — designed to deliver a wow-point experience for visiting VIPs while partially replacing the traditional hospitality roles performed by the secretary staff.",
         ],
       },
       {
-        heading: "Process",
+        heading: "Process — 1. Establishing collaboration and context research",
         body: [
-          "I interviewed secretarial staff, the university president, and past VIP visitors: staff wanted their three core tasks (welcome/hosting, guided explanation, refreshment service) partly automated; the president wanted the university's heritage reflected; VIPs wanted something memorable.",
-          "The concept drew on 'The Prince's Entrance Ceremony,' a historical painting depicting the six ceremonial stages a Joseon crown prince underwent entering Sungkyunkwan — guests became visiting 'crown princes,' the president the 'royal mentor,' and the service system (including the robots) the attending court. That reframing yielded three personas — Scholar, Court Servant, Court Lady — which shaped both the interaction flow and the three robots' distinct roles.",
-          "I scanned the President's Office to map circulation paths, assigned each robot a functional route (photo-taking, guided explanation, beverage service), and worked with the robotics lab to implement AI-driven interaction, guided-tour video, and expression displays — plus custom housing designed around each robot's persona.",
+          "Worked in collaboration with a robotics laboratory in the Department of Mechanical Engineering to set up the development environment for the robot system.",
+          "Conducted interviews with secretary staff, the President, and various VIP visitors to understand their expectations.",
+        ],
+      },
+      {
+        heading: "Process — 2. Identifying stakeholder expectations",
+        body: [
+          "Secretary Staff: their existing roles consist of three main tasks — welcoming and hosting guests, providing guided explanations, and serving beverages and refreshments.",
+          "President: desired a system that reflects the legacy and heritage of Sungkyunkwan University.",
+          "VIP Visitors: wanted something novel, memorable, and unexpected.",
+        ],
+      },
+      {
+        heading: "Process — 3. Concept development inspired by SKKU heritage",
+        body: [
+          "We drew inspiration from the historical artwork 'The Prince's Entrance Ceremony', which depicts the six ceremonial stages the crown prince underwent when entering the state academy, Sungkyunkwan, during the Joseon Dynasty.",
+          "Based on this narrative logic: visiting guests were framed as 'crown princes'; the President represented the 'royal mentor'; the service system — including the serving robots — became the attending 'court servants'. This cultural reinterpretation transformed the guest experience into a symbolic ceremonial journey.",
+          "From this narrative structure, we derived three key personas in court servants — the Scholar, the Court Servant, and the Court Lady. These personas guided the interaction flow and ultimately informed the deployment of three serving robots.",
+          "To accomplish this, we purchased three serving robots and initiated the development project. Based on this framework, we designed the complete service system by defining each role and mapping all touchpoints within the President's Office.",
+          "Building on this service system, we collaborated with the Mechanical Engineering laboratory to program the serving robots. We scanned the President's Office to map the full circulation paths and assigned functional behaviors to each route, enabling features such as photo-taking, guided explanations, and beverage service. In particular, we utilized the robot's display to implement guided-tour videos, facial expressions, and AI-driven interaction capabilities.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "All three robots are deployed and operating, and this project is what pulled me toward human-robot interaction as a research interest I'm still pursuing.",
+          "Finally, we designed custom housings tailored to each robot's concept. The robots are now fully operational and have become a strong wow-point within the President's Office.",
         ],
       },
     ],
   },
   {
     slug: "manufacturing-worker-training-ai",
-    title: "AI Training Tool for Wire-Harness Assembly Workers",
+    title: "Digital-Twin Service Design for Labor-Intensive Manufacturing System",
     org: "Co-research with a labmate, at a manufacturing partner in Weihai, China",
     period: "2025 –",
     location: "Weihai, China / Seoul, Korea",
@@ -544,32 +684,32 @@ export const projects: Project[] = [
     domains: ["Robotics & AI", "Corporate Strategy"],
     images: ["/images/cards/manufacturing-worker-training-ai.jpg", "/images/projects/manufacturing-worker-training-ai-1.jpg", "/images/projects/manufacturing-worker-training-ai-2.jpg"],
     brief:
-      "Digitizing workers instead of machines, in a labor-intensive process too manual for a traditional digital twin — now an AI tool that pinpoints exactly where a finished wire harness went wrong.",
-    role: "Overall research design and supervision (co-research with a labmate handling implementation and authorship)",
-    outcome: [
-      "A working AI tool that traces defects in a finished wire harness back to the exact assembly stage that caused them — complete",
-      "A second paper on which coaching interventions best speed novice-to-skilled progression — in progress, targeted for late 2026",
-    ],
+      "To build an AI persona–based digital simulation system for labor-intensive manufacturing environments where traditional digital-twin techniques are difficult to apply.",
+    role: "Persona Design",
+    outcome: ["In Progress"],
     sections: [
       {
         heading: "Problem",
         body: [
-          "Wire-harness assembly — a core automotive-electronics component — is too manual and non-automatable for a full digital twin. New workers need to reach proficiency fast, but there usually isn't a skilled worker free to watch each one and correct mistakes in real time. Each product runs through wire cutting, connector insertion, functional testing, and taping/final assembly, with 20+ connector types per product and three-person teams per stage — so how a team is composed changes lead time significantly.",
+          "We conducted field collaboration with a factory in Weihai, China, which manufactures wire harnesses, a core component of automotive electronics.",
+          "Wire-harness assembly is highly labor-intensive, and due to its manual, non-automatable nature, implementing a full digital twin is extremely challenging. Therefore, a new approach was needed: one that focuses on digitizing workers, not machines.",
+          "The production process of wiring harness consists of four main stages: wire cutting, connector insertion, functional testing and error inspection, and taping and final assembly. Each product involves 20+ connector types, and each stage requires a team of three workers. Lead time varies significantly depending on how worker teams are composed.",
+          "We analyzed real operational data from factory workers, including physical attributes (height, weight, body type, hand size), gender, wage and family information, assigned production stage, working hours, output and performance metrics, and defect rates.",
+          "In our preliminary analysis, we found notable patterns — for example, in the connector-insertion stage, workers with smaller hands and smaller body frames tended to achieve higher output and better performance.",
+          "Based on these attributes and performance patterns, we classified workers into distinct worker personas. These personas represent meaningful behavioral and performance groups that influence workflow efficiency.",
+          "Using the defined worker personas, we are developing an AI persona–based HR simulation to determine which personas should be assigned to each production stage, which combinations of personas yield the highest operational efficiency, and how team structures impact lead time, output, and error rates.",
         ],
       },
       {
-        heading: "Approach",
+        heading: "Result (In Progress)",
         body: [
-          "We ran a controlled comparison at a real factory: one group of new workers practiced with no assistance, another was coached by a skilled worker, and we tracked both groups' skill-acquisition curves. The first deliverable — complete — is a working AI system that traces a finished harness back to the specific stage and cause of a defect. The second, now being written, asks a sharper question: given the repeating patterns of trial-and-error we saw in the novice-to-skilled transition, which coaching interventions actually work.",
-        ],
-      },
-      {
-        heading: "My role",
-        body: [
-          "This is a co-research project with a labmate whose graduating paper this is — I set the overall research direction and supervise, while he owns the implementation and writing. The published portfolio site described an earlier version of this project (persona-based optimal worker placement); the direction above reflects where the research actually stands now.",
+          "We are currently reconstructing the factory workflow in Unity, creating a 3D environment that enables dynamic simulation of worker–process interactions.",
+          "Once completed, the system will identify the optimal persona combinations for each assembly stage, predict operational efficiency improvements when these combinations are applied, and serve as a decision-support tool for worker assignment, new-hire placement, and performance management.",
+          "Ultimately, this approach aims to create a human-centered digital twin model that enhances productivity in environments where automation is not possible.",
         ],
       },
     ],
+    note: "Known site bug, not yet resolved: the original page's GOAL section was actually copy-pasted from the Military Wargame page and describes soldier simulation, not manufacturing — omitted here rather than reproduced, since it would misdescribe this project. Also, per the vault: this description is the initial framing from when the project was scoped; the actual current status is further along (a defect-tracing AI tool is complete, and a second paper on coaching interventions is in progress) — see the previous version of this page for that update, pending your call on which to keep.",
   },
   {
     slug: "samsung-ax-dashboard",
@@ -600,6 +740,7 @@ export const projects: Project[] = [
         ],
       },
     ],
+    note: "Not on the old Framer site — this is current employment (2025–2026), added from the resume/vault.",
   },
   {
     slug: "samsung-bixby-cooking-assistant",
@@ -629,6 +770,7 @@ export const projects: Project[] = [
         ],
       },
     ],
+    note: "Not on the old Framer site — this is current employment (2025–2026), added from the resume/vault.",
   },
 ];
 

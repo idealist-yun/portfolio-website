@@ -20,6 +20,7 @@ export type ResearchItem = {
   images?: string[];
   collaborators?: string;
   sections: Section[];
+  note?: string;
 };
 
 export const research: ResearchItem[] = [
@@ -33,24 +34,45 @@ export const research: ResearchItem[] = [
     topics: ["Disability & Accessibility"],
     images: ["/images/cards/disability-persona-augmentation.jpg", "/images/research/disability-persona-augmentation.jpg"],
     summary:
-      "Augmented 9 real caregiver interviews into 2,400 synthetic profiles and simulated daily-living support needs for people with developmental disabilities across 11 ADL/IADL scenarios — a reusable framework for a domain where data is always scarce.",
+      "Defined data-driven personas of individuals with developmental disabilities and trained AI-based personas to simulate their behaviors across diverse daily-living scenarios, with the goal of identifying unmet service needs.",
     sections: [
       {
-        heading: "Where it started",
+        heading: "My Role",
+        body: ["Responsible for the entire end-to-end research and execution process."],
+      },
+      {
+        heading: "Outcome",
         body: [
-          "Stanford's Generative Agents work suggested that if an AI agent could stand in for a person with a developmental disability, I could run experiments I could never ethically or practically run on real participants. That idea, combined with fieldwork at the National Rehabilitation Center that convinced me disability research needed exactly this kind of scalable, data-driven approach, became my graduate thesis.",
+          "Developed five developmental-disability personas and derived service needs across eleven daily-living scenarios for each persona. These findings form the core foundation of the ongoing thesis manuscript.",
         ],
       },
       {
-        heading: "Method (9 steps)",
+        heading: "Goal",
         body: [
-          "Interview people with developmental disabilities and their caregivers; rule-based amplification of their Vineland Adaptive Behavior Scale responses (combined with K-Vineland-II clinical norm statistics) from 9 individuals to 2,400 synthetic profiles; re-cluster by Vineland-domain characteristics; define 5 personas from the resulting clusters; lay out the adaptive-behavior level each step of 11 ADL/IADL daily-living scenarios requires; apply each persona to every scenario; identify where a persona's capability falls short; have an LLM explain why that gap matters; and auto-generate a disability-specific Customer Journey Map from the result.",
+          "To develop a data-driven service-design framework for people with developmental disabilities, which later evolved into the foundation of my graduate thesis.",
+        ],
+      },
+      {
+        heading: "Research Model",
+        body: [
+          "To quantify the functional levels of individuals with developmental disabilities, I applied the Vineland Adaptive Behavior Scales, the gold standard for assessing adaptive behavior.",
+          "To measure service needs across daily-living scenarios, it was essential to build AI personas capable of simulating realistic behavior patterns. In doing so, I drew inspiration from a 2024 Stanford study demonstrating AI personas that replicate approximately 85% of human behavioral patterns.",
+        ],
+      },
+      {
+        heading: "Process",
+        body: [
+          "The research followed the steps below: I first reviewed existing persona design components and adapted them to create a framework specialized for developmental disabilities.",
+          "Then, I interviewed the caregivers of nine people with developmental disabilities, documenting their functional levels based on the Vineland Adaptive Behavior Scales.",
+          "Using inter-item relationships within the Vineland model, I constructed rule-based mappings that allowed me to augment the dataset from 9 to 2,400 profiles. These 2,400 profiles were then clustered to derive five distinct disability personas.",
+          "The resulting personas were embedded into an AI persona model and applied across 11 ADL/IADL-based daily-living scenarios. This enabled me to identify potential difficulties and support needs without direct observation, significantly improving efficiency and scalability.",
         ],
       },
       {
         heading: "Result",
         body: [
-          "The output was what I call an 'Augmented Double Diamond' — the standard design-thinking framework extended with a persona-augmentation step, letting service-design research proceed in domains where recruiting enough real participants is genuinely difficult. I'm now extending this into a full AI-agent simulation (see below), inspired by Altera's work on agents in 3D virtual environments like Minecraft and Unity.",
+          "Through this end-to-end process, I developed an 'Augmented Double Diamond' model — an extension of the traditional design-thinking framework that incorporates persona augmentation into the problem-solving cycle. This work successfully formed the foundation of my graduate thesis.",
+          "Looking ahead, I plan to build upon this approach by simulating AI personas within 3D virtual environments — such as Minecraft or Unity — similar to the methodology demonstrated in Altera's research. This will enable more immersive, interactive, and context-rich evaluations of daily-living challenges for people with developmental disabilities.",
         ],
       },
     ],
@@ -65,27 +87,50 @@ export const research: ResearchItem[] = [
     topics: ["Military & HR"],
     images: ["/images/cards/military-life-cycle-pattern.jpg"],
     summary:
-      "Interviewed 18 high-performing soldiers to derive a 5-stage military life-cycle model — grounded in my own experience commanding 60+ personnel and managing HR as a company commander.",
+      "By measuring soldiers' military service experiences, I proposed an HR system that uses data to predict the military service trajectory of newly enlisted personnel.",
     sections: [
+      {
+        heading: "My Role",
+        body: ["Company Commander, overseeing personnel and HR management."],
+      },
+      {
+        heading: "Outcome",
+        body: [
+          "Found five stages in military life experiences: 'Adaptation,' 'Growth,' 'Maturity,' 'Stagnation,' and 'Decline.'",
+          "Paper was published on Korean Academy of Military Social Welfare.",
+        ],
+      },
       {
         heading: "Problem",
         body: [
-          "Existing soldier-support programs (counselors, 'green camp' rehabilitation) focus entirely on soldiers who are struggling to adapt. Almost nothing focuses on making already-strong soldiers stronger — even though most conscripts see their service as time lost rather than a growth opportunity, and junior officers rarely have the experience to address individual needs the way veteran officers can from instinct.",
+          "Due to conscription in South Korea, many soldiers struggle to adapt to military life, resulting in frequent disciplinary issues.",
+          "While programs like military life counselors and green camps aim to address the adaptation problems, there is a lack of focus on developing high-performing soldiers.",
+          "Most research focuses on helping struggling soldiers, but true strength lies in improving all soldiers, particularly those who are excelling. Many conscripted soldiers view their service as a waste of time and not an opportunity for growth.",
+          "Junior officers often lack the experience to address individual needs, while senior officers can predict a soldier's service based on their own experience. By collecting data on soldiers' experiences, a predictive model can be created to forecast the military life of new recruits, tracking factors such as challenges, goals, self-realization, and skill development, which can lead to more personalized training programs for high-performing soldiers.",
         ],
       },
       {
-        heading: "Research model",
+        heading: "Research Model",
         body: [
-          "I combined life-cycle theory with persona theory: a soldier's 'marketing persona' at enlistment evolves toward a 'designated persona' by discharge, and how closely those converge — shaped by both internal military and external personal factors — represents real service progress.",
+          "This study aimed to develop a research model for understanding the patterns of soldiers' military lives, grounded in life cycle theory and persona theory. From enlistment to discharge, soldiers grow through their military experiences. Over time, their initial marketing persona at enlistment evolves toward the designated persona they aimed to achieve.",
+          "The degree to which the marketing persona at discharge aligns with the designated persona represents a soldier's progress. The extent of goal achievement during military service constitutes the positive gap, while unachieved goals form the negative gap. These gaps are influenced by both internal military factors and external factors.",
+          "The focus of this research is to quantify the experiences of exemplary soldiers through interviews and define patterns specific to each persona. Through a series of studies, the ultimate goal is to develop an HR model capable of predicting the military life of newly enlisted soldiers based on historical data.",
         ],
       },
       {
-        heading: "Method & result",
+        heading: "Process",
         body: [
-          "I interviewed 18 soldiers who had adapted successfully to military life and analyzed their traits, goals, and the internal/external factors behind their progress. The result: a 5-stage pattern — Adaptation, Growth, Maturity, Stagnation, Decline — with the highest overall achievement associated with soldiers who moved through all five. This is now feeding a planned predictive HR model for newly enlisted soldiers (see below).",
+          "I conducted interviews with 18 soldiers who successfully adapted to military life and analyzed their characteristics. I identified the personal traits (personas) of high-performing soldiers, measured their military life experiences, and identified both positive and negative factors contributing to goal achievement. I then analyzed the common factors among them.",
+        ],
+      },
+      {
+        heading: "Result",
+        body: [
+          "The military life experience has been patterned into five stages: 'Adaptation,' 'Growth,' 'Maturity,' 'Stagnation,' and 'Decline.' It was found that the highest achievement rates are associated with experiencing all five stages. Based on these findings, I have written a paper and submitted it to Korean Academy of Military Social Welfare, which is currently under review. In the future, I plan to develop a predictive model using big data collected from these patterns.",
         ],
       },
     ],
+    note: "This RESULT paragraph is the original site's wording from while the paper was under review — it has since actually been published (Dec. 2024), which is why the status badge above says Published rather than matching 'currently under review.'",
   },
   {
     slug: "idd-agent-simulation",
@@ -284,27 +329,49 @@ export const research: ResearchItem[] = [
     topics: ["Military & HR"],
     images: ["/images/cards/wargame-simulation.jpg", "/images/research/wargame-simulation.jpg"],
     summary:
-      "Scaling the HR simulation from unit to operation — the concept directly behind the 3D battlefield-mapping project I ran as a company commander.",
+      "As a Forward Observation Officer, I experienced two GP operations during which I encountered North Korean provocations (artillery attacks, missile launches, and drone incursions). Also, as a HQ company commander, I planned and simulated military operations. These experiences underscored the critical importance of simulation for real-war situations, which is why I aim to develop an AI-driven military operation simulator.",
     sections: [
       {
-        heading: "Idea",
+        heading: "My Role",
         body: [
-          "If units are digital twins, real and simulated training (e.g., KCTC exercises) could predict how personnel should be deployed together. A core military metric — how fast readiness is actually achieved — is hard to standardize because large, aging military organizations often pass procedure down orally rather than as documented, step-by-step process. The plan is to simulate readiness-stage progression like a customer journey map or service blueprint, folding in data like soldier fitness, then connect individual-level tracking with unit-level prediction across live operations like KCTC.",
+          "Forward Observation Officer, HQ Company Commander, Persona modeling, System design.",
         ],
       },
       {
-        heading: "Where it comes from",
+        heading: "Outcome",
+        body: ["(In progress) Developing AI-driven wartime simulation model."],
+      },
+      {
+        heading: "Goal",
         body: [
-          "This grew directly out of commanding a company at the DMZ and the 3D battlefield-mapping project on the Project page — the sense that this connected to service design kept surfacing during my military service, and sharpened while I was doing my thesis.",
+          "To model a digital AI-driven military unit by transforming real soldiers' HR data — such as mission capabilities, physical performance, and assigned roles — into computational representations.",
+          "To build a wargame simulation model by recreating actual military terrain in Unity and simulating friendly-force responses under assumed enemy attack scenarios.",
+          "To further refine the system for real-world military application and ultimately distribute it as an AI defense solution.",
         ],
       },
       {
-        heading: "Status",
+        heading: "Process",
         body: [
-          "Idea stage; planned as a collaborator's paper with no progress yet.",
+          "During my service as a forward observer, I was deployed to a frontline Guard Post (GP) for operational missions. Initially, I tried to digitize the terrain data of forward areas, which had previously been informally understood through hand-drawn maps. This was intended to address the inconsistency in information delivery and comprehension caused by variations in map quality depending on the individual who created them.",
+          "Using the TAS-1K artillery observation equipment, precise coordinates for each point were calculated and used to create accurate 2D visual materials that reflect distances and positions on a two-dimensional plane.",
+          "Subsequently, all key elements — including enemy coordinates, targeting plans, anticipated enemy infiltration routes, and bypass routes — were diagrammed to create a comprehensive visual guidebook for use within the GP. (Due to security regulations, this guidebook cannot be taken outside the GP.)",
+          "Next, the goal was to create a comprehensive manual covering peacetime, wartime, and provocation scenarios using service scenarios. Observation officers are required to have both the expertise of a firepower specialist and the command capabilities to oversee the entire GP in emergencies. However, after experiencing provocations from North Korea, it became evident that the materials handed down by predecessors lacked critical guidance on wartime response. To address this gap, I conducted interviews with 31 soldiers in the GP, categorized by their roles.",
+          "Within the GP, roles such as sentry, situation monitor, observer, medic, and driver must function seamlessly like interlocking gears to ensure the success and sustainability of operations. However, due to the lack of clear regulations and reliance on oral transmission for handovers, inconsistencies in role interpretation often arose, even among soldiers performing the same tasks.",
+          "To resolve this issue, service scenarios were developed for each role through repeated interviews. These were consolidated into a comprehensive, diagrammed manual covering all potential situations, including peacetime, wartime, and provocations. The manual also includes visualizations of operational plans and command structures within the division, response scenarios for provocations such as gunfire or artillery strikes (based on the location and origin of the attack), and contingency plans for equipment malfunctions.",
+        ],
+      },
+      {
+        heading: "Result",
+        body: [
+          "Based on this experience, I was invited by the ROTC Central Association to deliver lectures to cadets yet to be commissioned, newly commissioned second lieutenants aspiring to field assignments, and mid-level officers newly assigned to forward areas.",
+          "During one of these lectures, I had the opportunity to meet the former Chief of Staff of the Army. We discussed the realities faced in forward areas and exchanged ideas on potential institutional improvements.",
+          "The discussion led to the following conclusion: through multiple operational deployments, I accumulated substantial knowledge of military operations. These experiences made it clear to me that the outcome of an operation depends heavily on the capabilities of its commanders. Yet, in Korea, there are no tools that allow proper simulation of real operations, nor any system capable of reflecting the actual capabilities of one's own soldiers.",
+          "Based on this gap, I began developing a new line of research. Just as I previously studied the soldier life cycle, I am now working on creating AI soldier personas using HR data collected at the time of enlistment. These personas will be continuously updated throughout a soldier's service period — tracking changes in physical performance, personality traits, interpersonal dynamics, and role competency — to build a system capable of capturing an entire unit's HR state in real time.",
+          "Using this foundation, I am developing an AI-driven military wargame simulator that reconstructs real battlefield environments from terrain data and allows commanders to deploy their actual personnel profiles. This enables the simulation of real combat scenarios in multiple configurations and improves decision-making accuracy under wartime conditions.",
         ],
       },
     ],
+    note: "The site's Outcome field literally says '(In progress)'; per the vault, this is actually still idea-stage (no progress made yet), planned as a collaborator's (Seoul National University HCI) paper — the status badge above reflects that vault correction rather than the site's wording.",
   },
   {
     slug: "hospital-inpatient-persona",

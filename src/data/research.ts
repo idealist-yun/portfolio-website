@@ -21,6 +21,7 @@ export type ResearchItem = {
   collaborators?: string;
   sections: Section[];
   note?: string;
+  demo?: { href: string };
 };
 
 export const research: ResearchItem[] = [
@@ -141,6 +142,7 @@ export const research: ResearchItem[] = [
     topics: ["Disability & Accessibility"],
     summary:
       "Building the 'brain' behind the persona-augmentation thesis — profile-native AI agents grounded in clinical assessment data, simulated across daily-living scenarios in a virtual environment, on a 2-year roadmap toward becoming a general simulation methodology.",
+    demo: { href: "/lab/index.html" },
     sections: [
       {
         heading: "Why this, and why now",

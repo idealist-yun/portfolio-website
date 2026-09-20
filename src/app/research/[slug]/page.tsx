@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { research } from "@/data/research";
 import { Tag } from "@/components/ui";
+import LabEmbed from "@/components/LabEmbed";
 
 export function generateStaticParams() {
   return research.map((r) => ({ slug: r.slug }));
@@ -56,6 +57,8 @@ export default async function ResearchDetail({
       <p className="mt-8 text-lg leading-relaxed text-muted">
         {item.summary}
       </p>
+
+      {item.demo && <LabEmbed href={item.demo.href} />}
 
       {item.images && item.images.length > 0 && (
         <div className="mt-8 space-y-4">

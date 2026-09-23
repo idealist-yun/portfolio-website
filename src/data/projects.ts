@@ -705,7 +705,6 @@ export const projects: Project[] = [
         ],
       },
     ],
-    note: "Not on the old Framer site — this is current employment (2025–2026), added from the resume/vault.",
   },
   {
     slug: "samsung-bixby-cooking-assistant",

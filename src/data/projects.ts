@@ -195,13 +195,12 @@ export const projects: Project[] = [
       {
         heading: "Result",
         body: [
-          "As the founder and president of the Federation of Korea ROTC 60th Officers, representing 3,651 officers of the ROTC 60th, I collaborated with organizations such as E-land and KB Kookmin Bank to promote and activate recruitment programs for discharged officers. Also, I led collaboration with senior discharged officers to create a continuous recruitment pool for companies they operate.",
+          "As the founder and president of the Federation of Korea ROTC 60th Officers, representing 3,561 officers of the ROTC 60th, I collaborated with organizations such as E-land and KB Kookmin Bank to promote and activate recruitment programs for discharged officers. Also, I led collaboration with senior discharged officers to create a continuous recruitment pool for companies they operate.",
           "Specifically, in partnership with Shinhan Financial Group, organized a joint job fair by consulting with various departments, including banking, cards, and insurance.",
           "In addition, I also established partnerships with hospitals to offer benefits to discharged officers and their families, securing agreements with healthcare providers.",
         ],
       },
     ],
-    note: "Vault correction (not yet applied here): the real number is 3,561, not 3,651 — a digit-transposition typo on the original site.",
   },
   {
     slug: "saihst-hospital-metaverse",

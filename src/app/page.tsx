@@ -44,14 +44,18 @@ export default function Home() {
           { label: "Data-Driven", body: "Quantitative persona modeling and behavioral analysis — extracting actionable insight from real usage and assessment data." },
           { label: "AI-Driven", body: "AI personas and simulation environments to pre-validate service strategies before they reach the real world." },
         ].map((phase) => (
-          <div key={phase.label}>
+          <Link
+            key={phase.label}
+            href={`/project?phase=${encodeURIComponent(phase.label)}`}
+            className="group block"
+          >
             <p className="font-serif text-xl font-semibold text-accent">
-              {phase.label}
+              {phase.label} <span className="group-hover:underline">→</span>
             </p>
             <p className="mt-2 text-sm leading-relaxed text-muted">
               {phase.body}
             </p>
-          </div>
+          </Link>
         ))}
       </section>
 

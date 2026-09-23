@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { projects, allDomains, allPhases, type Domain, type Phase } from "@/data/projects";
 import { Tag, Card } from "@/components/ui";
 
@@ -12,9 +13,23 @@ const phaseStyle: Record<Phase, string> = {
   "AI-Driven": "bg-accent text-white",
 };
 
+function isPhase(value: string | null): value is Phase {
+  return !!value && (allPhases as readonly string[]).includes(value);
+}
+
 export default function ProjectGrid() {
-  const [phase, setPhase] = useState<Phase>("Basic");
+  const searchParams = useSearchParams();
+  const requestedPhase = searchParams.get("phase");
+  const [phase, setPhase] = useState<Phase>(
+    isPhase(requestedPhase) ? requestedPhase : "Basic"
+  );
   const [domain, setDomain] = useState<Domain | "All">("All");
+
+  // Deep link from Home's phase cards (/project?phase=AI-Driven): follow the
+  // URL if it changes (e.g. navigating here again from another phase card).
+  useEffect(() => {
+    if (isPhase(requestedPhase)) setPhase(requestedPhase);
+  }, [requestedPhase]);
 
   const inPhase = useMemo(
     () => projects.filter((p) => p.phase === phase),

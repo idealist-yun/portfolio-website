@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { PageHeader } from "@/components/ui";
 import ProjectGrid from "@/components/ProjectGrid";
 
@@ -24,7 +25,9 @@ export default function ProjectPage() {
         </p>
       </div>
 
-      <ProjectGrid />
+      <Suspense fallback={null}>
+        <ProjectGrid />
+      </Suspense>
     </div>
   );
 }

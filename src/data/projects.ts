@@ -295,39 +295,6 @@ export const projects: Project[] = [
       },
     ],
   },
-  {
-    slug: "deepbridge-startup",
-    title: "DeepBridge — Regular Customer Management AI Tool",
-    org: "DeepBridge (own startup)",
-    period: "2021",
-    location: "Seoul, Korea",
-    phase: "Basic",
-    domains: ["Startup & Venture"],
-    brief:
-      "My first real startup attempt — a CCTV+POS customer-loyalty tool that unexpectedly won a university incubation slot, cut short by mandatory military service.",
-    role: "Founder & President",
-    outcome: [
-      "Selected for SKKU's campus-town startup incubation program (funding + education)",
-      "Signed MOUs with local shop owners in the surrounding commercial district",
-      "Wound down after ~6 months when military service began",
-    ],
-    sections: [
-      {
-        heading: "The idea",
-        body: [
-          "Customers feel like they haven't visited in a while; owners see the same faces daily and can't calibrate to that gap — and that mismatch is where customers quietly churn. Customers, in turn, feel like their own preferences and visit history are never really remembered. We combined in-store CCTV and POS data to build two things: a loyalty-management tool for owners (who's coming back, and how often), and a personalized 'food map' service for customers based on their own taste profile.",
-        ],
-      },
-      {
-        heading: "What happened",
-        body: [
-          "I entered what I thought was a business-plan competition with three teammates a week before the deadline. It turned out to be a university startup-school selection process — we were accepted into the campus-town incubation program, with real funding and education attached. Over about six months we completed the startup curriculum, built a prototype, and signed MOUs with shop owners in the area. Mandatory military service started in March 2022, cutting the run short before it could go further.",
-        ],
-      },
-    ],
-    note: "Not on the old Framer site — no case-study page existed for this one. Content sourced from the Obsidian vault interview instead.",
-  },
-
   // ---------------- DATA-DRIVEN ----------------
   {
     slug: "starfield-existing-branch",

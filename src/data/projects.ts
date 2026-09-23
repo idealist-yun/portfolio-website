@@ -72,7 +72,6 @@ export const projects: Project[] = [
         ],
       },
     ],
-    note: "Vault correction (not yet applied here): the Samsung Home Appliance Award was actually 2nd place, and was deliberately left off the resume as a coursework project.",
   },
   {
     slug: "mcst-public-communication",

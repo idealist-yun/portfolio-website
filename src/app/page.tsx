@@ -81,46 +81,6 @@ export default function Home() {
         </p>
       </section>
 
-      <section className="border-t border-border py-14">
-        <h2 className="font-serif text-2xl font-semibold text-foreground">
-          Featured Work
-        </h2>
-        <div className="mt-8 grid gap-6 sm:grid-cols-3">
-          {featuredWork.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="group block overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-accent"
-            >
-              {item.image ? (
-                <div className="aspect-[16/10] overflow-hidden border-b border-border">
-                  <Image
-                    src={item.image}
-                    alt={item.title}
-                    width={800}
-                    height={500}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="aspect-[16/10] border-b border-border bg-accent-soft" />
-              )}
-              <div className="p-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
-                  {item.tag}
-                </p>
-                <p className="mt-2 font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
-                  {item.title} <span className="text-accent">→</span>
-                </p>
-                <p className="mt-2 text-sm leading-relaxed text-muted">
-                  {item.body}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
       <section className="grid gap-6 border-t border-border py-14 sm:grid-cols-3">
         {[
           { label: "Basic", body: "Design thinking, internalized through consulting and service-design engagements across retail, public sector, and finance." },
@@ -166,6 +126,46 @@ export default function Home() {
             where social innovation, human behavior, and complex service
             needs intersect.
           </p>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-14">
+        <h2 className="font-serif text-2xl font-semibold text-foreground">
+          Featured Work
+        </h2>
+        <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          {featuredWork.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="group block overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-accent"
+            >
+              {item.image ? (
+                <div className="aspect-[16/10] overflow-hidden border-b border-border">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    width={800}
+                    height={500}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="aspect-[16/10] border-b border-border bg-accent-soft" />
+              )}
+              <div className="p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
+                  {item.tag}
+                </p>
+                <p className="mt-2 font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
+                  {item.title} <span className="text-accent">→</span>
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  {item.body}
+                </p>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 

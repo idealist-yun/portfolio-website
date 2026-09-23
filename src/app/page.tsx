@@ -2,6 +2,49 @@ import Link from "next/link";
 import Image from "next/image";
 import { profile } from "@/data/profile";
 import { Eyebrow } from "@/components/ui";
+import { research } from "@/data/research";
+import { projects } from "@/data/projects";
+
+const featuredWork = [
+  {
+    tag: "Disability Service Design",
+    ...(() => {
+      const r = research.find(
+        (r) => r.slug === "disability-persona-augmentation"
+      )!;
+      return {
+        href: `/research/${r.slug}`,
+        title: r.title,
+        body: r.summary,
+        image: r.images?.[0],
+      };
+    })(),
+  },
+  {
+    tag: "Simulation",
+    ...(() => {
+      const r = research.find((r) => r.slug === "idd-agent-simulation")!;
+      return {
+        href: `/research/${r.slug}`,
+        title: r.title,
+        body: r.summary,
+        image: r.images?.[0],
+      };
+    })(),
+  },
+  {
+    tag: "Human-Robot Interaction",
+    ...(() => {
+      const p = projects.find((p) => p.slug === "vip-concierge-robot")!;
+      return {
+        href: `/project/${p.slug}`,
+        title: p.title,
+        body: p.brief,
+        image: p.images?.[0],
+      };
+    })(),
+  },
+];
 
 const entryPoints = [
   {
@@ -36,6 +79,46 @@ export default function Home() {
           working toward becoming an AI-driven strategic designer &amp;
           entrepreneur.
         </p>
+      </section>
+
+      <section className="border-t border-border py-14">
+        <h2 className="font-serif text-2xl font-semibold text-foreground">
+          Featured Work
+        </h2>
+        <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          {featuredWork.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="group block overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-accent"
+            >
+              {item.image ? (
+                <div className="aspect-[16/10] overflow-hidden border-b border-border">
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    width={800}
+                    height={500}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="aspect-[16/10] border-b border-border bg-accent-soft" />
+              )}
+              <div className="p-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
+                  {item.tag}
+                </p>
+                <p className="mt-2 font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
+                  {item.title} <span className="text-accent">→</span>
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  {item.body}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
 
       <section className="grid gap-6 border-t border-border py-14 sm:grid-cols-3">

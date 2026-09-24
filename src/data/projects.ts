@@ -36,7 +36,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Startup & Venture"],
-    images: ["/images/cards/undergraduate-works.jpg", "/images/projects/undergraduate-works.jpg"],
+    images: ["/images/cards/undergraduate-works.jpg", "/images/full/undergraduate-works-01.jpg", "/images/full/undergraduate-works-02.jpg"],
     brief:
       "After being introduced to design thinking, founded a student club to practice and apply design-thinking methodologies in real projects.",
     role: "President, Team leader",
@@ -81,7 +81,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Public Sector"],
-    images: ["/images/cards/mcst-public-communication.jpg", "/images/projects/mcst-public-communication.jpg"],
+    images: ["/images/cards/mcst-public-communication.jpg", "/images/full/mcst-public-communication-01.jpg", "/images/full/mcst-public-communication-02.jpg", "/images/full/mcst-public-communication-03.jpg", "/images/full/mcst-public-communication-04.jpg", "/images/full/mcst-public-communication-05.jpg", "/images/full/mcst-public-communication-06.jpg"],
     brief:
       "Operation of a participatory policy communication lab and monitoring group for digital government branding",
     role: "Data Analysis, Visualization, and student management and operation",
@@ -130,7 +130,7 @@ export const projects: Project[] = [
     location: "Injae, Korea",
     phase: "Basic",
     domains: ["Military"],
-    images: ["/images/cards/military-3d-battlefield-mapping.jpg", "/images/projects/military-3d-battlefield-mapping.jpg"],
+    images: ["/images/cards/military-3d-battlefield-mapping.jpg", "/images/full/military-3d-battlefield-mapping-01.jpg", "/images/full/military-3d-battlefield-mapping-02.jpg"],
     brief:
       "Trained soldiers on terrain and implemented a 3D map for war games to ensure the success of the base defense operation during the KCTC exercise.",
     role: "Company Commander, responsible for operational planning",
@@ -165,6 +165,54 @@ export const projects: Project[] = [
     ],
   },
   {
+    slug: "military-hr-big-data",
+    title: "Military - Research on New Military HR System Based on Big Data",
+    org: "ROKA",
+    period: "2022 – 2024",
+    location: "Injae, Korea",
+    phase: "Basic",
+    domains: ["Military"],
+    images: ["/images/cards/military-hr-big-data.jpg", "/images/full/military-hr-big-data-01.jpg", "/images/full/military-hr-big-data-02.jpg", "/images/full/military-hr-big-data-03.jpg", "/images/full/military-hr-big-data-04.jpg"],
+    brief:
+      "By measuring soldiers' military service experiences, I proposed an HR system that uses data to predict the military service trajectory of newly enlisted personnel.",
+    role: "Company Commander, overseeing personnel and HR management",
+    outcome: [
+      "Found five stages in military life experiences: 'Adaptation,' 'Growth,' 'Maturity,' 'Stagnation,' and 'Decline'.",
+      "Paper was published on Korean Academy of Military Social Welfare",
+    ],
+    sections: [
+      {
+        heading: "Problem",
+        body: [
+          "Due to conscription in South Korea, many soldiers struggle to adapt to military life, resulting in frequent disciplinary issues.",
+          "While programs like military life counselors and green camps aim to address the adaptation problems, there is a lack of focus on developing high-performing soldiers.",
+          "Most research focuses on helping struggling soldiers, but true strength lies in improving all soldiers, particularly those who are excelling. Many conscripted soldiers view their service as a waste of time and not an opportunity for growth.",
+          "Junior officers often lack the experience to address individual needs, while senior officers can predict a soldier's service based on their own experience. By collecting data on soldiers' experiences, a predictive model can be created to forecast the military life of new recruits, tracking factors such as challenges, goals, self-realization, and skill development, which can lead to more personalized training programs for high-performing soldiers.",
+        ],
+      },
+      {
+        heading: "Research Model",
+        body: [
+          "This study aimed to develop a research model for understanding the patterns of soldiers' military lives, grounded in life cycle theory and persona theory. From enlistment to discharge, soldiers grow through their military experiences. Over time, their initial marketing persona at enlistment evolves toward the designated persona they aimed to achieve.",
+          "The degree to which the marketing persona at discharge aligns with the designated persona represents a soldier's progress. The extent of goal achievement during military service constitutes the positive gap, while unachieved goals form the negative gap. These gaps are influenced by both internal military factors and external factors.",
+          "The focus of this research is to quantify the experiences of exemplary soldiers through interviews and define patterns specific to each persona. Through a series of studies, the ultimate goal is to develop an HR model capable of predicting the military life of newly enlisted soldiers based on historical data.",
+        ],
+      },
+      {
+        heading: "Process",
+        body: [
+          "I conducted interviews with 18 soldiers who successfully adapted to military life and analyzed their characteristics. I identified the personal traits (personas) of high-performing soldiers, measured their military life experiences, and identified both positive and negative factors contributing to goal achievement. I then analyzed the common factors among them.",
+        ],
+      },
+      {
+        heading: "Result",
+        body: [
+          "The military life experience has been patterned into five stages: 'Adaptation,' 'Growth,' 'Maturity,' 'Stagnation,' and 'Decline.' It was found that the highest achievement rates are associated with experiencing all five stages. Based on these findings, I have written a paper and submitted it to Korean Academy of Military Social Welfare, which is currently under review. In the future, I plan to develop a predictive model using big data collected from these patterns.",
+        ],
+      },
+    ],
+  },
+  {
     slug: "veterans-reintegration",
     title: "Military - Supporting System for Veterans and Former Officers' Social Reintegration",
     org: "Federation of Korea ROTC 60th Officer",
@@ -172,7 +220,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Military"],
-    images: ["/images/cards/veterans-reintegration.jpg", "/images/projects/veterans-reintegration.jpg"],
+    images: ["/images/cards/veterans-reintegration.jpg", "/images/full/veterans-reintegration-01.jpg", "/images/full/veterans-reintegration-02.jpg", "/images/full/veterans-reintegration-03.jpg"],
     brief:
       "Provided a service for supporting employment, healthcare, and other resources to assist the social reintegration of ROTC veterans.",
     role: "President, responsible for policy development and organizational governance",
@@ -210,7 +258,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Disability & Healthcare"],
-    images: ["/images/cards/saihst-hospital-metaverse.jpg", "/images/projects/saihst-hospital-metaverse.jpg"],
+    images: ["/images/cards/saihst-hospital-metaverse.jpg", "/images/full/saihst-hospital-metaverse-01.jpg", "/images/full/saihst-hospital-metaverse-02.jpg", "/images/full/saihst-hospital-metaverse-03.jpg", "/images/full/saihst-hospital-metaverse-04.jpg"],
     brief:
       "By using metaverse service, planning rehabilitation and welfare-oriented services, especially collaborative artwork, for hospitalized patients.",
     role: "UI/UX Design, Service Prototyping",
@@ -253,7 +301,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Basic",
     domains: ["Disability & Healthcare"],
-    images: ["/images/cards/disability-as-market.jpg", "/images/projects/disability-as-market.jpg"],
+    images: ["/images/cards/disability-as-market.jpg", "/images/full/disability-as-market-01.jpg", "/images/full/disability-as-market-02.jpg", "/images/full/disability-as-market-03.jpg", "/images/full/disability-as-market-04.jpg", "/images/full/disability-as-market-05.jpg"],
     brief:
       "Participated in a research initiative led by the National Rehabilitation Center, focusing on disability progression in an aging society. I later extended this work by connecting it to a graduate-level hackathon project at Sungkyunkwan University.",
     role: "Research Assistant",
@@ -304,7 +352,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Data-Driven",
     domains: ["Retail & Consumer"],
-    images: ["/images/cards/starfield-existing-branch.jpg", "/images/projects/starfield-existing-branch.jpg"],
+    images: ["/images/cards/starfield-existing-branch.jpg", "/images/full/starfield-existing-branch-01.jpg", "/images/full/starfield-existing-branch-02.jpg", "/images/full/starfield-existing-branch-03.jpg", "/images/full/starfield-existing-branch-04.jpg", "/images/full/starfield-existing-branch-05.jpg", "/images/full/starfield-existing-branch-06.jpg", "/images/full/starfield-existing-branch-07.jpg", "/images/full/starfield-existing-branch-08.jpg", "/images/full/starfield-existing-branch-09.jpg", "/images/full/starfield-existing-branch-10.jpg"],
     brief:
       "Analyzed crowd characteristics at existing Starfield locations to design a new journey with F&B experiences",
     role: "Data Analysis, Visualization, Social Media data collection and NLP",
@@ -357,7 +405,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Data-Driven",
     domains: ["Corporate Strategy", "Retail & Consumer"],
-    images: ["/images/cards/samsung-brand-fandom.jpg", "/images/projects/samsung-brand-fandom.jpg"],
+    images: ["/images/cards/samsung-brand-fandom.jpg", "/images/full/samsung-brand-fandom-01.jpg", "/images/full/samsung-brand-fandom-02.jpg", "/images/full/samsung-brand-fandom-03.jpg", "/images/full/samsung-brand-fandom-04.jpg", "/images/full/samsung-brand-fandom-05.jpg", "/images/full/samsung-brand-fandom-06.jpg"],
     brief:
       "Consulting on Samsung Electronics' Branding Strategy Through a Comparative Analysis of Home Appliance Branding Strategies with Competitors",
     role: "Data Analysis, Visualization",
@@ -405,7 +453,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Data-Driven",
     domains: ["Corporate Strategy", "Retail & Consumer"],
-    images: ["/images/cards/samsung-lifelog-minifridge.jpg", "/images/projects/samsung-lifelog-minifridge.jpg"],
+    images: ["/images/cards/samsung-lifelog-minifridge.jpg", "/images/full/samsung-lifelog-minifridge-01.jpg", "/images/full/samsung-lifelog-minifridge-02.jpg", "/images/full/samsung-lifelog-minifridge-03.jpg", "/images/full/samsung-lifelog-minifridge-04.jpg", "/images/full/samsung-lifelog-minifridge-05.jpg"],
     brief:
       "Analyzed the current usage of home appliances and customer lifestyles to develop a scenario for Samsung Affiliate A's new product",
     role: "Data Analysis, Visualization",
@@ -450,7 +498,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "Data-Driven",
     domains: ["Corporate Strategy", "Retail & Consumer"],
-    images: ["/images/cards/samsung-raemian-metaverse.jpg", "/images/projects/samsung-raemian-metaverse.jpg"],
+    images: ["/images/cards/samsung-raemian-metaverse.jpg", "/images/full/samsung-raemian-metaverse-01.jpg", "/images/full/samsung-raemian-metaverse-02.jpg", "/images/full/samsung-raemian-metaverse-03.jpg", "/images/full/samsung-raemian-metaverse-04.jpg", "/images/full/samsung-raemian-metaverse-05.jpg", "/images/full/samsung-raemian-metaverse-06.jpg"],
     brief:
       "Identified metaverse services for residents through hyper-local data and a meta-analysis of Raemian, a Korean apartment brand.",
     role: "Service scenario development, service prototyping, and student management and operation",
@@ -495,7 +543,7 @@ export const projects: Project[] = [
     location: "Changwon, Korea",
     phase: "Data-Driven",
     domains: ["Retail & Consumer"],
-    images: ["/images/cards/starfield-new-branch-1.jpg", "/images/projects/starfield-new-branch-1.jpg"],
+    images: ["/images/cards/starfield-new-branch-1.jpg", "/images/full/starfield-new-branch-1-01.jpg", "/images/full/starfield-new-branch-1-02.jpg", "/images/full/starfield-new-branch-1-03.jpg", "/images/full/starfield-new-branch-1-04.jpg", "/images/full/starfield-new-branch-1-05.jpg", "/images/full/starfield-new-branch-1-06.jpg", "/images/full/starfield-new-branch-1-07.jpg", "/images/full/starfield-new-branch-1-08.jpg"],
     brief:
       "Consulting on predicting customer characteristics for a newly planned Starfield location and proposing corresponding services based on these predictions.",
     role: "Demography analysis, persona design",
@@ -541,7 +589,7 @@ export const projects: Project[] = [
     location: "Korea",
     phase: "Data-Driven",
     domains: ["Retail & Consumer"],
-    images: ["/images/cards/starfield-new-branch-2.jpg", "/images/projects/starfield-new-branch-2.jpg"],
+    images: ["/images/cards/starfield-new-branch-2.jpg", "/images/full/starfield-new-branch-2-01.jpg", "/images/full/starfield-new-branch-2-02.jpg", "/images/full/starfield-new-branch-2-03.jpg", "/images/full/starfield-new-branch-2-04.jpg", "/images/full/starfield-new-branch-2-05.jpg", "/images/full/starfield-new-branch-2-06.jpg"],
     brief:
       "Consulting on predicting customer characteristics for a newly planning Starfield location and proposing corresponding services based on these predictions.",
     role: "Demographic analysis, Persona design",
@@ -592,7 +640,7 @@ export const projects: Project[] = [
     location: "Seoul, Korea",
     phase: "AI-Driven",
     domains: ["Public Sector", "Robotics & AI"],
-    images: ["/images/cards/vip-concierge-robot.jpg", "/images/projects/vip-concierge-robot-1.jpg", "/images/projects/vip-concierge-robot-2.jpg", "/images/projects/vip-concierge-robot-3.jpg"],
+    images: ["/images/cards/vip-concierge-robot.jpg", "/images/full/vip-concierge-robot-01.jpg", "/images/full/vip-concierge-robot-02.jpg", "/images/full/vip-concierge-robot-03.jpg", "/images/full/vip-concierge-robot-04.jpg", "/images/full/vip-concierge-robot-05.jpg", "/images/full/vip-concierge-robot-06.jpg", "/images/full/vip-concierge-robot-07.jpg"],
     brief:
       "Commissioned by the President of Sungkyunkwan University to design a service and robotic interaction system for guest reception within the presidential office.",
     role: "Service Design, Human–Robot Interaction Design",
@@ -647,7 +695,7 @@ export const projects: Project[] = [
     location: "Weihai, China / Seoul, Korea",
     phase: "AI-Driven",
     domains: ["Robotics & AI", "Corporate Strategy"],
-    images: ["/images/cards/manufacturing-worker-training-ai.jpg", "/images/projects/manufacturing-worker-training-ai-1.jpg", "/images/projects/manufacturing-worker-training-ai-2.jpg"],
+    images: ["/images/cards/manufacturing-worker-training-ai.jpg", "/images/full/manufacturing-worker-training-ai-01.jpg", "/images/full/manufacturing-worker-training-ai-02.jpg", "/images/full/manufacturing-worker-training-ai-03.jpg", "/images/full/manufacturing-worker-training-ai-04.jpg", "/images/full/manufacturing-worker-training-ai-05.jpg", "/images/full/manufacturing-worker-training-ai-06.jpg", "/images/full/manufacturing-worker-training-ai-07.jpg", "/images/full/manufacturing-worker-training-ai-08.jpg"],
     brief:
       "To build an AI persona–based digital simulation system for labor-intensive manufacturing environments where traditional digital-twin techniques are difficult to apply.",
     role: "Persona Design",
@@ -675,6 +723,51 @@ export const projects: Project[] = [
       },
     ],
     note: "Known site bug, not yet resolved: the original page's GOAL section was actually copy-pasted from the Military Wargame page and describes soldier simulation, not manufacturing — omitted here rather than reproduced, since it would misdescribe this project. Also, per the vault: this description is the initial framing from when the project was scoped; the actual current status is further along (a defect-tracing AI tool is complete, and a second paper on coaching interventions is in progress) — see the previous version of this page for that update, pending your call on which to keep.",
+  },
+  {
+    slug: "wargame-simulation-project",
+    title: "Service Design for Military Wargame Simulations",
+    org: "ROKA",
+    period: "2022 – 2024",
+    location: "Injae, Korea",
+    phase: "AI-Driven",
+    domains: ["Military", "Robotics & AI"],
+    images: ["/images/cards/wargame-simulation.jpg", "/images/full/wargame-simulation-01.jpg", "/images/full/wargame-simulation-02.jpg", "/images/full/wargame-simulation-03.jpg", "/images/full/wargame-simulation-04.jpg", "/images/full/wargame-simulation-05.jpg", "/images/full/wargame-simulation-06.jpg", "/images/full/wargame-simulation-07.jpg"],
+    brief:
+      "As an Forward Observation Officer, I experienced two GP operations during which I encountered North Korean provocations (artillery attacks, missile launches, and drone incursions). Also, as a HQ company commander, I planned and simulated military operations. These experiences underscored the critical importance of simulation for real-war situations, which is why I aim to develop an AI-driven military operation simulator.",
+    role: "Forward Observation Officer, HQ Company Commander, Persona modeling, System design",
+    outcome: ["(In progress) Developing AI-driven wartime simulation model"],
+    sections: [
+      {
+        heading: "Goal",
+        body: [
+          "To model a digital AI-driven military unit by transforming real soldiers' HR data — such as mission capabilities, physical performance, and assigned roles — into computational representations.",
+          "To build a wargame simulation model by recreating actual military terrain in Unity and simulating friendly-force responses under assumed enemy attack scenarios.",
+          "To further refine the system for real-world military application and ultimately distribute it as an AI defense solution.",
+        ],
+      },
+      {
+        heading: "Process",
+        body: [
+          "During my service as a forward observer, I was deployed to a frontline Guard Post (GP) for operational missions. Initially, I tried to digitize the terrain data of forward areas, which had previously been informally understood through hand-drawn maps. This was intended to address the inconsistency in information delivery and comprehension caused by variations in map quality depending on the individual who created them.",
+          "Using the TAS-1K artillery observation equipment, precise coordinates for each point were calculated and used to create accurate 2D visual materials that reflect distances and positions on a two-dimensional plane.",
+          "Subsequently, all key elements — including enemy coordinates, targeting plans, anticipated enemy infiltration routes, and bypass routes — were diagrammed to create a comprehensive visual guidebook for use within the GP. (Due to security regulations, this guidebook cannot be taken outside the GP.)",
+          "Next, the goal was to create a comprehensive manual covering peacetime, wartime, and provocation scenarios using service scenarios. Observation officers are required to have both the expertise of a firepower specialist and the command capabilities to oversee the entire GP in emergencies. However, after experiencing provocations from North Korea, it became evident that the materials handed down by predecessors lacked critical guidance on wartime response. To address this gap, I conducted interviews with 31 soldiers in the GP, categorized by their roles.",
+          "Within the GP, roles such as sentry, situation monitor, observer, medic, and driver must function seamlessly like interlocking gears to ensure the success and sustainability of operations. However, due to the lack of clear regulations and reliance on oral transmission for handovers, inconsistencies in role interpretation often arose, even among soldiers performing the same tasks.",
+          "To resolve this issue, service scenarios were developed for each role through repeated interviews. These were consolidated into a comprehensive, diagrammed manual covering all potential situations, including peacetime, wartime, and provocations. The manual also includes visualizations of operational plans and command structures within the division, response scenarios for provocations such as gunfire or artillery strikes (based on the location and origin of the attack), and contingency plans for equipment malfunctions.",
+        ],
+      },
+      {
+        heading: "Result",
+        body: [
+          "Based on this experience, I was invited by the ROTC Central Association to deliver lectures to cadets yet to be commissioned, newly commissioned second lieutenants aspiring to field assignments, and mid-level officers newly assigned to forward areas.",
+          "During one of these lectures, I had the opportunity to meet the former Chief of Staff of the Army. We discussed the realities faced in forward areas and exchanged ideas on potential institutional improvements.",
+          "The discussion led to the following conclusion: through multiple operational deployments, I accumulated substantial knowledge of military operations. These experiences made it clear to me that the outcome of an operation depends heavily on the capabilities of its commanders. Yet, in Korea, there are no tools that allow proper simulation of real operations, nor any system capable of reflecting the actual capabilities of one's own soldiers.",
+          "Based on this gap, I began developing a new line of research. Just as I previously studied the soldier life cycle, I am now working on creating AI soldier personas using HR data collected at the time of enlistment. These personas will be continuously updated throughout a soldier's service period — tracking changes in physical performance, personality traits, interpersonal dynamics, and role competency — to build a system capable of capturing an entire unit's HR state in real time.",
+          "Using this foundation, I am developing an AI-driven military wargame simulator that reconstructs real battlefield environments from terrain data and allows commanders to deploy their actual personnel profiles. This enables the simulation of real combat scenarios in multiple configurations and improves decision-making accuracy under wartime conditions.",
+        ],
+      },
+    ],
   },
   {
     slug: "samsung-ax-dashboard",

@@ -33,7 +33,7 @@ export const research: ResearchItem[] = [
     venue: "Master's Thesis, Sungkyunkwan University",
     date: "Jun. 2025",
     topics: ["Disability & Accessibility"],
-    images: ["/images/cards/disability-persona-augmentation.jpg", "/images/research/disability-persona-augmentation.jpg"],
+    images: ["/images/cards/disability-persona-augmentation.jpg", "/images/full/disability-persona-augmentation-01.jpg", "/images/full/disability-persona-augmentation-02.jpg", "/images/full/disability-persona-augmentation-03.jpg", "/images/full/disability-persona-augmentation-04.jpg", "/images/full/disability-persona-augmentation-05.jpg", "/images/full/disability-persona-augmentation-06.jpg", "/images/full/disability-persona-augmentation-07.jpg", "/images/full/disability-persona-augmentation-08.jpg", "/images/full/disability-persona-augmentation-09.jpg", "/images/full/disability-persona-augmentation-10.jpg", "/images/full/disability-persona-augmentation-11.jpg", "/images/full/disability-persona-augmentation-12.jpg", "/images/full/disability-persona-augmentation-13.jpg", "/images/full/disability-persona-augmentation-14.jpg", "/images/full/disability-persona-augmentation-15.jpg", "/images/full/disability-persona-augmentation-16.jpg", "/images/full/disability-persona-augmentation-17.jpg", "/images/full/disability-persona-augmentation-18.jpg"],
     summary:
       "Defined data-driven personas of individuals with developmental disabilities and trained AI-based personas to simulate their behaviors across diverse daily-living scenarios, with the goal of identifying unmet service needs.",
     sections: [
@@ -330,7 +330,7 @@ export const research: ResearchItem[] = [
     status: "Planned",
     collaborators: "with a Seoul National University HCI master's collaborator",
     topics: ["Military & HR"],
-    images: ["/images/cards/wargame-simulation.jpg", "/images/research/wargame-simulation.jpg"],
+    images: ["/images/cards/wargame-simulation.jpg", "/images/full/wargame-simulation-01.jpg", "/images/full/wargame-simulation-02.jpg", "/images/full/wargame-simulation-03.jpg", "/images/full/wargame-simulation-04.jpg", "/images/full/wargame-simulation-05.jpg", "/images/full/wargame-simulation-06.jpg", "/images/full/wargame-simulation-07.jpg"],
     summary:
       "As a Forward Observation Officer, I experienced two GP operations during which I encountered North Korean provocations (artillery attacks, missile launches, and drone incursions). Also, as a HQ company commander, I planned and simulated military operations. These experiences underscored the critical importance of simulation for real-war situations, which is why I aim to develop an AI-driven military operation simulator.",
     sections: [

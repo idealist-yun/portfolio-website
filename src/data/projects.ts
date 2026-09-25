@@ -486,7 +486,6 @@ export const projects: Project[] = [
         ],
       },
     ],
-    note: "Vault addition (not on the original page): this analysis fed a separate paper by a senior PhD labmate, 'Brand Fandom Dynamic Analysis Framework Based on Customer Data in Online Communities' — I contributed as an undergraduate researcher without formal co-authorship.",
   },
   {
     slug: "samsung-lifelog-minifridge",

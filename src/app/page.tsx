@@ -69,10 +69,10 @@ export default function Home() {
     <div className="mx-auto max-w-5xl px-6">
       <section className="pt-20 pb-16 sm:pt-28 sm:pb-20">
         <Eyebrow>{profile.affiliation}</Eyebrow>
-        <h1 className="mt-4 max-w-3xl font-serif text-4xl font-semibold leading-[1.15] tracking-tight text-foreground sm:text-5xl">
+        <h1 className="mt-4 max-w-3xl font-serif text-5xl font-semibold leading-[1.08] tracking-tight text-foreground sm:text-6xl">
           At the intersection of design, data, and human possibility.
         </h1>
-        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+        <p className="mt-7 max-w-2xl text-xl leading-relaxed text-foreground/80">
           I&apos;m {profile.name} ({profile.handle}) — a strategic designer
           committed to bridging business innovation with social impact. I
           define myself as a data-driven strategic designer, and I&apos;m
@@ -157,7 +157,7 @@ export default function Home() {
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
                   {item.tag}
                 </p>
-                <p className="mt-2 font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
+                <p className="mt-2 font-serif text-xl font-semibold leading-snug tracking-tight text-foreground group-hover:text-accent">
                   {item.title} <span className="text-accent">→</span>
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -201,7 +201,7 @@ export default function Home() {
               href={e.href}
               className="group block rounded-2xl border border-border bg-surface p-6 transition-colors hover:border-accent"
             >
-              <p className="font-serif text-lg font-semibold text-foreground group-hover:text-accent">
+              <p className="font-serif text-xl font-semibold tracking-tight text-foreground group-hover:text-accent">
                 {e.label} →
               </p>
               <p className="mt-2 text-sm leading-relaxed text-muted">

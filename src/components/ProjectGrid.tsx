@@ -97,7 +97,7 @@ export default function ProjectGrid() {
                 </span>
                 <span className="text-xs text-muted">{p.period}</span>
               </div>
-              <h3 className="mt-3 font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
+              <h3 className="mt-3 font-serif text-xl font-semibold leading-snug tracking-tight text-foreground group-hover:text-accent">
                 {p.title} <span className="text-accent">→</span>
               </h3>
               <p className="mt-1 text-sm text-muted">

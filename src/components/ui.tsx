@@ -18,12 +18,16 @@ export function PageHeader({
   lede?: string;
 }) {
   return (
-    <div className="mb-14 max-w-2xl">
+    <div className="mb-16 max-w-2xl">
       <Eyebrow>{eyebrow}</Eyebrow>
-      <h1 className="mt-3 font-serif text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+      <h1 className="mt-3 font-serif text-5xl font-semibold leading-[1.1] tracking-tight text-foreground sm:text-6xl">
         {title}
       </h1>
-      {lede && <p className="mt-5 text-lg leading-relaxed text-muted">{lede}</p>}
+      {lede && (
+        <p className="mt-6 text-xl leading-relaxed text-foreground/80">
+          {lede}
+        </p>
+      )}
     </div>
   );
 }

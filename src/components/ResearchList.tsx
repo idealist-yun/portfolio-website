@@ -68,7 +68,7 @@ export default function ResearchList() {
                         </div>
                       )}
                       <div className="flex flex-wrap items-start justify-between gap-3">
-                        <h3 className="font-serif text-lg font-semibold leading-snug text-foreground group-hover:text-accent">
+                        <h3 className="font-serif text-xl font-semibold leading-snug tracking-tight text-foreground group-hover:text-accent">
                           {item.title} <span className="text-accent">→</span>
                         </h3>
                         <span

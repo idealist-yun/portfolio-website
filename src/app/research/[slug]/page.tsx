@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { research } from "@/data/research";
 import { Tag } from "@/components/ui";
 import LabEmbed from "@/components/LabEmbed";
+import Reveal from "@/components/Reveal";
 
 export function generateStaticParams() {
   return research.map((r) => ({ slug: r.slug }));
@@ -35,7 +36,7 @@ export default async function ResearchDetail({
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <span
-          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusStyle[item.status]}`}
+          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] ${statusStyle[item.status]}`}
         >
           {item.status}
         </span>
@@ -46,36 +47,40 @@ export default async function ResearchDetail({
         )}
       </div>
 
-      <h1 className="mt-4 font-serif text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+      <h1 className="mt-4 font-serif text-4xl font-semibold leading-[1.08] tracking-tight text-foreground sm:text-5xl">
         {item.title}
       </h1>
 
       {item.collaborators && (
-        <p className="mt-2 text-sm italic text-muted">{item.collaborators}</p>
+        <p className="mt-3 text-sm italic text-muted">{item.collaborators}</p>
       )}
 
-      <p className="mt-8 text-lg leading-relaxed text-muted">
+      <p className="mt-9 max-w-2xl text-xl leading-relaxed text-foreground/80">
         {item.summary}
       </p>
 
       {item.demo && <LabEmbed href={item.demo.href} />}
 
-      <div className="mt-10 space-y-8">
+      <div className="mt-16 space-y-16">
         {item.sections.map((s, i) => (
-          <div key={i}>
-            <h2 className="font-serif text-xl font-semibold text-foreground">
+          <Reveal key={i} delay={Math.min(i, 4) * 60}>
+            <h2 className="font-serif text-sm font-bold uppercase tracking-[0.16em] text-accent">
               {s.heading}
             </h2>
-            <div className="mt-3 space-y-4">
+            <div className="mt-4 h-px w-10 bg-accent" />
+            <div className="mt-5 space-y-5">
               {s.body.map((entry, j) =>
                 typeof entry === "string" ? (
-                  <p key={j} className="text-base leading-relaxed text-muted">
+                  <p
+                    key={j}
+                    className="max-w-2xl text-[17px] leading-[1.7] text-foreground/80"
+                  >
                     {entry}
                   </p>
                 ) : (
                   <div
                     key={j}
-                    className="overflow-hidden rounded-2xl border border-border"
+                    className="overflow-hidden rounded-2xl border border-border shadow-[0_1px_3px_rgba(28,30,33,0.06)]"
                   >
                     <Image
                       src={entry.img}
@@ -88,11 +93,11 @@ export default async function ResearchDetail({
                 )
               )}
             </div>
-          </div>
+          </Reveal>
         ))}
       </div>
 
-      <div className="mt-10 flex flex-wrap gap-2">
+      <div className="mt-16 flex flex-wrap gap-2">
         {item.topics.map((t) => (
           <Tag key={t}>{t}</Tag>
         ))}

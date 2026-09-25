@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects";
 import { Tag } from "@/components/ui";
+import Reveal from "@/components/Reveal";
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -34,27 +35,27 @@ export default async function ProjectDetail({
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <span
-          className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${phaseStyle[project.phase]}`}
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] ${phaseStyle[project.phase]}`}
         >
           {project.phase}
         </span>
         <span className="text-sm text-muted">{project.period}</span>
       </div>
 
-      <h1 className="mt-4 font-serif text-3xl font-semibold leading-tight text-foreground sm:text-4xl">
+      <h1 className="mt-4 font-serif text-4xl font-semibold leading-[1.08] tracking-tight text-foreground sm:text-5xl">
         {project.title}
       </h1>
-      <p className="mt-2 text-base text-muted">
+      <p className="mt-3 text-base text-muted">
         {project.org} · {project.location}
       </p>
 
-      <p className="mt-8 text-lg leading-relaxed text-muted">
+      <p className="mt-9 max-w-2xl text-xl leading-relaxed text-foreground/80">
         {project.brief}
       </p>
 
-      <div className="mt-8 grid gap-6 rounded-2xl border border-border bg-surface p-6 sm:grid-cols-2">
+      <div className="mt-10 grid gap-8 border-y border-border py-8 sm:grid-cols-2">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-warm">
             My Role
           </p>
           <p className="mt-2 text-sm leading-relaxed text-foreground">
@@ -62,7 +63,7 @@ export default async function ProjectDetail({
           </p>
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-warm">
             Outcome
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-4 text-sm leading-relaxed text-foreground">
@@ -73,22 +74,26 @@ export default async function ProjectDetail({
         </div>
       </div>
 
-      <div className="mt-10 space-y-8">
+      <div className="mt-16 space-y-16">
         {project.sections.map((s, i) => (
-          <div key={i}>
-            <h2 className="font-serif text-xl font-semibold text-foreground">
+          <Reveal key={i} delay={Math.min(i, 4) * 60}>
+            <h2 className="font-serif text-sm font-bold uppercase tracking-[0.16em] text-accent">
               {s.heading}
             </h2>
-            <div className="mt-3 space-y-4">
+            <div className="mt-4 h-px w-10 bg-accent" />
+            <div className="mt-5 space-y-5">
               {s.body.map((item, j) =>
                 typeof item === "string" ? (
-                  <p key={j} className="text-base leading-relaxed text-muted">
+                  <p
+                    key={j}
+                    className="max-w-2xl text-[17px] leading-[1.7] text-foreground/80"
+                  >
                     {item}
                   </p>
                 ) : (
                   <div
                     key={j}
-                    className="overflow-hidden rounded-2xl border border-border"
+                    className="overflow-hidden rounded-2xl border border-border shadow-[0_1px_3px_rgba(28,30,33,0.06)]"
                   >
                     <Image
                       src={item.img}
@@ -101,11 +106,11 @@ export default async function ProjectDetail({
                 )
               )}
             </div>
-          </div>
+          </Reveal>
         ))}
       </div>
 
-      <div className="mt-10 flex flex-wrap gap-2">
+      <div className="mt-16 flex flex-wrap gap-2">
         {project.domains.map((d) => (
           <Tag key={d}>{d}</Tag>
         ))}

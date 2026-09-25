@@ -60,37 +60,33 @@ export default async function ResearchDetail({
 
       {item.demo && <LabEmbed href={item.demo.href} />}
 
-      {item.images && item.images.length > 0 && (
-        <div className="mt-8 space-y-4">
-          {item.images.map((src) => (
-            <div
-              key={src}
-              className="overflow-hidden rounded-2xl border border-border"
-            >
-              <Image
-                src={src}
-                alt={item.title}
-                width={1400}
-                height={900}
-                className="h-auto w-full"
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
       <div className="mt-10 space-y-8">
         {item.sections.map((s, i) => (
           <div key={i}>
             <h2 className="font-serif text-xl font-semibold text-foreground">
               {s.heading}
             </h2>
-            <div className="mt-3 space-y-3">
-              {s.body.map((p, j) => (
-                <p key={j} className="text-base leading-relaxed text-muted">
-                  {p}
-                </p>
-              ))}
+            <div className="mt-3 space-y-4">
+              {s.body.map((entry, j) =>
+                typeof entry === "string" ? (
+                  <p key={j} className="text-base leading-relaxed text-muted">
+                    {entry}
+                  </p>
+                ) : (
+                  <div
+                    key={j}
+                    className="overflow-hidden rounded-2xl border border-border"
+                  >
+                    <Image
+                      src={entry.img}
+                      alt={item.title}
+                      width={1400}
+                      height={900}
+                      className="h-auto w-full"
+                    />
+                  </div>
+                )
+              )}
             </div>
           </div>
         ))}

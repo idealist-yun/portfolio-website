@@ -7,7 +7,8 @@ export type ResearchTopic =
   | "Consumer Experience"
   | "Public Communication";
 
-export type Section = { heading: string; body: string[] };
+export type BodyItem = string | { img: string };
+export type Section = { heading: string; body: BodyItem[] };
 
 export type ResearchItem = {
   slug: string;
@@ -33,13 +34,17 @@ export const research: ResearchItem[] = [
     venue: "Master's Thesis, Sungkyunkwan University",
     date: "Jun. 2025",
     topics: ["Disability & Accessibility"],
-    images: ["/images/cards/disability-persona-augmentation.jpg", "/images/full/disability-persona-augmentation-01.jpg", "/images/full/disability-persona-augmentation-02.jpg", "/images/full/disability-persona-augmentation-03.jpg", "/images/full/disability-persona-augmentation-04.jpg", "/images/full/disability-persona-augmentation-05.jpg", "/images/full/disability-persona-augmentation-06.jpg", "/images/full/disability-persona-augmentation-07.jpg", "/images/full/disability-persona-augmentation-08.jpg", "/images/full/disability-persona-augmentation-09.jpg", "/images/full/disability-persona-augmentation-10.jpg", "/images/full/disability-persona-augmentation-11.jpg", "/images/full/disability-persona-augmentation-12.jpg", "/images/full/disability-persona-augmentation-13.jpg", "/images/full/disability-persona-augmentation-14.jpg", "/images/full/disability-persona-augmentation-15.jpg", "/images/full/disability-persona-augmentation-16.jpg", "/images/full/disability-persona-augmentation-17.jpg", "/images/full/disability-persona-augmentation-18.jpg"],
+    images: ["/images/cards/disability-persona-augmentation.jpg"],
     summary:
       "Defined data-driven personas of individuals with developmental disabilities and trained AI-based personas to simulate their behaviors across diverse daily-living scenarios, with the goal of identifying unmet service needs.",
     sections: [
       {
         heading: "My Role",
-        body: ["Responsible for the entire end-to-end research and execution process."],
+        body: [
+          { img: "/images/full/disability-persona-augmentation-01.jpg" },
+          { img: "/images/full/disability-persona-augmentation-02.jpg" },
+          "Responsible for the entire end-to-end research and execution process.",
+        ],
       },
       {
         heading: "Outcome",
@@ -57,22 +62,38 @@ export const research: ResearchItem[] = [
         heading: "Research Model",
         body: [
           "To quantify the functional levels of individuals with developmental disabilities, I applied the Vineland Adaptive Behavior Scales, the gold standard for assessing adaptive behavior.",
+          { img: "/images/full/disability-persona-augmentation-03.jpg" },
           "To measure service needs across daily-living scenarios, it was essential to build AI personas capable of simulating realistic behavior patterns. In doing so, I drew inspiration from a 2024 Stanford study demonstrating AI personas that replicate approximately 85% of human behavioral patterns.",
+          { img: "/images/full/disability-persona-augmentation-04.jpg" },
         ],
       },
       {
         heading: "Process",
         body: [
           "The research followed the steps below: I first reviewed existing persona design components and adapted them to create a framework specialized for developmental disabilities.",
+          { img: "/images/full/disability-persona-augmentation-05.jpg" },
+          { img: "/images/full/disability-persona-augmentation-06.jpg" },
           "Then, I interviewed the caregivers of nine people with developmental disabilities, documenting their functional levels based on the Vineland Adaptive Behavior Scales.",
+          { img: "/images/full/disability-persona-augmentation-07.jpg" },
+          { img: "/images/full/disability-persona-augmentation-08.jpg" },
           "Using inter-item relationships within the Vineland model, I constructed rule-based mappings that allowed me to augment the dataset from 9 to 2,400 profiles. These 2,400 profiles were then clustered to derive five distinct disability personas.",
+          { img: "/images/full/disability-persona-augmentation-09.jpg" },
+          { img: "/images/full/disability-persona-augmentation-10.jpg" },
+          { img: "/images/full/disability-persona-augmentation-11.jpg" },
+          { img: "/images/full/disability-persona-augmentation-12.jpg" },
+          { img: "/images/full/disability-persona-augmentation-13.jpg" },
+          { img: "/images/full/disability-persona-augmentation-14.jpg" },
           "The resulting personas were embedded into an AI persona model and applied across 11 ADL/IADL-based daily-living scenarios. This enabled me to identify potential difficulties and support needs without direct observation, significantly improving efficiency and scalability.",
+          { img: "/images/full/disability-persona-augmentation-15.jpg" },
+          { img: "/images/full/disability-persona-augmentation-16.jpg" },
         ],
       },
       {
         heading: "Result",
         body: [
           "Through this end-to-end process, I developed an 'Augmented Double Diamond' model — an extension of the traditional design-thinking framework that incorporates persona augmentation into the problem-solving cycle. This work successfully formed the foundation of my graduate thesis.",
+          { img: "/images/full/disability-persona-augmentation-17.jpg" },
+          { img: "/images/full/disability-persona-augmentation-18.jpg" },
           "Looking ahead, I plan to build upon this approach by simulating AI personas within 3D virtual environments — such as Minecraft or Unity — similar to the methodology demonstrated in Altera's research. This will enable more immersive, interactive, and context-rich evaluations of daily-living challenges for people with developmental disabilities.",
         ],
       },
@@ -330,7 +351,7 @@ export const research: ResearchItem[] = [
     status: "Planned",
     collaborators: "with a Seoul National University HCI master's collaborator",
     topics: ["Military & HR"],
-    images: ["/images/cards/wargame-simulation.jpg", "/images/full/wargame-simulation-01.jpg", "/images/full/wargame-simulation-02.jpg", "/images/full/wargame-simulation-03.jpg", "/images/full/wargame-simulation-04.jpg", "/images/full/wargame-simulation-05.jpg", "/images/full/wargame-simulation-06.jpg", "/images/full/wargame-simulation-07.jpg"],
+    images: ["/images/cards/wargame-simulation.jpg"],
     summary:
       "As a Forward Observation Officer, I experienced two GP operations during which I encountered North Korean provocations (artillery attacks, missile launches, and drone incursions). Also, as a HQ company commander, I planned and simulated military operations. These experiences underscored the critical importance of simulation for real-war situations, which is why I aim to develop an AI-driven military operation simulator.",
     sections: [
@@ -358,6 +379,7 @@ export const research: ResearchItem[] = [
           "During my service as a forward observer, I was deployed to a frontline Guard Post (GP) for operational missions. Initially, I tried to digitize the terrain data of forward areas, which had previously been informally understood through hand-drawn maps. This was intended to address the inconsistency in information delivery and comprehension caused by variations in map quality depending on the individual who created them.",
           "Using the TAS-1K artillery observation equipment, precise coordinates for each point were calculated and used to create accurate 2D visual materials that reflect distances and positions on a two-dimensional plane.",
           "Subsequently, all key elements — including enemy coordinates, targeting plans, anticipated enemy infiltration routes, and bypass routes — were diagrammed to create a comprehensive visual guidebook for use within the GP. (Due to security regulations, this guidebook cannot be taken outside the GP.)",
+          { img: "/images/full/wargame-simulation-01.jpg" },
           "Next, the goal was to create a comprehensive manual covering peacetime, wartime, and provocation scenarios using service scenarios. Observation officers are required to have both the expertise of a firepower specialist and the command capabilities to oversee the entire GP in emergencies. However, after experiencing provocations from North Korea, it became evident that the materials handed down by predecessors lacked critical guidance on wartime response. To address this gap, I conducted interviews with 31 soldiers in the GP, categorized by their roles.",
           "Within the GP, roles such as sentry, situation monitor, observer, medic, and driver must function seamlessly like interlocking gears to ensure the success and sustainability of operations. However, due to the lack of clear regulations and reliance on oral transmission for handovers, inconsistencies in role interpretation often arose, even among soldiers performing the same tasks.",
           "To resolve this issue, service scenarios were developed for each role through repeated interviews. These were consolidated into a comprehensive, diagrammed manual covering all potential situations, including peacetime, wartime, and provocations. The manual also includes visualizations of operational plans and command structures within the division, response scenarios for provocations such as gunfire or artillery strikes (based on the location and origin of the attack), and contingency plans for equipment malfunctions.",
@@ -367,10 +389,16 @@ export const research: ResearchItem[] = [
         heading: "Result",
         body: [
           "Based on this experience, I was invited by the ROTC Central Association to deliver lectures to cadets yet to be commissioned, newly commissioned second lieutenants aspiring to field assignments, and mid-level officers newly assigned to forward areas.",
+          { img: "/images/full/wargame-simulation-02.jpg" },
+          { img: "/images/full/wargame-simulation-03.jpg" },
+          { img: "/images/full/wargame-simulation-04.jpg" },
           "During one of these lectures, I had the opportunity to meet the former Chief of Staff of the Army. We discussed the realities faced in forward areas and exchanged ideas on potential institutional improvements.",
+          { img: "/images/full/wargame-simulation-05.jpg" },
           "The discussion led to the following conclusion: through multiple operational deployments, I accumulated substantial knowledge of military operations. These experiences made it clear to me that the outcome of an operation depends heavily on the capabilities of its commanders. Yet, in Korea, there are no tools that allow proper simulation of real operations, nor any system capable of reflecting the actual capabilities of one's own soldiers.",
           "Based on this gap, I began developing a new line of research. Just as I previously studied the soldier life cycle, I am now working on creating AI soldier personas using HR data collected at the time of enlistment. These personas will be continuously updated throughout a soldier's service period — tracking changes in physical performance, personality traits, interpersonal dynamics, and role competency — to build a system capable of capturing an entire unit's HR state in real time.",
           "Using this foundation, I am developing an AI-driven military wargame simulator that reconstructs real battlefield environments from terrain data and allows commanders to deploy their actual personnel profiles. This enables the simulation of real combat scenarios in multiple configurations and improves decision-making accuracy under wartime conditions.",
+          { img: "/images/full/wargame-simulation-06.jpg" },
+          { img: "/images/full/wargame-simulation-07.jpg" },
         ],
       },
     ],

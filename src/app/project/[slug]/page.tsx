@@ -52,25 +52,6 @@ export default async function ProjectDetail({
         {project.brief}
       </p>
 
-      {project.images && project.images.length > 0 && (
-        <div className="mt-8 space-y-4">
-          {project.images.map((src) => (
-            <div
-              key={src}
-              className="overflow-hidden rounded-2xl border border-border"
-            >
-              <Image
-                src={src}
-                alt={project.title}
-                width={1400}
-                height={900}
-                className="h-auto w-full"
-              />
-            </div>
-          ))}
-        </div>
-      )}
-
       <div className="mt-8 grid gap-6 rounded-2xl border border-border bg-surface p-6 sm:grid-cols-2">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
@@ -98,12 +79,27 @@ export default async function ProjectDetail({
             <h2 className="font-serif text-xl font-semibold text-foreground">
               {s.heading}
             </h2>
-            <div className="mt-3 space-y-3">
-              {s.body.map((p, j) => (
-                <p key={j} className="text-base leading-relaxed text-muted">
-                  {p}
-                </p>
-              ))}
+            <div className="mt-3 space-y-4">
+              {s.body.map((item, j) =>
+                typeof item === "string" ? (
+                  <p key={j} className="text-base leading-relaxed text-muted">
+                    {item}
+                  </p>
+                ) : (
+                  <div
+                    key={j}
+                    className="overflow-hidden rounded-2xl border border-border"
+                  >
+                    <Image
+                      src={item.img}
+                      alt={project.title}
+                      width={1400}
+                      height={900}
+                      className="h-auto w-full"
+                    />
+                  </div>
+                )
+              )}
             </div>
           </div>
         ))}

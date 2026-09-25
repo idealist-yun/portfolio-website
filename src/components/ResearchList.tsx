@@ -9,7 +9,7 @@ import {
   allTopics,
   type ResearchTopic,
 } from "@/data/research";
-import { Tag, Card } from "@/components/ui";
+import { Tag, Card, SectionHeading } from "@/components/ui";
 
 const statusStyle: Record<string, string> = {
   Published: "bg-accent text-white",
@@ -45,9 +45,7 @@ export default function ResearchList() {
           if (items.length === 0) return null;
           return (
             <div key={status}>
-              <h2 className="font-serif text-2xl font-semibold text-foreground">
-                {status}
-              </h2>
+              <SectionHeading>{status}</SectionHeading>
               <div className="mt-6 space-y-5">
                 {items.map((item) => (
                   <Link

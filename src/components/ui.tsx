@@ -32,6 +32,17 @@ export function PageHeader({
   );
 }
 
+export function SectionHeading({ children }: { children: ReactNode }) {
+  return (
+    <div>
+      <h2 className="font-serif text-2xl font-semibold text-accent sm:text-3xl">
+        {children}
+      </h2>
+      <div className="mt-2 border-t-2 border-accent" />
+    </div>
+  );
+}
+
 export function Tag({
   children,
   active,

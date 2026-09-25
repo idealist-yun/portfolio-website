@@ -1,4 +1,4 @@
-import { PageHeader, Card } from "@/components/ui";
+import { PageHeader, Card, SectionHeading } from "@/components/ui";
 import {
   visionIntro,
   visionOrigin,
@@ -14,23 +14,23 @@ export default function VisionPage() {
       <PageHeader eyebrow="Vision" title={visionIntro} />
 
       <section className="mb-16 max-w-3xl">
-        <p className="text-base leading-relaxed text-muted">{visionOrigin}</p>
+        <p className="text-xl leading-relaxed text-foreground/80">
+          {visionOrigin}
+        </p>
       </section>
 
       <section className="mb-16">
-        <h2 className="font-serif text-2xl font-semibold text-foreground">
-          Three levels
-        </h2>
+        <SectionHeading>Three levels</SectionHeading>
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {levels.map((l) => (
             <div key={l.level}>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-warm">
                 {l.level}
               </p>
-              <p className="mt-2 font-serif text-lg font-semibold leading-snug text-foreground">
+              <p className="mt-2 font-serif text-xl font-semibold leading-snug tracking-tight text-foreground">
                 {l.title}
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-muted">
+              <p className="mt-2 text-base leading-relaxed text-muted">
                 {l.body}
               </p>
             </div>
@@ -39,10 +39,8 @@ export default function VisionPage() {
       </section>
 
       <section className="mb-16">
-        <h2 className="font-serif text-2xl font-semibold text-foreground">
-          Core capabilities
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+        <SectionHeading>Core capabilities</SectionHeading>
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">
           Built on what I&apos;ve developed so far, and what I&apos;ll continue
           to build through graduate study, my future practice will deliver
           three core capabilities across disability, healthcare, consumer
@@ -64,9 +62,7 @@ export default function VisionPage() {
       </section>
 
       <section className="mb-16">
-        <h2 className="font-serif text-2xl font-semibold text-foreground">
-          Long-term roadmap
-        </h2>
+        <SectionHeading>Long-term roadmap</SectionHeading>
         <div className="mt-8 space-y-8">
           {phases.map((p) => (
             <div
@@ -90,10 +86,8 @@ export default function VisionPage() {
       </section>
 
       <section>
-        <h2 className="font-serif text-2xl font-semibold text-foreground">
-          Anticipated impact
-        </h2>
-        <ul className="mt-6 max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted">
+        <SectionHeading>Anticipated impact</SectionHeading>
+        <ul className="mt-6 max-w-3xl list-disc space-y-2 pl-5 text-base leading-relaxed text-muted">
           {impact.map((item, i) => (
             <li key={i}>{item}</li>
           ))}

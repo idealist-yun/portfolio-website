@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { profile } from "@/data/profile";
-import { Eyebrow } from "@/components/ui";
+import { Eyebrow, SectionHeading } from "@/components/ui";
 import { research } from "@/data/research";
 import { projects } from "@/data/projects";
 
@@ -130,9 +130,7 @@ export default function Home() {
       </section>
 
       <section className="border-t border-border py-14">
-        <h2 className="font-serif text-2xl font-semibold text-foreground">
-          Featured Work
-        </h2>
+        <SectionHeading>Featured Work</SectionHeading>
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {featuredWork.map((item) => (
             <Link
@@ -170,9 +168,7 @@ export default function Home() {
       </section>
 
       <section className="border-t border-border py-14">
-        <h2 className="font-serif text-2xl font-semibold text-foreground">
-          About Me
-        </h2>
+        <SectionHeading>About Me</SectionHeading>
         <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted">
           Beyond my work, I enjoy traveling, playing the piano, running, and
           reading — moments that help me reset, think clearly, and stay
@@ -191,9 +187,7 @@ export default function Home() {
       </section>
 
       <section className="border-t border-border py-14">
-        <h2 className="font-serif text-2xl font-semibold text-foreground">
-          Where to go next
-        </h2>
+        <SectionHeading>Where to go next</SectionHeading>
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {entryPoints.map((e) => (
             <Link

@@ -26,7 +26,7 @@ export default async function ResearchDetail({
   if (!item) notFound();
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-16">
+    <div className="mx-auto max-w-4xl px-6 py-16">
       <Link
         href="/research"
         className="text-sm text-muted transition-colors hover:text-accent"
@@ -55,7 +55,7 @@ export default async function ResearchDetail({
         <p className="mt-3 text-sm italic text-muted">{item.collaborators}</p>
       )}
 
-      <p className="mt-9 max-w-2xl text-xl leading-relaxed text-foreground/80">
+      <p className="mt-9 max-w-3xl text-xl leading-relaxed text-foreground/80">
         {item.summary}
       </p>
 
@@ -73,7 +73,7 @@ export default async function ResearchDetail({
                 typeof entry === "string" ? (
                   <p
                     key={j}
-                    className="max-w-2xl text-[17px] leading-[1.7] text-foreground/80"
+                    className="max-w-3xl text-[18px] leading-[1.7] text-foreground/80"
                   >
                     {entry}
                   </p>

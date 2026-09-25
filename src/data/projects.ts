@@ -8,7 +8,7 @@ export type Domain =
   | "Startup & Venture"
   | "Robotics & AI";
 
-export type BodyItem = string | { img: string };
+export type BodyItem = string | { img: string } | { embed: "vip-robot-sim" };
 export type Section = { heading: string; body: BodyItem[] };
 
 export type Project = {
@@ -762,6 +762,7 @@ export const projects: Project[] = [
           { img: "/images/full/vip-concierge-robot-04.jpg" },
           { img: "/images/full/vip-concierge-robot-05.jpg" },
           { img: "/images/full/vip-concierge-robot-06.jpg" },
+          { embed: "vip-robot-sim" },
           "Building on this service system, we collaborated with the Mechanical Engineering laboratory to program the serving robots. We scanned the President's Office to map the full circulation paths and assigned functional behaviors to each route, enabling features such as photo-taking, guided explanations, and beverage service. In particular, we utilized the robot's display to implement guided-tour videos, facial expressions, and AI-driven interaction capabilities.",
           { img: "/images/full/vip-concierge-robot-07.jpg" },
         ],

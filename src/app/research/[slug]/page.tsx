@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import Body from "@/components/Body";
 import { notFound } from "next/navigation";
 import { research } from "@/data/research";
 import { Tag } from "@/components/ui";
@@ -55,7 +55,14 @@ export default async function ResearchDetail({
         <p className="mt-3 text-sm italic text-muted">{item.collaborators}</p>
       )}
 
-      <p className="mt-9 max-w-3xl text-xl leading-relaxed text-foreground/80">
+      {item.fromOriginal && (
+        <p className="mt-9 text-xs font-semibold uppercase tracking-[0.18em] text-warm">
+          The Brief:
+        </p>
+      )}
+      <p
+        className={`${item.fromOriginal ? "mt-2" : "mt-9"} max-w-3xl text-xl leading-relaxed text-foreground/80`}
+      >
         {item.summary}
       </p>
 
@@ -68,31 +75,7 @@ export default async function ResearchDetail({
               {s.heading}
             </h2>
             <div className="mt-4 h-px w-10 bg-accent" />
-            <div className="mt-5 space-y-5">
-              {s.body.map((entry, j) =>
-                typeof entry === "string" ? (
-                  <p
-                    key={j}
-                    className="max-w-3xl text-[18px] leading-[1.7] text-foreground/80"
-                  >
-                    {entry}
-                  </p>
-                ) : (
-                  <div
-                    key={j}
-                    className="overflow-hidden rounded-2xl border border-border shadow-[0_1px_3px_rgba(28,30,33,0.06)]"
-                  >
-                    <Image
-                      src={entry.img}
-                      alt={item.title}
-                      width={1400}
-                      height={900}
-                      className="h-auto w-full"
-                    />
-                  </div>
-                )
-              )}
-            </div>
+            <Body items={s.body} alt={item.title} />
           </Reveal>
         ))}
       </div>
@@ -103,16 +86,6 @@ export default async function ResearchDetail({
         ))}
       </div>
 
-      {item.note && (
-        <div className="mt-10 rounded-xl border border-warm/40 bg-warm/5 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
-            Editorial note (for review)
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
-            {item.note}
-          </p>
-        </div>
-      )}
     </div>
   );
 }

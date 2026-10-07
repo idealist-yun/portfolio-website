@@ -1,15 +1,9 @@
-import type { ComponentType } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects";
 import { relatedFor } from "@/data/projectMeta";
 import Reveal from "@/components/Reveal";
-import VipRobotSim from "@/components/VipRobotSim";
-
-const EMBEDS: Record<string, ComponentType> = {
-  "vip-robot-sim": VipRobotSim,
-};
+import Body from "@/components/Body";
 
 export function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }));
@@ -58,14 +52,17 @@ export default async function ProjectDetail({
         {project.org} · {project.location}
       </p>
 
-      <p className="mt-9 max-w-3xl text-xl leading-relaxed text-foreground/80">
+      <p className="mt-9 text-xs font-semibold uppercase tracking-[0.18em] text-warm">
+        The Brief:
+      </p>
+      <p className="mt-2 max-w-3xl text-xl leading-relaxed text-foreground/80">
         {project.brief}
       </p>
 
       <div className="mt-10 grid gap-8 border-y border-border py-8 sm:grid-cols-2">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-warm">
-            My Role
+            My Role:
           </p>
           <p className="mt-2 text-sm leading-relaxed text-foreground">
             {project.role}
@@ -73,7 +70,7 @@ export default async function ProjectDetail({
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-warm">
-            Outcome
+            Outcome:
           </p>
           <ul className="mt-2 list-disc space-y-1 pl-4 text-sm leading-relaxed text-foreground">
             {project.outcome.map((o, i) => (
@@ -90,51 +87,7 @@ export default async function ProjectDetail({
               {s.heading}
             </h2>
             <div className="mt-4 h-px w-10 bg-accent" />
-            <div className="mt-5 space-y-5">
-              {s.body.map((item, j) => {
-                if (typeof item === "string") {
-                  return (
-                    <p
-                      key={j}
-                      className="max-w-3xl text-[18px] leading-[1.7] text-foreground/80"
-                    >
-                      {item}
-                    </p>
-                  );
-                }
-                if ("img" in item) {
-                  return (
-                    <div
-                      key={j}
-                      className="overflow-hidden rounded-2xl border border-border shadow-[0_1px_3px_rgba(28,30,33,0.06)]"
-                    >
-                      <Image
-                        src={item.img}
-                        alt={project.title}
-                        width={1400}
-                        height={900}
-                        className="h-auto w-full"
-                      />
-                    </div>
-                  );
-                }
-                if ("link" in item) {
-                  return (
-                    <a
-                      key={j}
-                      href={item.link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border border-accent px-5 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-white"
-                    >
-                      {item.link.label} ↓
-                    </a>
-                  );
-                }
-                const Embed = EMBEDS[item.embed];
-                return Embed ? <Embed key={j} /> : null;
-              })}
-            </div>
+            <Body items={s.body} alt={project.title} />
           </Reveal>
         ))}
       </div>
@@ -160,16 +113,6 @@ export default async function ProjectDetail({
         </div>
       )}
 
-      {project.note && (
-        <div className="mt-10 rounded-xl border border-warm/40 bg-warm/5 p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
-            Editorial note (for review)
-          </p>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
-            {project.note}
-          </p>
-        </div>
-      )}
     </div>
   );
 }

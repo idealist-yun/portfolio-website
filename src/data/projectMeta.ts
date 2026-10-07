@@ -67,7 +67,6 @@ const dataOthers = [
 // "Want to check more? Discover my other projects." lists, as on the original
 // pages (static lists; Basic pages and Data-Driven pages only).
 export function relatedFor(slug: string): string[] {
-  if (slug === "disability-as-market") return basicOthers.slice(0, 2);
   const g = projectGroup[slug];
   if (["design-thinking", "military", "vulnerable"].includes(g) && slug !== "wargame-simulation-project")
     return basicOthers;

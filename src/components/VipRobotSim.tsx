@@ -33,7 +33,7 @@ const OFF_P: Pt = [-34, -28]; // the President walks beside the guest
 // cropped from the project's route-map slide.
 const SPOTS: Record<
   string,
-  { n: string; title: string; short: string; body: string; img?: string; dur?: number }
+  { n: string; title: string; short: string; body: string; img?: string; dur?: number; wide?: boolean }
 > = {
   "B-1-1": {
     n: "①",
@@ -58,9 +58,11 @@ const SPOTS: Record<
   },
   "B-1-4": {
     n: "",
-    title: "Crown Prince's Entrance Ceremony paintings",
-    short: "the Crown Prince's Entrance Ceremony paintings",
-    body: "From the 1817 album recording nine-year-old Crown Prince Hyomyeong's entrance to Seonggyungwan, held by the National Palace Museum of Korea. Six rites: leaving the palace, paying respects to Confucius, requesting lessons, presenting gifts, attending class, and returning to the palace to be congratulated. The same six rites frame this whole service.",
+    title: "Illustration of the Ceremony of the Crown Prince's Entrance to the National Confucian Academy (1817)",
+    short: "the Crown Prince's Entrance album paintings",
+    body: "An album of six scenes recording the nine-year-old Crown Prince Hyomyeong's entrance to Seonggyungwan (Wangseja ipakdo), held by the National Palace Museum of Korea. Shown: “Start of procession”. This service follows the same six steps, from welcoming the guest to the farewell (see the top bar).",
+    img: "/images/ipakdo/rite-1.jpg",
+    wide: true,
     dur: 5,
   },
   "B-1-5": {
@@ -77,6 +79,17 @@ const GUEST = {
   role: "Sample guest",
   drink: "tea",
 };
+// The six scenes of the 1817 album that this service borrows its structure from.
+// English scene titles follow the National Palace Museum of Korea's captions.
+const RITES = [
+  { ko: "출궁의", hanja: "出宮儀", scene: "Start of procession", img: "/images/ipakdo/rite-1.jpg" },
+  { ko: "작헌의", hanja: "酌獻儀", scene: "Observing proprieties at Daeseongjeon Shrine", img: "/images/ipakdo/rite-2.jpg" },
+  { ko: "왕복의", hanja: "往復儀", scene: "The Crown Prince requesting tutelage", img: "/images/ipakdo/rite-3.jpg" },
+  { ko: "수폐의", hanja: "脩幣儀", scene: "Presenting an offering", img: "/images/ipakdo/rite-4.jpg" },
+  { ko: "입학의", hanja: "入學儀", scene: "The day's lesson", img: "/images/ipakdo/rite-5.jpg" },
+  { ko: "수하의", hanja: "受賀儀", scene: "Congratulations from officials", img: "/images/ipakdo/rite-6.jpg" },
+];
+
 const OFFICE: Pt = [1285, 150];
 const SEAT_G: Pt = [535, 270];
 const SEAT_P: Pt = [535, 330];
@@ -682,21 +695,39 @@ export default function VipRobotSim() {
                 type="button"
                 onClick={() => jumpToPhase(i)}
                 className="block w-full text-left"
+                title={`${RITES[i].hanja} · ${RITES[i].scene}`}
               >
                 <span
-                  className="block h-1.5 rounded-full transition-colors"
-                  style={{
-                    background:
-                      i <= phaseIdx ? PHASE_COLORS[i] : "var(--border)",
-                  }}
-                />
+                  className={`relative block overflow-hidden rounded-md border transition-all ${
+                    i === phaseIdx
+                      ? "border-accent ring-2 ring-accent/30"
+                      : "border-border"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={RITES[i].img}
+                    alt={`${RITES[i].scene}, from the 1817 Crown Prince's Entrance album`}
+                    loading="lazy"
+                    className={`aspect-[4/3] w-full object-cover transition-all ${
+                      i <= phaseIdx ? "" : "opacity-50 grayscale"
+                    }`}
+                  />
+                  <span
+                    className="absolute inset-x-0 bottom-0 block h-1"
+                    style={{
+                      background:
+                        i <= phaseIdx ? PHASE_COLORS[i] : "transparent",
+                    }}
+                  />
+                </span>
                 <span
                   className={`mt-1.5 block text-[11px] leading-tight ${
                     i === phaseIdx ? "font-semibold text-foreground" : "text-muted"
                   }`}
                 >
                   <span className="block text-[10px] uppercase tracking-wider text-warm">
-                    {i + 1} · {p.ko}
+                    {i + 1} · {p.ko} {RITES[i].hanja}
                   </span>
                   {p.en}
                 </span>
@@ -704,6 +735,14 @@ export default function VipRobotSim() {
             </li>
           ))}
         </ol>
+        <p className="mt-2 text-[11px] leading-snug text-muted">
+          The six service stages are borrowed from the six scenes of the 1817{" "}
+          <span className="text-foreground/80">
+            Illustration of the Ceremony of the Crown Prince&apos;s Entrance to the
+            National Confucian Academy
+          </span>{" "}
+          (National Palace Museum of Korea; images via the AKS Digital Humanities wiki).
+        </p>
 
         <p className="mb-2 mt-5 text-[11px] text-muted">
           Modern ↔ Joseon narrative:{" "}
@@ -1014,8 +1053,16 @@ export default function VipRobotSim() {
         <div className="mt-3 sm:absolute sm:left-0 sm:top-[57%] sm:mt-0 sm:w-[40%]">
           {activeSpot ? (
             <div className="rounded-xl border border-border bg-surface/95 p-3 shadow-[0_2px_12px_rgba(28,30,33,0.08)] backdrop-blur">
+              {SPOTS[activeSpot].wide && SPOTS[activeSpot].img && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={SPOTS[activeSpot].img}
+                  alt=""
+                  className="mb-2 h-28 w-full rounded-md border border-border object-cover object-top"
+                />
+              )}
               <div className="flex gap-3">
-                {SPOTS[activeSpot].img && (
+                {!SPOTS[activeSpot].wide && SPOTS[activeSpot].img && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={SPOTS[activeSpot].img}

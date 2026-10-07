@@ -1,344 +1,660 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-// Robot colors — reuses the site's accent/warm tokens plus one desaturated
-// green so all three serving robots read distinctly against the floor plan.
-const ROBOTS = {
-  a: { color: "var(--accent)", label: "Robot A", role: "로비 안내" },
-  b: { color: "#3f7a5c", label: "Robot B", role: "도슨트 투어" },
-  c: { color: "var(--warm)", label: "Robot C", role: "다과 서빙" },
-} as const;
+type Pt = [number, number];
+type State = "idle" | "move" | "speak" | "serve";
+type Seg = {
+  t0: number;
+  t1: number;
+  pts: Pt[];
+  len: number;
+  text: string;
+  state: State;
+};
+type RobotKey = "a" | "b" | "c";
 
-type RobotKey = keyof typeof ROBOTS;
-
-const TICKER: { robot: RobotKey; text: string }[] = [
-  { robot: "a", text: "로비에서 대기 — 방문객 도착 확인" },
-  { robot: "a", text: "인사 및 회의실 안내" },
-  { robot: "b", text: "Zone C 진입 — 도슨트 투어 시작" },
-  { robot: "b", text: "전시품 ①·②·③ 설명 재생" },
-  { robot: "b", text: "전시품 ④·⑤ 설명 후 Zone B로 복귀" },
-  { robot: "c", text: "다과 준비 데스크에서 음료 픽업" },
-  { robot: "c", text: "총장실로 다과 서빙" },
-  { robot: "c", text: "휴게실 정리 후 복귀" },
-  { robot: "b", text: "포토존 안내 — 기념 촬영" },
-];
-
-// Room blocks, sized and placed to match the actual room proportions from
-// the "서비스 동선 (세부)" blueprint — Zone C is a shorter room top-left,
-// Zone B a taller central hall, Zone A the lobby beneath it, with the
-// President's Office / lounge / elevator / back-office filling the right
-// column — rendered in a quieter, editorial palette instead of the original
-// slide's saturated pink/green/blue/yellow.
-const ROOMS = [
-  {
-    key: "C",
-    name: "서연처 · 전시",
-    sub: "Zone C",
-    x: 230,
-    y: 140,
-    w: 475,
-    h: 270,
-    fill: "#f2e6da",
-    stroke: "#d9bd9c",
-  },
-  {
-    key: "B",
-    name: "궁궐(동궁) · 응접",
-    sub: "Zone B",
-    x: 705,
-    y: 140,
-    w: 465,
-    h: 300,
-    fill: "#e9efe6",
-    stroke: "#bdd0b7",
-  },
-  {
-    key: "A",
-    name: "성균관 · 로비",
-    sub: "Zone A",
-    x: 705,
-    y: 440,
-    w: 465,
-    h: 290,
-    fill: "#e7ecf2",
-    stroke: "#bccadb",
-  },
-  {
-    key: "President",
-    name: "총장실",
-    x: 1170,
-    y: 15,
-    w: 230,
-    h: 205,
-    fill: "#f7f1de",
-    stroke: "#ddc98a",
-  },
-  {
-    key: "Lounge",
-    name: "휴게실 · 탕비실",
-    x: 1170,
-    y: 220,
-    w: 230,
-    h: 340,
-    fill: "#f5efe3",
-    stroke: "#ddd0b4",
-  },
-  {
-    key: "Elevator",
-    name: "엘리베이터",
-    x: 1170,
-    y: 560,
-    w: 120,
-    h: 170,
-    fill: "#e9e7e0",
-    stroke: "#cac5b8",
-  },
-  {
-    key: "Office",
-    name: "사무실",
-    x: 820,
-    y: 730,
-    w: 220,
-    h: 50,
-    fill: "#e2e0d8",
-    stroke: "#c3beaf",
-  },
-] as const;
-
-// The photo zone is a labeled strip (not a stop), matching the top of Zone B
-// in the original blueprint.
-const PHOTO_ZONE = { x: 865, y: 140, w: 140, h: 35, label: "포토존" };
-
-const TABLES = [
-  { x: 395, y: 195, w: 140, h: 155 },
-  { x: 705, y: 195, w: 70, h: 110, label: "데스크" },
-];
-
-// Exhibit points (전시품①–⑧) are pushed flush against each room's nearest
-// wall, ~20px in from the border — matching how the art actually hangs
-// around the perimeter in the original blueprint, rather than floating
-// mid-floor.
-const STOPS: { id: string; x: number; y: number }[] = [
-  { id: "A-S/E", x: 1150, y: 653 },
-  { id: "A-R", x: 900, y: 470 },
-  { id: "B-S/E", x: 985, y: 400 },
-  { id: "B-1-R", x: 725, y: 353 },
-  { id: "B-Photo (포토존)", x: 930, y: 185 },
-  { id: "B-2-R", x: 1150, y: 160 },
-  { id: "B-D", x: 1150, y: 290 },
-  { id: "전시품⑤", x: 1150, y: 325 },
-  { id: "B-1-3 · 전시품③", x: 685, y: 160 },
-  { id: "B-1-2 · 전시품②", x: 685, y: 265 },
-  { id: "B-1-1 · 전시품①", x: 685, y: 370 },
-  { id: "B-1-4 · 전시품④", x: 245, y: 265 },
-  { id: "B-1-5", x: 245, y: 390 },
-  { id: "전시품⑥ (총장실)", x: 1190, y: 200 },
-  { id: "전시품⑦ (휴게실)", x: 1190, y: 260 },
-  { id: "전시품⑧ (로비)", x: 725, y: 480 },
-  { id: "C-1-E", x: 650, y: 395 },
-  { id: "C-2-E (총장실)", x: 1380, y: 35 },
-  { id: "C-S (휴게실)", x: 1190, y: 400 },
-];
-
-const PATHS: Record<RobotKey, { d: string; dur: string }> = {
-  a: { d: "M1150,653 L900,470 L1150,653", dur: "7s" },
-  b: {
-    d: "M985,400 L725,353 L650,395 L245,390 L245,265 L245,160 L685,160 L685,265 L685,370 L725,353 L985,400 L930,185 L985,400",
-    dur: "26s",
-  },
-  c: {
-    d: "M985,400 L1150,290 L1150,160 L1380,35 L1190,400 L1150,290 L985,400",
-    dur: "15s",
-  },
+const ROBOTS: Record<RobotKey, { color: string; name: string; role: string }> = {
+  a: { color: "var(--accent)", name: "Robot A", role: "Lobby host" },
+  b: { color: "#3f7a5c", name: "Robot B", role: "Docent" },
+  c: { color: "var(--warm)", name: "Robot C", role: "Beverage service" },
 };
 
+const SPEED = 110; // map units per second at 1x
+
+const dist = (a: Pt, b: Pt) => Math.hypot(b[0] - a[0], b[1] - a[1]);
+const pathLen = (pts: Pt[]) =>
+  pts.reduce((s, p, i) => (i ? s + dist(pts[i - 1], p) : 0), 0);
+
+function createTrack(start: Pt) {
+  const segs: Seg[] = [];
+  let t = 0;
+  let cur = start;
+  const api = {
+    get t() {
+      return t;
+    },
+    segs,
+    wait(dur: number, text: string, state: State = "idle") {
+      segs.push({ t0: t, t1: t + dur, pts: [cur], len: 0, text, state });
+      t += dur;
+      return api;
+    },
+    until(T: number, text: string, state: State = "idle") {
+      if (T > t) api.wait(T - t, text, state);
+      return api;
+    },
+    go(path: Pt[], text: string) {
+      const pts = [cur, ...path];
+      const len = pathLen(pts);
+      const dur = len / SPEED;
+      segs.push({ t0: t, t1: t + dur, pts, len, text, state: "move" });
+      t += dur;
+      cur = path[path.length - 1];
+      return api;
+    },
+  };
+  return api;
+}
+
+const WP = {
+  A_SE: [1138, 653] as Pt,
+  A_R: [898, 455] as Pt,
+  B_SE: [981, 388] as Pt,
+  B_1R: [737, 353] as Pt,
+  C_S: [1265, 388] as Pt,
+  C_1E: [597, 398] as Pt,
+};
+
+function buildScenario() {
+  const A = createTrack(WP.A_SE);
+  const B = createTrack(WP.B_SE);
+  const C = createTrack(WP.C_S);
+
+  // Welcome + guide to Room B
+  A.wait(3, "Welcomes the guest: bows, guest name appears on the screen", "speak").go(
+    [[898, 653], WP.A_R],
+    "Guides the guest to Room B (Zone B)"
+  );
+  const tBStart = A.t;
+  const tGreetEnd = 3;
+
+  // Robot B: greet, lead into Zone C, docent tour
+  B.until(tBStart, "Standing by at B-S/E")
+    .wait(3, "Greets the guest: “Welcome. I'll show you to the meeting room.”", "speak")
+    .go([[614, 388], [614, 343]], "Leads the guest into Zone C");
+  const tTourStart = B.t;
+  B.wait(2.5, "Docent · Exhibit ① (script triggered by the secretary's remote)", "speak")
+    .go([[614, 271]], "Leads the guest to Exhibit ②")
+    .wait(2.5, "Docent · Exhibit ②", "speak")
+    .go([[614, 205]], "Leads the guest to Exhibit ③")
+    .wait(2.5, "Docent · Exhibit ③", "speak")
+    .go([[614, 175], [282, 175], [282, 269]], "Leads the guest to the Crown Prince's Entrance painting")
+    .wait(2.5, "Docent · Crown Prince's Entrance Ceremony painting", "speak")
+    .go([[282, 385]], "Leads the guest to Exhibit ④")
+    .wait(2.5, "Docent · Exhibit ④", "speak")
+    .wait(3, "Farewell: “Have a pleasant time. I'll be waiting outside; please call me if you need anything.”", "speak");
+  const tExitStart = B.t;
+  B.go([[282, 388], [737, 388], WP.B_1R], "Exits and returns to standby at B-1-R");
+
+  // Robot C: drinks, serve Zone C
+  C.until(tExitStart - 2, "Standing by in the lounge (C-S)")
+    .wait(3.5, "Back-end: staff load the guest's drinks and snacks onto the tray", "serve")
+    .go([[1090, 398], WP.C_1E], "Carries the drinks to Zone C");
+  const tServe = C.t;
+  C.wait(3, "Greets the guest and serves the drinks", "serve").wait(
+    1.5,
+    "Bows and leaves the room",
+    "speak"
+  );
+  const tMeetStart = C.t;
+  C.go([[1090, 398]], "Returns to Room B");
+
+  const tMeetEnd = tMeetStart + 12;
+
+  // Post-meeting: B photo + hand-off, A to elevator
+  B.until(tMeetEnd, "Standing by at B-1-R (meeting in progress)")
+    .wait(2, "Greets the guest as the meeting ends", "speak")
+    .go([[737, 388], [924, 388], [924, 208]], "Leads the guest to the photo zone");
+  const tPhoto = B.t;
+  B.wait(3.5, "Photo assist: helps the guest take a commemorative photo", "serve")
+    .go([[924, 388], [898, 388], [898, 415]], "Guides the guest to Room A");
+  const tHandoff = B.t;
+  B.wait(2.5, "Greets the guest and hands over to Robot A", "speak").go(
+    [[898, 388], WP.B_SE],
+    "Returns to B-S/E"
+  );
+
+  A.until(tHandoff, "Waiting at A-R")
+    .wait(2.5, "Greets the guest and takes over from Robot B", "speak")
+    .go([[898, 653], WP.A_SE], "Guides the guest to the elevator");
+  const tFarewell = A.t;
+  A.wait(3.5, "Farewell: sees the guest off", "speak");
+
+  C.until(tMeetEnd + 4, "Standing by in Room B").go([WP.C_S], "Returns to the lounge (C-S)");
+
+  const LOOP = Math.max(A.t, B.t, C.t) + 3;
+  A.until(LOOP, "Standing by at A-S/E");
+  B.until(LOOP, "Standing by at B-S/E");
+  C.until(LOOP, "Standing by in the lounge (C-S)");
+
+  const phases = [
+    { t: 0, ko: "출궁의", en: "Welcoming the guest" },
+    { t: tGreetEnd, ko: "작헌의", en: "Mutual greeting" },
+    { t: tBStart, ko: "왕복의", en: "Moving to the meeting room" },
+    { t: tExitStart - 2, ko: "수폐의", en: "Seated, drinks served" },
+    { t: tMeetStart, ko: "입학의", en: "Meeting" },
+    { t: tMeetEnd, ko: "수하의", en: "Seeing the guest off" },
+  ];
+
+  const backend = [
+    { t: 0, text: "Guest list synced with the serving robots" },
+    { t: tGreetEnd, text: "Guest name displayed on the robot screens" },
+    { t: tTourStart, text: "Secretary triggers each exhibit's docent script by remote" },
+    { t: tExitStart - 2, text: "Staff prepare the guest's drinks and snacks" },
+    { t: tServe - 3.5, text: "Robot C operated — drinks placed on the tray" },
+    { t: tMeetStart, text: "Meeting in progress — all robots on standby" },
+    { t: tPhoto, text: "Secretary monitors the photo assist and hand-off" },
+    { t: tFarewell, text: "Guest departs — session log closed" },
+  ];
+
+  return { tracks: { a: A.segs, b: B.segs, c: C.segs }, LOOP, phases, backend };
+}
+
+function positionAt(segs: Seg[], time: number) {
+  const seg =
+    segs.find((s) => time >= s.t0 && time < s.t1) ?? segs[segs.length - 1];
+  if (seg.len === 0) return { pos: seg.pts[0], seg };
+  let d = ((time - seg.t0) / (seg.t1 - seg.t0)) * seg.len;
+  for (let i = 1; i < seg.pts.length; i++) {
+    const l = dist(seg.pts[i - 1], seg.pts[i]);
+    if (d <= l || i === seg.pts.length - 1) {
+      const k = l === 0 ? 0 : Math.min(1, d / l);
+      return {
+        pos: [
+          seg.pts[i - 1][0] + (seg.pts[i][0] - seg.pts[i - 1][0]) * k,
+          seg.pts[i - 1][1] + (seg.pts[i][1] - seg.pts[i - 1][1]) * k,
+        ] as Pt,
+        seg,
+      };
+    }
+    d -= l;
+  }
+  return { pos: seg.pts[seg.pts.length - 1], seg };
+}
+
+const ROOMS = [
+  { name: "Zone C · Exhibition", x: 232, y: 140, w: 470, h: 290, fill: "#f2e6da", stroke: "#d9bd9c" },
+  { name: "Zone B · Reception", x: 702, y: 140, w: 468, h: 290, fill: "#e9efe6", stroke: "#bdd0b7" },
+  { name: "Zone A · Lobby", x: 702, y: 430, w: 468, h: 290, fill: "#e7ecf2", stroke: "#bccadb" },
+  { name: "President's Office", x: 1170, y: 10, w: 205, h: 207, fill: "#f7f1de", stroke: "#ddc98a" },
+  { name: "Lounge", x: 1170, y: 330, w: 205, h: 100, fill: "#f5efe3", stroke: "#ddd0b4" },
+  { name: "Pantry", x: 1170, y: 430, w: 85, h: 72, fill: "#f5efe3", stroke: "#ddd0b4" },
+  { name: "Elevator", x: 1170, y: 560, w: 80, h: 108, fill: "#e4e2da", stroke: "#c3beaf" },
+  { name: "Office", x: 828, y: 720, w: 217, h: 55, fill: "#e2e0d8", stroke: "#c3beaf" },
+];
+
+const FURNITURE = [
+  { x: 418, y: 195, w: 86, h: 155, label: "Table" },
+  { x: 418, y: 415, w: 86, h: 15, label: "" },
+  { x: 702, y: 240, w: 28, h: 65, label: "" },
+  { x: 1207, y: 30, w: 50, h: 92, label: "Table" },
+];
+
+const EXHIBITS = [
+  { n: "③", x: 686, y: 190, w: 16, h: 27 },
+  { n: "②", x: 686, y: 245, w: 16, h: 55 },
+  { n: "①", x: 686, y: 335, w: 16, h: 24 },
+  { n: "④", x: 232, y: 366, w: 16, h: 28 },
+  { n: "", x: 232, y: 240, w: 16, h: 72 },
+  { n: "⑤", x: 1170, y: 295, w: 12, h: 35 },
+  { n: "⑥", x: 1205, y: 205, w: 75, h: 12 },
+  { n: "⑦", x: 1182, y: 330, w: 60, h: 12 },
+  { n: "⑧", x: 702, y: 468, w: 14, h: 42 },
+];
+
+const POINTS: { id: string; x: number; y: number; label?: boolean }[] = [
+  { id: "B-1-1", x: 614, y: 343, label: true },
+  { id: "B-1-2", x: 614, y: 271, label: true },
+  { id: "B-1-3", x: 614, y: 205, label: true },
+  { id: "B-1-4", x: 282, y: 269, label: true },
+  { id: "B-1-5", x: 282, y: 385, label: true },
+  { id: "B-1-R", x: 737, y: 353, label: true },
+  { id: "B-Photo", x: 924, y: 208, label: true },
+  { id: "B-D", x: 1127, y: 288, label: true },
+  { id: "B-2-R", x: 1154, y: 203, label: true },
+  { id: "C-1-E", x: 597, y: 398, label: true },
+  { id: "C-2-E", x: 1320, y: 120, label: true },
+  { id: "A-R", x: 898, y: 455, label: true },
+];
+
+const ENDPOINTS: { id: string; x: number; y: number; key: RobotKey }[] = [
+  { id: "A-S/E", x: 1138, y: 653, key: "a" },
+  { id: "B-S/E", x: 981, y: 388, key: "b" },
+  { id: "C-S", x: 1265, y: 388, key: "c" },
+];
+
+const GUIDES: Record<string, { d: string; key: RobotKey }> = {
+  a: { d: "M1138,653 H898 V455", key: "a" },
+  b: { d: "M981,388 H282 V175 H614 V388 M737,388 V353 M981,388 V203 H1148", key: "b" },
+  c1: { d: "M1265,392 H597", key: "c" },
+  c2: { d: "M1265,388 H1110 V185 H1180 L1320,120", key: "c" },
+};
+
+const PHASE_COLORS = ["#dfe5ee", "#cdd8e8", "#b9c9e0", "#8fa8cc", "#5b7fb5", "#143c6e"];
+
 export default function VipRobotSim() {
-  const [step, setStep] = useState(0);
+  const scenario = useMemo(buildScenario, []);
+  const { tracks, LOOP, phases, backend } = scenario;
+
+  const [time, setTime] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [speed, setSpeed] = useState(1);
+  const [visible, setVisible] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const last = useRef<number | null>(null);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setStep((s) => (s + 1) % TICKER.length);
-    }, 2400);
-    return () => clearInterval(id);
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setPlaying(false);
+    }
   }, []);
 
-  const active = TICKER[step];
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), {
+      threshold: 0.15,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!playing || !visible) {
+      last.current = null;
+      return;
+    }
+    let raf = 0;
+    const tick = (now: number) => {
+      if (last.current != null) {
+        const dt = (now - last.current) / 1000;
+        setTime((t) => (t + dt * speed) % LOOP);
+      }
+      last.current = now;
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [playing, visible, speed, LOOP]);
+
+  const current = useMemo(() => {
+    const out = {} as Record<RobotKey, ReturnType<typeof positionAt>>;
+    (Object.keys(tracks) as RobotKey[]).forEach((k) => {
+      out[k] = positionAt(tracks[k], time);
+    });
+    return out;
+  }, [time, tracks]);
+
+  const phaseIdx = phases.reduce((acc, p, i) => (time >= p.t ? i : acc), 0);
+  const backendNow = backend.reduce((acc, b) => (time >= b.t ? b : acc), backend[0]);
+
+  const jumpToPhase = useCallback(
+    (i: number) => {
+      setTime(phases[i].t);
+    },
+    [phases]
+  );
+
+  const stateLabel: Record<State, string> = {
+    idle: "Standing by",
+    move: "Moving",
+    speak: "Interacting",
+    serve: "Serving",
+  };
 
   return (
-    <div className="not-prose overflow-hidden rounded-2xl border border-border bg-surface">
-      <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+    <div
+      ref={rootRef}
+      className="overflow-hidden rounded-2xl border border-border bg-surface"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-warm">
           Live simulation — service circulation
         </p>
-        <span className="flex items-center gap-1.5 text-[11px] font-medium text-muted">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent/50" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
-          </span>
-          Simulated
-        </span>
+        <div className="flex items-center gap-2 text-xs">
+          <button
+            type="button"
+            onClick={() => setPlaying((p) => !p)}
+            className="rounded-full border border-border px-3 py-1 font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
+            aria-label={playing ? "Pause simulation" : "Play simulation"}
+          >
+            {playing ? "Pause" : "Play"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTime(0)}
+            className="rounded-full border border-border px-3 py-1 font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
+          >
+            Restart
+          </button>
+          {[1, 2, 4].map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => setSpeed(s)}
+              className={`rounded-full border px-2.5 py-1 font-medium transition-colors ${
+                speed === s
+                  ? "border-accent bg-accent text-white"
+                  : "border-border text-muted hover:border-accent hover:text-accent"
+              }`}
+            >
+              {s}×
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="p-4 sm:p-6">
-        <p className="mb-3 text-[11px] text-muted">
-          현대 공간 ↔ 조선시대 서사: <span className="text-foreground/80">성균관 = 로비</span> ·{" "}
-          <span className="text-foreground/80">궁궐(동궁) = 응접</span> ·{" "}
-          <span className="text-foreground/80">서연처 = 전시</span>
+        <ol className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+          {phases.map((p, i) => (
+            <li key={p.ko}>
+              <button
+                type="button"
+                onClick={() => jumpToPhase(i)}
+                className="block w-full text-left"
+              >
+                <span
+                  className="block h-1.5 rounded-full transition-colors"
+                  style={{
+                    background:
+                      i <= phaseIdx ? PHASE_COLORS[i] : "var(--border)",
+                  }}
+                />
+                <span
+                  className={`mt-1.5 block text-[11px] leading-tight ${
+                    i === phaseIdx ? "font-semibold text-foreground" : "text-muted"
+                  }`}
+                >
+                  <span className="block text-[10px] uppercase tracking-wider text-warm">
+                    {i + 1} · {p.ko}
+                  </span>
+                  {p.en}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ol>
+
+        <p className="mb-2 mt-5 text-[11px] text-muted">
+          Modern ↔ Joseon narrative:{" "}
+          <span className="text-foreground/80">Zone A = Seonggyungwan</span> ·{" "}
+          <span className="text-foreground/80">Zone B = Donggung (East Palace)</span> ·{" "}
+          <span className="text-foreground/80">Zone C = Seoyeonchŏ (study hall)</span>
         </p>
 
-        <svg viewBox="0 0 1400 790" className="h-auto w-full">
+        <svg
+          viewBox="210 0 1190 790"
+          className="h-auto w-full"
+          role="img"
+          aria-label="Floor plan of the President's Office with three serving robots moving along their service routes"
+        >
           {ROOMS.map((r) => (
-            <g key={r.key}>
+            <g key={r.name}>
               <rect
                 x={r.x}
                 y={r.y}
                 width={r.w}
                 height={r.h}
-                rx={14}
+                rx={10}
                 fill={r.fill}
                 stroke={r.stroke}
+                strokeWidth={2}
               />
               <text
-                x={r.x + 16}
-                y={r.y + 28}
-                fontSize="17"
+                x={r.x + 14}
+                y={r.y + r.h - 12}
+                fontSize="15"
                 fontWeight={600}
                 fill="var(--foreground)"
-                opacity={0.75}
+                opacity={0.7}
               >
                 {r.name}
               </text>
-              {"sub" in r && (
-                <text
-                  x={r.x + 16}
-                  y={r.y + 48}
-                  fontSize="12"
-                  fontWeight={500}
-                  fill="var(--muted)"
-                  letterSpacing="0.06em"
-                >
-                  {r.sub}
-                </text>
-              )}
             </g>
           ))}
 
-          <g>
-            <rect
-              x={PHOTO_ZONE.x}
-              y={PHOTO_ZONE.y}
-              width={PHOTO_ZONE.w}
-              height={PHOTO_ZONE.h}
-              rx={6}
-              fill="#fff"
-              stroke="#bdd0b7"
-              strokeDasharray="4 3"
-            />
-            <text
-              x={PHOTO_ZONE.x + PHOTO_ZONE.w / 2}
-              y={PHOTO_ZONE.y + PHOTO_ZONE.h / 2 + 5}
-              fontSize="13"
-              textAnchor="middle"
-              fill="var(--muted)"
-            >
-              {PHOTO_ZONE.label}
-            </text>
-          </g>
+          {/* photo zone */}
+          <rect
+            x={865}
+            y={128}
+            width={140}
+            height={30}
+            rx={5}
+            fill="#fff"
+            stroke="#bdd0b7"
+            strokeDasharray="4 3"
+          />
+          <text x={935} y={148} fontSize="13" textAnchor="middle" fill="var(--muted)">
+            Photo zone
+          </text>
 
-          {TABLES.map((t, i) => (
+          {FURNITURE.map((f, i) => (
             <g key={i}>
               <rect
-                x={t.x}
-                y={t.y}
-                width={t.w}
-                height={t.h}
-                rx={8}
+                x={f.x}
+                y={f.y}
+                width={f.w}
+                height={f.h}
+                rx={6}
                 fill="#d7d2c6"
                 stroke="#b7b0a0"
               />
-              {t.label && (
+              {f.label && (
                 <text
-                  x={t.x + t.w / 2}
-                  y={t.y + t.h / 2 + 5}
+                  x={f.x + f.w / 2}
+                  y={f.y + f.h / 2 + 5}
                   fontSize="13"
                   textAnchor="middle"
                   fill="var(--muted)"
                 >
-                  {t.label}
+                  {f.label}
+                </text>
+              )}
+            </g>
+          ))}
+          <text x={716} y={278} fontSize="11" fill="var(--muted)" transform="rotate(-90 716 278)" textAnchor="middle">
+            Secretary desk
+          </text>
+          <text x={461} y={411} fontSize="11" textAnchor="middle" fill="var(--muted)">
+            Monitor
+          </text>
+          <text
+            x={246}
+            y={276}
+            fontSize="10"
+            fill="var(--muted)"
+            transform="rotate(-90 246 276)"
+            textAnchor="middle"
+          >
+            Entrance painting
+          </text>
+
+          {/* exhibits */}
+          {EXHIBITS.map((e, i) => (
+            <g key={i}>
+              <rect
+                x={e.x}
+                y={e.y}
+                width={e.w}
+                height={e.h}
+                rx={3}
+                fill="#fff"
+                stroke="var(--muted)"
+                strokeWidth={1.2}
+              />
+              {e.n && (
+                <text
+                  x={e.x + e.w / 2}
+                  y={e.y + e.h / 2 + 5}
+                  fontSize="13"
+                  fontWeight={600}
+                  textAnchor="middle"
+                  fill="var(--foreground)"
+                >
+                  {e.n}
                 </text>
               )}
             </g>
           ))}
 
-          {/* guide paths */}
-          {(Object.keys(PATHS) as RobotKey[]).map((k) => (
+          {/* doors */}
+          {[
+            [895, 430],
+            [985, 430],
+            [1270, 430],
+          ].map(([x, y]) => (
             <path
-              key={k}
-              d={PATHS[k].d}
-              fill="none"
-              stroke={ROBOTS[k].color}
-              strokeOpacity={0.28}
-              strokeWidth={2}
-              strokeDasharray="1 7"
-              strokeLinecap="round"
+              key={`${x}${y}`}
+              d={`M${x - 14},${y} a14,14 0 0 1 28,0`}
+              fill="#e8c9b0"
+              stroke="#cf9a72"
             />
           ))}
 
-          {/* waypoints */}
-          {STOPS.map((s) => (
-            <g key={s.id}>
-              <circle cx={s.x} cy={s.y} r={5} fill="#fff" stroke="var(--muted)" strokeWidth={1.5} />
-              <title>{s.id}</title>
+          {/* route guides */}
+          {Object.entries(GUIDES).map(([k, g]) => (
+            <path
+              key={k}
+              d={g.d}
+              fill="none"
+              stroke={ROBOTS[g.key].color}
+              strokeOpacity={k === "c2" ? 0.28 : 0.45}
+              strokeWidth={3}
+              strokeDasharray={k === "c2" ? "2 8" : "10 8"}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))}
+
+          {POINTS.map((p) => (
+            <g key={p.id}>
+              <circle cx={p.x} cy={p.y} r={6} fill="#fff" stroke="var(--muted)" strokeWidth={1.5} />
+              {p.label && (
+                <text x={p.x + 10} y={p.y - 8} fontSize="12" fill="var(--muted)">
+                  {p.id}
+                </text>
+              )}
+            </g>
+          ))}
+
+          {ENDPOINTS.map((p) => (
+            <g key={p.id}>
+              <circle
+                cx={p.x}
+                cy={p.y}
+                r={24}
+                fill="none"
+                stroke={ROBOTS[p.key].color}
+                strokeOpacity={0.5}
+                strokeWidth={2}
+              />
+              <text
+                x={p.x}
+                y={p.y + 42}
+                fontSize="12"
+                textAnchor="middle"
+                fill="var(--muted)"
+              >
+                {p.id}
+              </text>
             </g>
           ))}
 
           {/* robots */}
-          {(Object.keys(PATHS) as RobotKey[]).map((k) => (
-            <g key={k}>
-              <circle r={16} fill={ROBOTS[k].color}>
-                <animateMotion
-                  dur={PATHS[k].dur}
-                  repeatCount="indefinite"
-                  path={PATHS[k].d}
-                  rotate="0"
-                />
-              </circle>
-              <text fontSize="15" fontWeight={700} fill="#fff" textAnchor="middle" dy="5">
-                {k}
-                <animateMotion
-                  dur={PATHS[k].dur}
-                  repeatCount="indefinite"
-                  path={PATHS[k].d}
-                  rotate="0"
-                />
-              </text>
-            </g>
-          ))}
+          {(Object.keys(ROBOTS) as RobotKey[]).map((k) => {
+            const { pos, seg } = current[k];
+            const active = seg.state === "speak" || seg.state === "serve";
+            return (
+              <g key={k} transform={`translate(${pos[0]} ${pos[1]})`}>
+                {active && (
+                  <circle r={28} fill={ROBOTS[k].color} opacity={0.18}>
+                    <animate attributeName="r" values="22;32;22" dur="1.6s" repeatCount="indefinite" />
+                  </circle>
+                )}
+                <circle r={17} fill={ROBOTS[k].color} stroke="#fff" strokeWidth={3} />
+                <text
+                  fontSize="16"
+                  fontWeight={700}
+                  fill="#fff"
+                  textAnchor="middle"
+                  dy="5.5"
+                >
+                  {k.toUpperCase()}
+                </text>
+              </g>
+            );
+          })}
         </svg>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-muted">
-          {(Object.keys(ROBOTS) as RobotKey[]).map((k) => (
-            <span key={k} className="flex items-center gap-1.5">
-              <span
-                className="inline-block h-2.5 w-2.5 rounded-full"
-                style={{ background: ROBOTS[k].color }}
-              />
-              {ROBOTS[k].label} · {ROBOTS[k].role}
-            </span>
-          ))}
+        <div className="mt-4 flex items-center gap-3">
+          <input
+            type="range"
+            min={0}
+            max={LOOP}
+            step={0.1}
+            value={time}
+            onChange={(e) => setTime(parseFloat(e.target.value))}
+            className="h-1 w-full accent-[var(--accent)]"
+            aria-label="Simulation timeline"
+          />
+          <span className="w-20 shrink-0 text-right text-[11px] tabular-nums text-muted">
+            {time.toFixed(0)}s / {LOOP.toFixed(0)}s
+          </span>
         </div>
 
-        <div className="mt-4 flex items-center gap-2.5 rounded-xl border border-border bg-background/60 px-4 py-3">
-          <span
-            className="inline-block h-2 w-2 shrink-0 rounded-full"
-            style={{ background: ROBOTS[active.robot].color }}
-          />
-          <p className="text-sm leading-snug text-foreground">
-            <span className="font-semibold">{ROBOTS[active.robot].label}</span>{" "}
-            <span className="text-foreground/80">{active.text}</span>
-          </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {(Object.keys(ROBOTS) as RobotKey[]).map((k) => {
+            const { seg } = current[k];
+            return (
+              <div
+                key={k}
+                className="rounded-xl border border-border bg-background/60 px-4 py-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                    <span
+                      className="inline-block h-2.5 w-2.5 rounded-full"
+                      style={{ background: ROBOTS[k].color }}
+                    />
+                    {ROBOTS[k].name} · {ROBOTS[k].role}
+                  </span>
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted">
+                    {stateLabel[seg.state]}
+                  </span>
+                </div>
+                <p className="mt-2 min-h-[2.75rem] text-[13px] leading-snug text-foreground/80">
+                  {seg.text}
+                </p>
+              </div>
+            );
+          })}
         </div>
+
+        <div className="mt-3 rounded-xl border border-dashed border-border px-4 py-2.5 text-[12px] leading-snug text-muted">
+          <span className="font-semibold uppercase tracking-wider text-warm">
+            Back-end
+          </span>{" "}
+          <span className="text-foreground/80">{backendNow.text}</span>
+        </div>
+
+        <p className="mt-3 text-[11px] text-muted">
+          Simulated from the project&apos;s service blueprint and floor-plan
+          route map; positions and timings are illustrative.
+        </p>
       </div>
     </div>
   );

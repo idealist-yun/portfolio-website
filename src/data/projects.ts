@@ -8,7 +8,11 @@ export type Domain =
   | "Startup & Venture"
   | "Robotics & AI";
 
-export type BodyItem = string | { img: string } | { embed: "vip-robot-sim" };
+export type BodyItem =
+  | string
+  | { img: string }
+  | { embed: "vip-robot-sim" }
+  | { link: { label: string; href: string } };
 export type Section = { heading: string; body: BodyItem[] };
 
 export type Project = {
@@ -338,6 +342,7 @@ export const projects: Project[] = [
           "Due to my younger sibling's developmental disability, I defined it as my mission to address issues such as improving the lives of people with disabilities and alleviating the guilt felt by their families. Through studying service design and business, I came to believe that these issues should be approached within the realm of the market. Over time, various experiences broadened my perspective to include designing for the vulnerable as a whole.",
           "While contemplating how to integrate service design with disability-related fields in my career, I had the opportunity in 2023 to participate in a publication project. This project brought together graduate students from diverse fields, including law, statistics, biotechnology, and service design, to discuss social trends within their respective disciplines.",
           "In my contribution, I explored the concept of approaching disability not merely from a welfare perspective, but as a market expansion strategy. Through this process, I refined my perspective and, in particular, predicted that the newly released AirPods 4 would incorporate hearing aid functionality.",
+          { link: { label: "Download PDF", href: "/files/disability-service-design.pdf" } },
           { img: "/images/full/disability-as-market-01.jpg" },
         ],
       },

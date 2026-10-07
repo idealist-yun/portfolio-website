@@ -11,20 +11,7 @@ const phaseStyle: Record<string, string> = {
   "AI-Driven": "bg-accent text-white",
 };
 
-const phases = [
-  {
-    label: "Basic",
-    body: "Design thinking, internalized through consulting and service-design engagements across retail, public sector, and finance.",
-  },
-  {
-    label: "Data-Driven",
-    body: "Quantitative persona modeling and behavioral analysis — extracting actionable insight from real usage and assessment data.",
-  },
-  {
-    label: "AI-Driven",
-    body: "AI personas and simulation environments to pre-validate service strategies before they reach the real world.",
-  },
-];
+const phases = [{ label: "Basic" }, { label: "Data-Driven" }, { label: "AI-Driven" }];
 
 const featuredWork = [
   {
@@ -91,21 +78,42 @@ export default function Home() {
       <section className="pt-20 pb-16 sm:pt-28 sm:pb-24">
         <Eyebrow>{profile.affiliation}</Eyebrow>
         <h1 className="mt-5 max-w-4xl font-serif text-6xl font-semibold leading-[1.02] tracking-tight text-foreground sm:text-7xl">
-          At the intersection of design, data, and human possibility.
+          Welcome to the intersection of design, data, and human possibility!
         </h1>
         <p className="mt-7 max-w-xl text-lg font-medium leading-snug text-accent">
           My brother&apos;s developmental disability taught me to ask: how do
           we design services that actually meet human need?
         </p>
-        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted">
-          I&apos;m {profile.name} ({profile.handle}) — a strategic designer
-          working from data-driven service design toward AI-driven
-          simulation &amp; entrepreneurship.
-        </p>
+        <div className="mt-6 max-w-2xl space-y-4 text-lg leading-relaxed text-muted">
+          <p>
+            Hi, all. I&apos;m Sangyun Lee – a strategic designer committed to
+            bridging business innovation with social impact.
+          </p>
+          <p>
+            Currently I&apos;m studying Integrated Product Design at the
+            University of Pennsylvania. Previously, I worked in the Market
+            Intelligence Team at Samsung Electronics, developing business
+            insights and future strategies, and completed my Master&apos;s in
+            Service Design, supported by a dual undergraduate background in
+            Business Administration and Data Science. Before graduate school, I
+            served as a lieutenant, leading organizational strategy and
+            operational readiness.
+          </p>
+          <p>
+            With all these backgrounds, I define myself as a data-driven
+            strategic designer.
+          </p>
+          <p>
+            Looking ahead, I aspire to become an AI-driven strategic designer
+            &amp; entrepreneur.
+          </p>
+        </div>
       </section>
 
       <section className="relative border-t border-border py-14">
-        <div className="pointer-events-none absolute left-0 right-0 top-20 hidden h-px bg-border sm:block" />
+        <Eyebrow>Research area</Eyebrow>
+        <div className="mt-6" />
+        <div className="pointer-events-none absolute left-0 right-0 top-[7.5rem] hidden h-px bg-border sm:block" />
         <div className="grid gap-10 sm:grid-cols-3">
           {phases.map((phase, i) => (
             <Link
@@ -122,16 +130,23 @@ export default function Home() {
                 {phase.label}{" "}
                 <span className="text-accent group-hover:underline">→</span>
               </p>
-              <p className="mt-2 text-sm leading-relaxed text-muted">
-                {phase.body}
-              </p>
             </Link>
           ))}
         </div>
       </section>
 
       <section className="border-t border-border py-14">
-        <div className="max-w-3xl space-y-5 text-base leading-relaxed text-muted">
+        <div className="max-w-3xl space-y-5 text-lg leading-relaxed text-muted">
+          <p>My past experiences can be distilled into three phases.</p>
+          <p>
+            And now, I stand at a turning point—because I have begun to see new
+            possibilities built upon those capabilities.
+          </p>
+        </div>
+      </section>
+
+      <section className="border-t border-border py-14">
+        <div className="max-w-3xl space-y-6 text-lg leading-relaxed text-muted">
           <p>
             Since childhood, I have carried a question shaped by my younger
             brother&apos;s developmental disability:{" "}
@@ -139,21 +154,84 @@ export default function Home() {
               &ldquo;How can we meaningfully improve the lives of people with
               disabilities?&rdquo;
             </span>{" "}
-            That question led me to explore whether data-driven scientific
-            methods and service-design frameworks could create sustainable
-            solutions in disability contexts.
+            This question led me to explore whether data-driven scientific
+            methods and service-design frameworks could be applied to create
+            sustainable solutions in disability contexts.
           </p>
           <p>
-            The culmination of this inquiry so far was my graduate thesis on
-            data-driven disability persona augmentation — analyzing and
-            simulating the daily-living performance of people with
-            developmental disabilities through a structured, computational
-            approach. I&apos;m now extending that work into an AI-agent
-            simulation testbed at Penn, and applying the same
-            persona-and-simulation framework beyond disability, to any field
-            where social innovation, human behavior, and complex service
-            needs intersect.
+            The culmination of this inquiry was my graduate thesis,
+            &ldquo;Data-driven disability persona augmentation for service
+            journey inference,&rdquo; in which I analyzed and simulated the
+            daily living performance of people with developmental disabilities
+            through a structured, computational approach.
           </p>
+          <p>The study followed these steps:</p>
+          <ul className="list-disc space-y-2 pl-6">
+            <li>
+              Conducting in-depth interviews with nine caregivers of individuals
+              with developmental disabilities
+            </li>
+            <li>
+              Augmenting the dataset to 2,400 profiles using the Vineland
+              Adaptive Behavior Scales
+            </li>
+            <li>
+              Deriving five disability personas through multidimensional
+              clustering
+            </li>
+            <li>Training these personas into an AI persona model</li>
+            <li>Applying them to 11 ADL/IADL-based daily scenarios</li>
+            <li>
+              Reproducing and analyzing where and why each persona requires
+              support, using computational simulations
+            </li>
+          </ul>
+          <p>
+            This research went beyond modeling. It demonstrated the possibility
+            of quantifying support needs, understanding behavioral patterns,
+            and predicting service requirements across diverse daily contexts.
+          </p>
+          <p>
+            Through this thesis and my earlier projects, I recognized two clear
+            possibilities:
+          </p>
+          <ul className="list-disc space-y-2 pl-6">
+            <li>
+              Persona definitions can be constructed with precision across
+              various domains through data-driven methods.
+            </li>
+            <li>
+              AI personas can be used to pre-validate real-world solutions
+              before implementation.
+            </li>
+          </ul>
+          <p>
+            These two insights form a framework that extends far beyond the
+            disability domain. I now believe they can be applied to any field
+            where social innovation, human behavior, and complex service needs
+            intersect.
+          </p>
+          <div className="pt-6">
+            <h3 className="font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              My Future
+            </h3>
+            <p className="mt-4">
+              By strengthening this research and my own design framework, I
+              envision building a world-class global company dedicated to
+              disability innovation—one that stands alongside leaders like
+              Samsung and Apple. At the same time, I aspire to create a
+              strategic design consulting firm that drives breakthrough
+              innovation, much like IDEO.
+            </p>
+            <p className="mt-5">
+              If you&apos;d like to explore my long-term plans in more detail,
+              please visit the{" "}
+              <Link href="/vision" className="text-accent underline">
+                Vision
+              </Link>{" "}
+              page.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -233,6 +311,9 @@ export default function Home() {
             className="w-full h-auto"
           />
         </div>
+        <p className="mt-8 font-serif text-2xl font-semibold text-foreground">
+          See you anon!
+        </p>
       </section>
 
       <section className="border-t border-border py-14">

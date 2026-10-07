@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { projects } from "@/data/projects";
-import { Tag } from "@/components/ui";
+import { relatedFor } from "@/data/projectMeta";
 import Reveal from "@/components/Reveal";
 import VipRobotSim from "@/components/VipRobotSim";
 
@@ -29,6 +29,9 @@ export default async function ProjectDetail({
   const { slug } = await params;
   const project = projects.find((p) => p.slug === slug);
   if (!project) notFound();
+  const related = relatedFor(slug)
+    .map((s) => projects.find((p) => p.slug === s))
+    .filter((p): p is (typeof projects)[number] => !!p);
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-16">
@@ -115,6 +118,19 @@ export default async function ProjectDetail({
                     </div>
                   );
                 }
+                if ("link" in item) {
+                  return (
+                    <a
+                      key={j}
+                      href={item.link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border border-accent px-5 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-white"
+                    >
+                      {item.link.label} ↓
+                    </a>
+                  );
+                }
                 const Embed = EMBEDS[item.embed];
                 return Embed ? <Embed key={j} /> : null;
               })}
@@ -123,11 +139,26 @@ export default async function ProjectDetail({
         ))}
       </div>
 
-      <div className="mt-16 flex flex-wrap gap-2">
-        {project.domains.map((d) => (
-          <Tag key={d}>{d}</Tag>
-        ))}
-      </div>
+      {related.length > 0 && (
+        <div className="mt-20 border-t border-border pt-10">
+          <h2 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
+            Want to check more?
+          </h2>
+          <p className="mt-2 text-base text-muted">Discover my other projects.</p>
+          <ul className="mt-6 space-y-3">
+            {related.map((r) => (
+              <li key={r.slug}>
+                <Link
+                  href={`/project/${r.slug}`}
+                  className="text-base text-accent hover:underline"
+                >
+                  {r.title} →
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {project.note && (
         <div className="mt-10 rounded-xl border border-warm/40 bg-warm/5 p-4">

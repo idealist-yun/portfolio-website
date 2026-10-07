@@ -28,44 +28,46 @@ const SPEED = 110; // map units per second at 1x
 const OFF_G: Pt = [-34, 28]; // guest walks behind-left of the escorting robot
 const OFF_P: Pt = [-34, -28]; // the President walks beside the guest
 
-// Editable: what each docent stop presents. Photos are cropped from the
-// project's route-map slide; descriptions reflect what is visible there.
+// What each docent stop presents, following the SKKU reception-room
+// narration script (the script order is Robot B's stop order). Photos are
+// cropped from the project's route-map slide.
 const SPOTS: Record<
   string,
-  { n: string; title: string; short: string; body: string; img?: string }
+  { n: string; title: string; short: string; body: string; img?: string; dur?: number }
 > = {
   "B-1-1": {
     n: "①",
-    title: "Exhibit ① · Ceramics display shelf",
-    short: "Exhibit ①",
-    body: "A tall wooden shelf displaying ceramic plates and ornaments. Robot B stops here and plays the narration script prepared for this piece.",
-    img: "/images/vip/spot-1.jpg",
+    title: "“San” (Mountain) · Lee Dae-won, oil on canvas",
+    short: "the mountain painting",
+    body: "A 1981 oil painting by Lee Dae-won, a leading postwar Korean Western-style painter known for vivid pointillist colour and gentle rural landscapes. Painted at the peak of his career and donated to the university while he was president of Hongik University; now in the SKKU Museum collection.",
+    img: "/images/vip/spot-0.jpg",
   },
   "B-1-2": {
     n: "②",
-    title: "Exhibit ② · Framed calligraphy",
-    short: "Exhibit ②",
-    body: "A framed calligraphy work hung beside the secretary's desk. Robot B turns to face it and plays the script for this piece.",
-    img: "/images/vip/spot-2.jpg",
+    title: "Sabang tapjak shelf · inlaid celadon and a wafer",
+    short: "the sabang tapjak shelf",
+    body: "A scholar's study-room shelf open on all four sides, its drawer doors carved with the Four Gentlemen. It displays an inlaid celadon bowl beside a Samsung system-semiconductor wafer: SKKU's 600-year tradition meeting modern technology, since inlay-celadon making mirrors chip fabrication from oxidation to packaging.",
+    img: "/images/vip/spot-1.jpg",
   },
   "B-1-3": {
     n: "③",
-    title: "Exhibit ③ · Display shelf",
-    short: "Exhibit ③",
-    body: "A wooden display shelf with a bowl and tableware. Robot B pauses here while the secretary triggers the script from the remote.",
-    img: "/images/vip/spot-3.jpg",
+    title: "Meorijang chest · “Inui-yeji” calligraphy",
+    short: "the meorijang chest and the Inui-yeji calligraphy",
+    body: "A bedside chest standing between the pair of shelves; its upturned ends keep scrolls from rolling off, and guests may rest their belongings on it. Above hangs “Inui-yeji” (benevolence, righteousness, propriety, wisdom), SKKU's motto, written by Sun Jianfen and donated by Shandong University in 1990, a mark of 30 years of Korea–China exchange.",
+    img: "/images/vip/spot-2.jpg",
   },
   "B-1-4": {
     n: "",
-    title: "Crown Prince's Entrance Ceremony painting",
-    short: "the Crown Prince's Entrance Ceremony painting",
-    body: "The Joseon-era artwork that inspired the whole service concept: the six ceremonies of the crown prince's entrance to Seonggyungwan, retold here as the guest's visit.",
+    title: "Crown Prince's Entrance Ceremony paintings",
+    short: "the Crown Prince's Entrance Ceremony paintings",
+    body: "From the 1817 album recording nine-year-old Crown Prince Hyomyeong's entrance to Seonggyungwan, held by the National Palace Museum of Korea. Six rites: leaving the palace, paying respects to Confucius, requesting lessons, presenting gifts, attending class, and returning to the palace to be congratulated. The same six rites frame this whole service.",
+    dur: 5,
   },
   "B-1-5": {
     n: "④",
-    title: "Exhibit ④ · Keepsake shelf",
-    short: "Exhibit ④",
-    body: "A display shelf of keepsakes and books at the far end of Zone C. The last stop before Robot B says farewell.",
+    title: "Seonggyungwan official seal (1857)",
+    short: "the Seonggyungwan official seal",
+    body: "The seal of Joseon's highest educational institution, made in 1857 (the original is held by the National Palace Museum of Korea). Distinguished visitors receive a commemorative Seonggyungwan appointment certificate stamped with this seal, a traditional artefact put to modern use.",
     img: "/images/vip/spot-4.jpg",
   },
 };
@@ -225,21 +227,23 @@ function buildScenario() {
     p: "Walks with the guest into Zone C",
   });
   const tTourStart = B.t;
-  const stops: { id: string; at: Pt[]; text: string }[] = [
-    { id: "B-1-1", at: [], text: "Docent · Exhibit ① (script triggered by the secretary's remote)" },
-    { id: "B-1-2", at: [[614, 271]], text: "Docent · Exhibit ②" },
-    { id: "B-1-3", at: [[614, 205]], text: "Docent · Exhibit ③" },
-    { id: "B-1-4", at: [[614, 175], [282, 175], [282, 269]], text: "Docent · Crown Prince's Entrance Ceremony painting" },
-    { id: "B-1-5", at: [[282, 385]], text: "Docent · Exhibit ④" },
+  const stops: { id: string; at: Pt[] }[] = [
+    { id: "B-1-1", at: [] },
+    { id: "B-1-2", at: [[614, 271]] },
+    { id: "B-1-3", at: [[614, 205]] },
+    { id: "B-1-4", at: [[614, 175], [282, 175], [282, 269]] },
+    { id: "B-1-5", at: [[282, 385]] },
   ];
   for (const st of stops) {
     if (st.at.length) {
       B.go(st.at, `Leads the guests to ${SPOTS[st.id].short}`, { g: "Follows Robot B", p: "Walks with the guest" });
     }
-    B.wait(2.5, st.text, "speak", {
-      spot: st.id,
-      g: `Listens to the docent: ${SPOTS[st.id].short}`,
-    });
+    B.wait(
+      SPOTS[st.id].dur ?? 3,
+      `Docent · ${SPOTS[st.id].short}${st.id === "B-1-1" ? " (script triggered by the secretary's remote)" : ""}`,
+      "speak",
+      { spot: st.id, g: `Listens to the docent: ${SPOTS[st.id].short}` }
+    );
   }
   const tFarewellStart = B.t;
   B.wait(
@@ -1016,7 +1020,7 @@ export default function VipRobotSim() {
                   <img
                     src={SPOTS[activeSpot].img}
                     alt=""
-                    className="h-20 w-14 shrink-0 rounded-md border border-border object-cover"
+                    className="h-20 w-16 shrink-0 rounded-md border border-border object-cover"
                   />
                 )}
                 <div className="min-w-0">

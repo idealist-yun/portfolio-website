@@ -14,6 +14,8 @@ type Seg = {
   state: State;
   spot?: string;
   g?: string;
+  p?: string;
+  carry?: boolean;
   follow?: { robot: RobotKey; dx: number; dy: number };
 };
 const ROBOTS: Record<RobotKey, { color: string; name: string; role: string }> = {
@@ -23,7 +25,8 @@ const ROBOTS: Record<RobotKey, { color: string; name: string; role: string }> = 
 };
 
 const SPEED = 110; // map units per second at 1x
-const OFF: Pt = [-34, 28]; // guest stands beside the robot that is escorting them
+const OFF_G: Pt = [-34, 28]; // guest walks behind-left of the escorting robot
+const OFF_P: Pt = [-34, -28]; // the President walks beside the guest
 
 // Editable: what each docent stop presents. Photos are cropped from the
 // project's route-map slide; descriptions reflect what is visible there.
@@ -70,8 +73,16 @@ const SPOTS: Record<
 const GUEST = {
   name: "Dr. Park",
   role: "Visiting professor (sample guest)",
-  drink: "hot americano",
+  drink: "tea",
 };
+const OFFICE: Pt = [1285, 150];
+const SEAT_G: Pt = [535, 270];
+const SEAT_P: Pt = [535, 330];
+const CUPS: Pt[] = [
+  [486, 272],
+  [486, 328],
+];
+const B_DOOR: Pt = [898, 395];
 
 const dist = (a: Pt, b: Pt) => Math.hypot(b[0] - a[0], b[1] - a[1]);
 const pathLen = (pts: Pt[]) =>
@@ -108,7 +119,7 @@ function createTrack(start: Pt) {
       cur = p;
       return api;
     },
-    follow(robot: RobotKey, t0: number, t1: number, text: string) {
+    follow(robot: RobotKey, t0: number, t1: number, text: string, off: Pt) {
       if (t1 <= t0) return api;
       segs.push({
         t0,
@@ -117,7 +128,7 @@ function createTrack(start: Pt) {
         len: 0,
         text,
         state: "idle",
-        follow: { robot, dx: OFF[0], dy: OFF[1] },
+        follow: { robot, dx: off[0], dy: off[1] },
       });
       t = t1;
       return api;
@@ -141,46 +152,68 @@ function followSegs(
   segs: Seg[],
   from: number,
   to: number,
-  fallback: string
+  fallback: string,
+  off: Pt,
+  who: "g" | "p"
 ) {
   for (const s of segs) {
     const t0 = Math.max(s.t0, from);
     const t1 = Math.min(s.t1, to);
-    if (t1 - t0 > 0.001) g.follow(robot, t0, t1, s.g ?? fallback);
+    if (t1 - t0 > 0.001) {
+      g.follow(robot, t0, t1, (who === "p" ? s.p ?? s.g : s.g) ?? fallback, off);
+    }
   }
 }
+
+const add = (v: Pt, o: Pt): Pt => [v[0] + o[0], v[1] + o[1]];
 
 function buildScenario() {
   const A = createTrack(WP.A_SE);
   const B = createTrack(WP.B_SE);
   const C = createTrack(WP.C_S);
+  const P = createTrack(OFFICE);
+  const G = createTrack(add(WP.A_R, OFF_G));
   const name = GUEST.name;
-  const sub = (v: Pt, o: Pt = OFF): Pt => [v[0] + o[0], v[1] + o[1]];
 
-  // Welcome + guide to Room B
+  const gA = add(WP.A_R, OFF_G);
+  const gDoor = add(B_DOOR, OFF_G);
+  const pDoor = add(B_DOOR, OFF_P);
+  const walkIn = pathLen([gA, gDoor]) / SPEED;
+  const handDur = pathLen([gDoor, gA]) / SPEED;
+
+  // Welcome in the lobby, guide to the Zone B door
   A.wait(3, `Welcomes ${name}: bows, the guest's name appears on the screen`, "speak", {
-    g: "Arrives at the lobby and is welcomed by Robot A",
+    g: "Arrives from the elevator and is welcomed by Robot A",
   }).go([[898, 653], WP.A_R], "Guides the guest to Room B (Zone B)", {
     g: "Follows Robot A to Room B",
   });
   const tBStart = A.t;
   const tGreetEnd = 3;
-  const gA: Pt = sub(WP.A_R); // beside Robot A at A-R
-  const walkInPath: Pt[] = [gA, [gA[0], 416], sub(WP.B_SE)]; // lobby door -> beside Robot B
-  const walkIn = pathLen(walkInPath) / SPEED;
   const tBGreet = tBStart + walkIn;
-  const SEAT: Pt = [535, 300];
-  const walkBackPath: Pt[] = [SEAT, [535, 381], sub(WP.B_1R)];
-  const walkBack = pathLen(walkBackPath) / SPEED;
-  const handPath: Pt[] = [sub([898, 415]), gA];
-  const handDur = pathLen(handPath) / SPEED;
 
-  // Robot B: greet, lead into Zone C, docent tour
-  B.until(tBGreet, "Standing by at B-S/E")
-    .wait(3, `Greets ${name}: “Welcome, ${name}. I'll show you to the meeting room.”`, "speak", {
-      g: "Is greeted by name by Robot B",
-    })
-    .go([[614, 388], [614, 343]], "Leads the guest into Zone C", { g: "Follows Robot B into Zone C" });
+  // Robot B steps out to the door first and waits there
+  const toDoor: Pt[] = [[898, 388], B_DOOR];
+  const toDoorDur = pathLen([WP.B_SE, ...toDoor]) / SPEED;
+  B.until(tBStart - toDoorDur - 0.4, "Standing by at B-S/E")
+    .go(toDoor, "Steps out to the Zone B door to meet the guest")
+    .until(tBGreet, "Waiting at the door to receive the guests");
+
+  // The President walks out to the same door
+  const toDoorP: Pt[] = [[1180, 190], [1100, 300], [940, 380], pDoor];
+  const pDur = pathLen([OFFICE, ...toDoorP]) / SPEED;
+  const tPLeave = tBGreet - pDur - 0.3;
+  P.until(tPLeave, "In the President's Office")
+    .go(toDoorP, "Walks out to the Zone B door to receive the guest")
+    .until(tBGreet, "Receives the guest at the Zone B door");
+
+  // B greets both and leads the tour
+  B.wait(3, `Greets ${name} and the President: “Welcome, ${name}. This way to the meeting room.”`, "speak", {
+    g: "Is greeted by name by Robot B",
+    p: "Welcomes the guest with Robot B",
+  }).go([[898, 388], [614, 388], [614, 343]], "Leads the guests into Zone C", {
+    g: "Follows Robot B into Zone C",
+    p: "Walks with the guest into Zone C",
+  });
   const tTourStart = B.t;
   const stops: { id: string; at: Pt[]; text: string }[] = [
     { id: "B-1-1", at: [], text: "Docent · Exhibit ① (script triggered by the secretary's remote)" },
@@ -191,7 +224,7 @@ function buildScenario() {
   ];
   for (const st of stops) {
     if (st.at.length) {
-      B.go(st.at, `Leads the guest to ${SPOTS[st.id].short}`, { g: "Follows Robot B" });
+      B.go(st.at, `Leads the guests to ${SPOTS[st.id].short}`, { g: "Follows Robot B", p: "Walks with the guest" });
     }
     B.wait(2.5, st.text, "speak", {
       spot: st.id,
@@ -208,92 +241,156 @@ function buildScenario() {
   const tExitStart = B.t;
   B.go([[282, 388], [737, 388], WP.B_1R], "Exits and returns to standby at B-1-R");
 
-  // Robot C: drinks, serve Zone C
+  // Robot C brings the tea and sets it on the table
   C.until(tExitStart - 2, "Standing by in the lounge (C-S)")
-    .wait(3.5, `Back-end: staff load ${name}'s ${GUEST.drink} onto the tray`, "serve")
-    .go([[1090, 398], WP.C_1E], "Carries the drinks to Zone C");
+    .wait(3.5, "Back-end: staff load the tea onto the tray", "serve")
+    .go([[1090, 398], [570, 398], [570, 300]], "Carries the tea to the table in Zone C", { carry: true });
   const tServe = C.t;
-  C.wait(3, `Greets ${name} and serves the ${GUEST.drink}`, "serve").wait(
+  C.wait(1.2, "Sets the tea cups on the table", "serve", { carry: true });
+  const tPlace = C.t;
+  C.wait(2.5, `Greets ${name} and the President: “Please enjoy your tea.”`, "serve").wait(
     1.5,
     "Bows and leaves the room",
     "speak"
   );
   const tMeetStart = C.t;
-  C.go([[1090, 398]], "Returns to Room B");
-
+  C.go([[570, 398], [1090, 398]], "Returns to Room B");
   const tMeetEnd = tMeetStart + 12;
 
-  // Post-meeting: B photo + hand-off, A to elevator
-  B.until(tMeetEnd + walkBack, "Standing by at B-1-R (meeting in progress)")
-    .wait(2, `Greets ${name} as the meeting ends`, "speak", { g: "Is greeted by Robot B" })
-    .go([[737, 388], [924, 388], [924, 208]], "Leads the guest to the photo zone", {
+  // Walk-back from the table (both actors), B waits for the slower one
+  const walkBackG: Pt[] = [SEAT_G, [600, 270], [600, 381], add(WP.B_1R, OFF_G)];
+  const walkBackP: Pt[] = [SEAT_P, [600, 330], add(WP.B_1R, OFF_P)];
+  const walkBack = Math.max(pathLen(walkBackG), pathLen(walkBackP)) / SPEED;
+  const tFollow = tMeetEnd + walkBack;
+
+  // Photo zone: B waits, guests step up to pose, then come back
+  B.until(tFollow, "Standing by at B-1-R (meeting in progress)")
+    .wait(2, "Greets the guests as the meeting ends", "speak", { g: "Is greeted by Robot B" })
+    .go([[737, 388], [924, 388], [924, 208]], "Leads the guests to the photo zone", {
       g: "Follows Robot B to the photo zone",
     });
-  const tPhoto = B.t;
-  B.wait(3.5, "Photo assist: helps the guest take a commemorative photo", "serve", {
-    g: "Takes a commemorative photo with Robot B's help",
-  }).go([[924, 388], [898, 388], [898, 415]], "Guides the guest to Room A", {
+  const tPhotoStart = B.t;
+  B.wait(0.8, "Invites the guests to step up to the photo zone", "speak")
+    .wait(2.5, "Takes the photo: “Please smile. Three, two, one…”", "serve")
+    .wait(0.8, "Thanks the guests and invites them back", "speak");
+  const tHoldEnd = tPhotoStart + 3.3;
+  const tPhotoEnd = B.t;
+  const flash = { t0: tHoldEnd - 0.7, t1: tHoldEnd - 0.4 };
+  B.go([[924, 388], [898, 388], B_DOOR], "Guides the guests to Room A", {
     g: "Follows Robot B to Room A",
   });
   const tHandoff = B.t;
-  B.wait(2.5, "Greets the guest and hands over to Robot A", "speak", {
+  B.wait(2.5, "Greets the guests and hands over to Robot A", "speak", {
     g: "Is handed over to Robot A",
   }).go([[898, 388], WP.B_SE], "Returns to B-S/E");
 
   A.until(tHandoff, "Waiting at A-R")
-    .wait(2.5, `Greets ${name} and takes over from Robot B`, "speak", {
+    .wait(2.5, "Greets the guests and takes over from Robot B", "speak", {
       g: "Is welcomed by Robot A in the lobby",
     })
-    .go([[898, 653], WP.A_SE], "Guides the guest to the elevator", {
+    .go([[898, 653], WP.A_SE], "Guides the guests to the elevator", {
       g: "Follows Robot A to the elevator",
     });
   const tFarewell = A.t;
-  A.wait(3.5, "Farewell: sees the guest off", "speak", { g: "Is seen off by Robot A" });
+  A.wait(3.5, "Farewell: sees the guests off", "speak", { g: "Is seen off by Robot A" });
+  const tFarewellEnd = A.t;
 
   C.until(tMeetEnd + 4, "Standing by in Room B").go([WP.C_S], "Returns to the lounge (C-S)");
 
-  const LOOP = Math.max(A.t, B.t, C.t) + 3;
-  A.until(LOOP, "Standing by at A-S/E");
+  // ---- actors ----
+  const poseG: Pt = [915, 172];
+  const poseP: Pt = [955, 172];
+  const photoSpot: Pt = [924, 208];
+
+  function runActor(
+    T: ReturnType<typeof createTrack>,
+    who: "g" | "p",
+    off: Pt,
+    seat: Pt,
+    farewellFirst: Pt[],
+    walkBackPath: Pt[],
+    pose: Pt,
+    texts: { seat: string; served: string; meeting: string }
+  ) {
+    followSegs(T, "b", B.segs, tBGreet, tFarewellStart + 1.2, "Accompanies the guest", off, who);
+    T.at(add([282, 385], off)).go([...farewellFirst, seat], "Walks to the table in Zone C");
+    T.until(tPlace, texts.seat);
+    T.until(tMeetStart, texts.served, "serve");
+    T.until(tMeetEnd, texts.meeting);
+    T.go(walkBackPath.slice(1), "Walks to Robot B");
+    T.until(tFollow, "Waits for Robot B");
+    followSegs(T, "b", B.segs, tFollow, tPhotoStart, "Accompanies the guest", off, who);
+    T.at(add(photoSpot, off)).go([pose], "Steps up to the photo zone");
+    T.until(tHoldEnd, "Strikes a pose for the photo", "serve");
+    T.go([add(photoSpot, off)], "Returns to Robot B");
+    T.until(tPhotoEnd, "Returns to Robot B");
+    followSegs(T, "b", B.segs, tPhotoEnd, tHandoff, "Accompanies the guest", off, who);
+    T.at(add(B_DOOR, off)).go([add(WP.A_R, off)], "Walks to Robot A");
+    followSegs(T, "a", A.segs, tHandoff + handDur, tFarewellEnd, "Accompanies the guest", off, who);
+  }
+
+  // The President's actor first (it ends with the walk back to the office)
+  runActor(
+    P,
+    "p",
+    OFF_P,
+    SEAT_P,
+    [[535, 357]],
+    walkBackP,
+    poseP,
+    { seat: "Takes a seat in Zone C", served: "Is served tea by Robot C", meeting: "In the meeting with the guest" }
+  );
+  const retPath: Pt[] = [[985, 600], [985, 440], [985, 388], [1100, 300], [1154, 203], [1180, 190], OFFICE];
+  P.at(add(WP.A_SE, OFF_P)).go(retPath, "Returns to the President's Office");
+
+  const LOOP = Math.max(A.t, B.t, C.t, P.t) + 3;
+  A.until(LOOP, "Standing by at A-S/E", "idle", { g: "Leaves by the elevator" });
   B.until(LOOP, "Standing by at B-S/E");
   C.until(LOOP, "Standing by in the lounge (C-S)");
+  P.until(LOOP, "In the President's Office");
 
-  // Guest
-  const G = createTrack(gA);
-  followSegs(G, "a", A.segs, 0, tBStart, "Follows Robot A");
-  G.at(gA).go(walkInPath.slice(1), "Walks into Room B");
-  followSegs(G, "b", B.segs, tBGreet, tFarewellStart + 1.2, "Follows Robot B");
-  G.at(sub([282, 385])).go([[535, 413], SEAT], "Walks to the table in Zone C");
-  G.until(tServe, "Takes a seat in Zone C");
-  G.wait(3, `Is served ${GUEST.drink} by Robot C`, "serve");
-  G.until(tMeetEnd, "In the meeting");
-  G.go(walkBackPath.slice(1), "Walks to Robot B");
-  followSegs(G, "b", B.segs, tMeetEnd + walkBack, tHandoff, "Follows Robot B");
-  G.at(handPath[0]).go(handPath.slice(1), "Walks to Robot A");
-  followSegs(G, "a", A.segs, tHandoff + handDur, LOOP, "Follows Robot A");
+  followSegs(G, "a", A.segs, 0, tBStart, "Follows Robot A", OFF_G, "g");
+  G.at(gA).go([gDoor], "Walks over to Robot B");
+  runActor(
+    G,
+    "g",
+    OFF_G,
+    SEAT_G,
+    [[535, 413]],
+    walkBackG,
+    poseG,
+    { seat: "Takes a seat in Zone C", served: `Is served ${GUEST.drink} by Robot C`, meeting: "In the meeting with the President" }
+  );
+  // the guest keeps following Robot A through the farewell and beyond
+  followSegs(G, "a", A.segs, tFarewellEnd, LOOP, "Leaves by the elevator", OFF_G, "g");
 
   const phases = [
     { t: 0, ko: "출궁의", en: "Welcoming the guest" },
     { t: tGreetEnd, ko: "작헌의", en: "Mutual greeting" },
     { t: tBStart, ko: "왕복의", en: "Moving to the meeting room" },
-    { t: tExitStart - 2, ko: "수폐의", en: "Seated, drinks served" },
+    { t: tExitStart - 2, ko: "수폐의", en: "Seated, tea served" },
     { t: tMeetStart, ko: "입학의", en: "Meeting" },
-    { t: tMeetEnd, ko: "수하의", en: "Seeing the guest off" },
+    { t: tMeetEnd, ko: "수하의", en: "Seeing the guests off" },
   ];
 
   const backend = [
-    { t: 0, text: `Guest list synced with the robots: ${name}, ${GUEST.role}, ${GUEST.drink}` },
+    { t: 0, text: `Guest list synced with the robots: ${name}, ${GUEST.role}` },
     { t: tGreetEnd, text: `${name}'s name displayed on the robot screens` },
+    { t: tPLeave, text: "Secretary notifies the President: the guest is on the way to Zone B" },
     { t: tTourStart, text: "Secretary triggers each exhibit's docent script by remote" },
-    { t: tExitStart - 2, text: `Staff prepare ${name}'s ${GUEST.drink} and snacks` },
-    { t: tServe - 3.5, text: "Robot C operated: drinks placed on the tray" },
+    { t: tExitStart - 2, text: `Staff prepare ${name}'s tea and snacks` },
+    { t: tServe - 3.5, text: "Robot C operated: tea placed on the tray" },
     { t: tMeetStart, text: "Meeting in progress: all robots on standby" },
-    { t: tPhoto, text: "Secretary monitors the photo assist and hand-off" },
+    { t: tPhotoStart, text: "Secretary monitors the photo assist and hand-off" },
     { t: tFarewell, text: "Guest departs: session log closed" },
   ];
 
   return {
     tracks: { a: A.segs, b: B.segs, c: C.segs },
     guest: G.segs,
+    president: P.segs,
+    cups: { t0: tPlace, t1: tFollow },
+    flash,
     LOOP,
     phases,
     backend,
@@ -390,7 +487,7 @@ const PHASE_COLORS = ["#dfe5ee", "#cdd8e8", "#b9c9e0", "#8fa8cc", "#5b7fb5", "#1
 
 export default function VipRobotSim() {
   const scenario = useMemo(() => buildScenario(), []);
-  const { tracks, guest, LOOP, phases, backend } = scenario;
+  const { tracks, guest, president, cups, flash, LOOP, phases, backend } = scenario;
 
   const [time, setTime] = useState(0);
   const [hoverSpot, setHoverSpot] = useState<string | null>(null);
@@ -450,6 +547,10 @@ export default function VipRobotSim() {
     () => positionAt(guest, time, resolve),
     [time, guest, resolve]
   );
+  const presNow = useMemo(
+    () => positionAt(president, time, resolve),
+    [time, president, resolve]
+  );
   const robotSpot = current.b.seg.spot ?? null;
   const activeSpot = hoverSpot ?? pinnedSpot ?? robotSpot;
   const robotHere = activeSpot !== null && robotSpot === activeSpot;
@@ -484,17 +585,32 @@ export default function VipRobotSim() {
           <button
             type="button"
             onClick={() => setPlaying((p) => !p)}
-            className="rounded-full border border-border px-3 py-1 font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-accent hover:text-accent"
             aria-label={playing ? "Pause simulation" : "Play simulation"}
+            title={playing ? "Pause" : "Play"}
           >
-            {playing ? "Pause" : "Play"}
+            {playing ? (
+              <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
+                <rect x="3" y="2" width="3.4" height="12" rx="1" />
+                <rect x="9.6" y="2" width="3.4" height="12" rx="1" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
+                <path d="M4 2.2v11.6a.6.6 0 0 0 .9.5l9-5.8a.6.6 0 0 0 0-1L4.9 1.7a.6.6 0 0 0-.9.5z" />
+              </svg>
+            )}
           </button>
           <button
             type="button"
             onClick={() => setTime(0)}
-            className="rounded-full border border-border px-3 py-1 font-medium text-foreground transition-colors hover:border-accent hover:text-accent"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border text-foreground transition-colors hover:border-accent hover:text-accent"
+            aria-label="Restart simulation"
+            title="Restart"
           >
-            Restart
+            <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M2.5 8a5.5 5.5 0 1 0 1.8-4.1" />
+              <path d="M2.2 2.2v3.2h3.2" />
+            </svg>
           </button>
           {[1, 2, 4].map((s) => (
             <button
@@ -764,15 +880,38 @@ export default function VipRobotSim() {
             );
           })}
 
-          {/* guest */}
-          <g transform={`translate(${guestNow.pos[0]} ${guestNow.pos[1]})`}>
-            <circle r={15} fill="#3a3d44" stroke="#fff" strokeWidth={3} />
-            <circle cy={-4} r={4.5} fill="#fff" />
-            <path d="M-8,9 a8,7 0 0 1 16,0 z" fill="#fff" />
-            <text y={-22} fontSize="12" fontWeight={600} textAnchor="middle" fill="var(--foreground)">
-              {GUEST.name}
-            </text>
-          </g>
+          {/* tea on the table */}
+          {time >= cups.t0 && time < cups.t1 &&
+            CUPS.map((c, i) => (
+              <g key={i} transform={`translate(${c[0]} ${c[1]})`}>
+                <ellipse cy={6} rx={13} ry={4} fill="#fff" stroke="#b7b0a0" />
+                <path d="M-8,-4 h16 v6 a8,8 0 0 1 -16,0 z" fill="#fff" stroke="var(--warm)" strokeWidth={1.6} />
+                <path d="M8,-1 a4,4 0 0 1 0,7" fill="none" stroke="var(--warm)" strokeWidth={1.6} />
+                <path d="M-3,-9 q-3,-4 0,-8 M3,-9 q-3,-4 0,-8" fill="none" stroke="var(--muted)" strokeWidth={1.2} opacity={0.6}>
+                  <animate attributeName="opacity" values="0.2;0.7;0.2" dur="2.2s" repeatCount="indefinite" />
+                </path>
+              </g>
+            ))}
+
+          {/* camera flash */}
+          {time >= flash.t0 && time < flash.t1 && (
+            <circle cx={935} cy={160} r={70} fill="#fff" stroke="#f3d98b" strokeWidth={3} opacity={0.85} />
+          )}
+
+          {/* President + guest */}
+          {[
+            { pos: presNow.pos, fill: "#8a6d1c", label: "President", dy: 32 },
+            { pos: guestNow.pos, fill: "#3a3d44", label: GUEST.name, dy: -22 },
+          ].map((av) => (
+            <g key={av.label} transform={`translate(${av.pos[0]} ${av.pos[1]})`}>
+              <circle r={15} fill={av.fill} stroke="#fff" strokeWidth={3} />
+              <circle cy={-4} r={4.5} fill="#fff" />
+              <path d="M-8,9 a8,7 0 0 1 16,0 z" fill="#fff" />
+              <text y={av.dy} fontSize="12" fontWeight={600} textAnchor="middle" fill="var(--foreground)">
+                {av.label}
+              </text>
+            </g>
+          ))}
 
           {/* robots */}
           {(Object.keys(ROBOTS) as RobotKey[]).map((k) => {
@@ -786,6 +925,12 @@ export default function VipRobotSim() {
                   </circle>
                 )}
                 <circle r={17} fill={ROBOTS[k].color} stroke="#fff" strokeWidth={3} />
+                {seg.carry && (
+                  <g transform="translate(0 -30)">
+                    <path d="M-7,-5 h14 v5 a7,7 0 0 1 -14,0 z" fill="#fff" stroke="var(--warm)" strokeWidth={1.6} />
+                    <path d="M7,-2 a3.5,3.5 0 0 1 0,6" fill="none" stroke="var(--warm)" strokeWidth={1.6} />
+                  </g>
+                )}
                 <text
                   fontSize="16"
                   fontWeight={700}
@@ -856,22 +1001,30 @@ export default function VipRobotSim() {
           </span>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-border bg-background/60 px-4 py-3">
-          <span className="flex items-center gap-2 text-xs font-semibold text-foreground">
-            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#3a3d44]">
-              <svg viewBox="-10 -12 20 22" className="h-3 w-3">
-                <circle cy={-4} r={4.5} fill="#fff" />
-                <path d="M-8,9 a8,7 0 0 1 16,0 z" fill="#fff" />
-              </svg>
-            </span>
-            Guest · {GUEST.name}
-          </span>
-          <span className="text-[11px] text-muted">
-            {GUEST.role} · prefers {GUEST.drink}
-          </span>
-          <span className="ml-auto text-[13px] text-foreground/80">
-            {guestNow.seg.text}
-          </span>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {[
+            { label: `Guest · ${GUEST.name}`, sub: `${GUEST.role}`, text: guestNow.seg.text, fill: "#3a3d44" },
+            { label: "President", sub: "Hosts the guest", text: presNow.seg.text, fill: "#8a6d1c" },
+          ].map((c) => (
+            <div key={c.label} className="rounded-xl border border-border bg-background/60 px-4 py-3">
+              <div className="flex items-center gap-2 text-xs font-semibold text-foreground">
+                <span
+                  className="inline-flex h-5 w-5 items-center justify-center rounded-full"
+                  style={{ background: c.fill }}
+                >
+                  <svg viewBox="-10 -12 20 22" className="h-3 w-3" aria-hidden>
+                    <circle cy={-4} r={4.5} fill="#fff" />
+                    <path d="M-8,9 a8,7 0 0 1 16,0 z" fill="#fff" />
+                  </svg>
+                </span>
+                {c.label}
+                <span className="font-normal text-muted">· {c.sub}</span>
+              </div>
+              <p className="mt-2 min-h-[2.75rem] text-[13px] leading-snug text-foreground/80">
+                {c.text}
+              </p>
+            </div>
+          ))}
         </div>
 
         <div className="mt-3 grid gap-3 sm:grid-cols-3">

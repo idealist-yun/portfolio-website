@@ -58,9 +58,9 @@ const SPOTS: Record<
   },
   "B-1-4": {
     n: "",
-    title: "Illustration of the Ceremony of the Crown Prince's Entrance to the National Confucian Academy (1817)",
+    title: "Wangseja ipakdo · Crown Prince's Entrance album (1817)",
     short: "the Crown Prince's Entrance album paintings",
-    body: "An album of six scenes recording the nine-year-old Crown Prince Hyomyeong's entrance to Seonggyungwan (Wangseja ipakdo), held by the National Palace Museum of Korea. Shown: “Start of procession”. This service follows the same six steps, from welcoming the guest to the farewell (see the top bar).",
+    body: "Six scenes of Crown Prince Hyomyeong's entrance to Seonggyungwan (National Palace Museum of Korea). Shown: “Start of procession”. This service follows the same six steps (see the top bar).",
     img: "/images/ipakdo/rite-1.jpg",
     wide: true,
     dur: 5,
@@ -1050,46 +1050,44 @@ export default function VipRobotSim() {
           })}
         </svg>
 
-        <div className="mt-3 min-h-[12.5rem]">
+        <div className="mt-3 sm:absolute sm:left-0 sm:top-[57%] sm:mt-0 sm:w-[40%]">
           {activeSpot ? (
-            <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 sm:flex-row">
-              {SPOTS[activeSpot].img &&
-                (SPOTS[activeSpot].wide ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={SPOTS[activeSpot].img}
-                    alt="Start of procession, from the 1817 Crown Prince's Entrance album"
-                    className="h-auto w-full shrink-0 self-start rounded-md border border-border sm:w-64"
-                  />
-                ) : (
+            <div className="rounded-xl border border-border bg-surface/95 p-3 shadow-[0_2px_12px_rgba(28,30,33,0.08)] backdrop-blur">
+              <div className="flex gap-3">
+                {SPOTS[activeSpot].img && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={SPOTS[activeSpot].img}
                     alt=""
-                    className="h-28 w-24 shrink-0 self-start rounded-md border border-border object-cover"
+                    className={
+                      SPOTS[activeSpot].wide
+                        ? "h-auto w-28 shrink-0 self-start rounded-md border border-border"
+                        : "h-20 w-16 shrink-0 rounded-md border border-border object-cover"
+                    }
                   />
-                ))}
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-warm">
-                  {activeSpot} ·{" "}
-                  {robotHere
-                    ? "Robot B is here now"
-                    : hoverSpot === activeSpot
-                      ? "Preview"
-                      : "Pinned"}
-                </p>
-                <p className="mt-1 text-sm font-semibold leading-snug text-foreground">
-                  {SPOTS[activeSpot].title}
-                </p>
-                <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
-                  {SPOTS[activeSpot].body}
-                </p>
+                )}
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-warm">
+                    {activeSpot} ·{" "}
+                    {robotHere
+                      ? "Robot B is here now"
+                      : hoverSpot === activeSpot
+                        ? "Preview"
+                        : "Pinned"}
+                  </p>
+                  <p className="mt-0.5 text-[13px] font-semibold leading-snug text-foreground">
+                    {SPOTS[activeSpot].title}
+                  </p>
+                  <p className="mt-1 text-[12px] leading-snug text-muted">
+                    {SPOTS[activeSpot].body}
+                  </p>
+                </div>
               </div>
             </div>
           ) : (
-            <p className="rounded-xl border border-dashed border-border px-4 py-3 text-[13px] leading-snug text-muted">
-              Hover a docent stop (B-1-1 to B-1-5) on the map, or watch Robot B,
-              to see what it presents.
+            <p className="rounded-xl border border-dashed border-border px-3 py-2 text-[12px] leading-snug text-muted">
+              Hover a docent stop (B-1-1 to B-1-5), or watch Robot B, to see what
+              it presents.
             </p>
           )}
         </div>

@@ -1050,48 +1050,46 @@ export default function VipRobotSim() {
           })}
         </svg>
 
-        <div className="mt-3 sm:absolute sm:left-0 sm:top-[57%] sm:mt-0 sm:w-[40%]">
+        <div className="mt-3 min-h-[12.5rem]">
           {activeSpot ? (
-            <div className="rounded-xl border border-border bg-surface/95 p-3 shadow-[0_2px_12px_rgba(28,30,33,0.08)] backdrop-blur">
-              {SPOTS[activeSpot].wide && SPOTS[activeSpot].img && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={SPOTS[activeSpot].img}
-                  alt=""
-                  className="mb-2 h-28 w-full rounded-md border border-border object-cover object-top"
-                />
-              )}
-              <div className="flex gap-3">
-                {!SPOTS[activeSpot].wide && SPOTS[activeSpot].img && (
+            <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 sm:flex-row">
+              {SPOTS[activeSpot].img &&
+                (SPOTS[activeSpot].wide ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={SPOTS[activeSpot].img}
+                    alt="Start of procession, from the 1817 Crown Prince's Entrance album"
+                    className="h-auto w-full shrink-0 self-start rounded-md border border-border sm:w-64"
+                  />
+                ) : (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={SPOTS[activeSpot].img}
                     alt=""
-                    className="h-20 w-16 shrink-0 rounded-md border border-border object-cover"
+                    className="h-28 w-24 shrink-0 self-start rounded-md border border-border object-cover"
                   />
-                )}
-                <div className="min-w-0">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-warm">
-                    {activeSpot} ·{" "}
-                    {robotHere
-                      ? "Robot B is here now"
-                      : hoverSpot === activeSpot
-                        ? "Preview"
-                        : "Pinned"}
-                  </p>
-                  <p className="mt-0.5 text-[13px] font-semibold leading-snug text-foreground">
-                    {SPOTS[activeSpot].title}
-                  </p>
-                  <p className="mt-1 text-[12px] leading-snug text-muted">
-                    {SPOTS[activeSpot].body}
-                  </p>
-                </div>
+                ))}
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-warm">
+                  {activeSpot} ·{" "}
+                  {robotHere
+                    ? "Robot B is here now"
+                    : hoverSpot === activeSpot
+                      ? "Preview"
+                      : "Pinned"}
+                </p>
+                <p className="mt-1 text-sm font-semibold leading-snug text-foreground">
+                  {SPOTS[activeSpot].title}
+                </p>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-muted">
+                  {SPOTS[activeSpot].body}
+                </p>
               </div>
             </div>
           ) : (
-            <p className="rounded-xl border border-dashed border-border px-3 py-2 text-[12px] leading-snug text-muted">
-              Hover a docent stop (B-1-1 to B-1-5), or watch Robot B, to see what
-              it presents.
+            <p className="rounded-xl border border-dashed border-border px-4 py-3 text-[13px] leading-snug text-muted">
+              Hover a docent stop (B-1-1 to B-1-5) on the map, or watch Robot B,
+              to see what it presents.
             </p>
           )}
         </div>

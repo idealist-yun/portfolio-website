@@ -211,10 +211,7 @@ export const publications: Role[] = [
     title: "Patterning Military Experience for Quality Improvement of Enlisted Soldiers",
     org: "Published, Korean Academy of Military Social Welfare",
     period: "Dec. 2024",
-    links: [
-      { label: "Read the research page", href: "/research/military-life-cycle-pattern" },
-      { label: "Related project", href: "/project/military-hr-big-data" },
-    ],
+    links: [{ label: "Read the research page", href: "/research/military-life-cycle-pattern" }],
     bullets: [
       "Developed a pattern model of high-performing soldiers' military life to give soldiers who struggle to adapt a clear path to follow.",
       "Interviewed 18 high-performing soldiers, combining longitudinal direct observation; yielded a 5-stage military life-cycle pattern model.",
@@ -223,13 +220,14 @@ export const publications: Role[] = [
 ];
 
 export const bookChapter: Role = {
-  title: "2023 Social Trends: Universal Design — disability as market strategy, not welfare",
-  org: "Book chapter, 2023 Social Trends (graduate-student publishing project)",
+  title: "Universal Design: Disability Reinterpreted Through Universality and Market Logic",
+  org: "Book chapter, 2023 Social Trend (10 graduate-student authors across fields)",
   period: "Mar. 2023",
-  links: [{ label: "Read the project page", href: "/project/disability-as-market" }],
+  links: [{ label: "Read the chapter summary", href: "/project/disability-as-market" }],
   bullets: [
-    "Reframed disability as a market-expansion strategy rather than welfare, using the Kano model: universal design as must-be quality, assistive technology as one-dimensional quality, and service design as the missing attractive quality.",
-    "Used the Bradley Timepiece, a tactile watch for blind users funded with $600,000 on Kickstarter whose sales came 98% from sighted customers, as the case that turns a disability need into a mainstream want.",
+    "Argued that disability should be approached as a market-expansion strategy rather than welfare: desirable, non-stigmatizing universal design that brings disabled and non-disabled customers into one market.",
+    "Broadened disability to situational cases such as injury or a language barrier, explained the seven principles of Universal Design, and compared Barrier-Free Design with Universal Design.",
+    "Used cases such as hearing aids versus wireless earbuds ($10,000 versus $249) to show how a mainstream product can absorb a disability need.",
   ],
 };
 
@@ -241,7 +239,7 @@ export const extracurricular: Role[] = [
     period: "Sep. 2026 – Present",
     bullets: [
       "Working on the department's alumni-network initiatives:",
-      "Making an interest- and career-based alumni dashboard, and a newsletter for alumni; linking companies and senior alumni to open up career opportunities for IPD students.",
+      "Making an interest- and career-based alumni dashboard and a newsletter for alumni, and linking companies and senior alumni to open up career opportunities for IPD students.",
     ],
   },
   {
@@ -283,7 +281,8 @@ export const extracurricular: Role[] = [
 
 export const awards: { title: string; org: string; period: string }[] = [
   { title: "NEO The MacGyver Award (Problem Solving)", org: "Samsung Electronics", period: "Aug. 2025" },
-  { title: "KD Pharma-Songcheon Foundation Scholarship (x2)", org: "Songcheon Foundation", period: "2024 – 2025" },
+  { title: "KD Pharma-Songcheon Foundation Scholarship", org: "Songcheon Foundation", period: "Feb. 2025" },
+  { title: "KD Pharma-Songcheon Foundation Scholarship", org: "Songcheon Foundation", period: "Aug. 2024" },
   { title: "GP Border Operation Merit Award", org: "Republic of Korea Army", period: "Mar. 2023" },
   { title: "3rd Prize, 2021 Mirae Asset Financial Big Data Festival", org: "Mirae Asset Daewoo", period: "Nov. 2021" },
   { title: "2nd Prize, 14th Convergence Foundation Project", org: "Sungkyunkwan University", period: "Feb. 2021" },

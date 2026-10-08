@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { featured, hrefFor, journey, universeOf, whyQuote } from "@/data/concept";
@@ -851,6 +850,16 @@ type Snap = {
 
 // physical keys, so Korean (or any non-Latin) input layouts still work
 const keyOf = (e: KeyboardEvent) => (e.code.startsWith("Key") ? e.code.slice(3).toLowerCase() : e.code.startsWith("Digit") ? e.code.slice(5) : e.key);
+// links out of the museum open in a new tab, so the exhibit stays where you left it
+const openInTab = (href: string) => {
+  const a = document.createElement("a");
+  a.href = href;
+  a.target = "_blank";
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+};
 const KEYDIR: Record<string, Pt> = { ArrowUp: [-1, -1], w: [-1, -1], ArrowDown: [1, 1], s: [1, 1], ArrowLeft: [-1, 1], a: [-1, 1], ArrowRight: [1, -1], d: [1, -1] };
 const START: Pt = fixSpot([11.2, 9.7]);
 
@@ -864,7 +873,6 @@ export default function ObservationRoom({
   selected?: string | null;
   onSelectedChange?: (id: string | null) => void;
 }) {
-  const router = useRouter();
   const [init] = useState(() => YUN_IDS.map((id, k) => makeYun(id, k)));
   const agents = useRef<Ian[]>(init);
   const clock = useRef(0);
@@ -956,13 +964,14 @@ export default function ObservationRoom({
   const choose = useCallback(
     (c: Choice) => {
       if (c.href) {
-        router.push(c.href);
+        openInTab(c.href);
+        setDlg(null);
         return;
       }
       if (c.go) setDlg((d) => (d ? { ...d, key: c.go as string } : d));
       else setDlg(null);
     },
-    [router, setDlg]
+    [setDlg]
   );
 
   // keyboard
@@ -1419,7 +1428,7 @@ export default function ObservationRoom({
       if (!expanded && small()) return;
       e.stopPropagation();
       const lk = hallOf(zid).link;
-      if (lk) router.push(lk.href);
+      if (lk) openInTab(lk.href);
     },
   });
   const panelItems: Item[] = PANELS.filter((p) => !p.wall).map((p, i) => {

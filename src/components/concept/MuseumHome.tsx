@@ -172,11 +172,14 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">
         <Stage>
         <div className="relative md:min-h-[820px]">
-          <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-instrument)] text-[clamp(2.5rem,10vw,4rem)] leading-[0.98] tracking-[-0.02em] md:max-w-[560px] md:text-[68px]">
-            Strategic designer, <em style={{ color: RED }}>PM,</em> business developer, service &amp; experience designer.
+          <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-instrument)] text-[clamp(2.5rem,10vw,4rem)] leading-[0.98] tracking-[-0.02em] md:max-w-[560px] md:text-[80px]">
+            Design for the people <em style={{ color: RED }}>systems forget.</em>
           </h1>
-          <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-8" style={{ color: MUTED }}>
-            Hi, I&rsquo;m Ian. From the army and a design lab to Samsung and now Penn. This small museum is that path: every avatar inside is me at one chapter. Walk around and talk to them.
+          <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-7" style={{ color: MUTED }}>
+            I&rsquo;m Ian: a strategic designer, PM, business developer, and service &amp; experience designer. The army, a design lab, Samsung, now Penn.
+          </p>
+          <p className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05]" style={{ color: INK }}>
+            Start with a person. Add data. Test with AI. Make it real.
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">

@@ -617,12 +617,12 @@ export default function ObservationRoom({
     setDlg(null);
     player.current.path = [];
     keys.current.clear();
-  }, [setPlay]);
+  }, [setPlay, setDlg]);
 
   const openDialog = useCallback((who: string) => {
     setDlg({ who, key: "root" });
     if (who !== "D") setMet((m) => (m.includes(who as ZoneId) ? m : [...m, who as ZoneId]));
-  }, []);
+  }, [setDlg]);
 
   const choose = useCallback(
     (c: Choice) => {
@@ -633,7 +633,7 @@ export default function ObservationRoom({
       if (c.go) setDlg((d) => (d ? { ...d, key: c.go as string } : d));
       else setDlg(null);
     },
-    [router]
+    [router, setDlg]
   );
 
   // keyboard
@@ -913,17 +913,14 @@ export default function ObservationRoom({
   };
 
   const onBackground = (e: React.MouseEvent<SVGSVGElement>) => {
-    if (!expanded) {
-      if (sel) setSel(null);
-      else expand();
-      return;
-    }
-    if (play && !dlg) {
+    if (play) {
+      if (dlg) return;
       const g = toGrid(e);
       if (g) walkTo(g);
       return;
     }
     if (sel) setSel(null);
+    else if (!expanded) expand();
   };
 
   const focus = hov ?? sel;
@@ -978,7 +975,7 @@ export default function ObservationRoom({
             onPointerLeave={() => setHov(null)}
             onClick={(e) => {
               e.stopPropagation();
-              if (play && expanded) {
+              if (play) {
                 if (snap.near === a.id) openDialog(a.id);
                 else walkTo([a.pos[0], a.pos[1] + 1.2]);
               } else setSel(sel === a.id ? null : a.id);
@@ -1010,7 +1007,7 @@ export default function ObservationRoom({
           onPointerLeave={() => setHov(null)}
           onClick={(e) => {
             e.stopPropagation();
-            if (play && expanded) {
+            if (play) {
               if (snap.near === "D") openDialog("D");
               else walkTo([snap.doc.pos[0], snap.doc.pos[1] + 1.2]);
             } else setSel(sel === "D" ? null : "D");
@@ -1132,7 +1129,7 @@ export default function ObservationRoom({
                     onPointerEnter={() => setPicHot(z.id)}
                     onPointerLeave={() => setPicHot(null)}
                     onClick={(e) => {
-                      if (!expanded) return;
+                      if (!expanded && !play) return;
                       e.stopPropagation();
                       router.push(hrefFor(f));
                     }}
@@ -1255,7 +1252,7 @@ export default function ObservationRoom({
       )}
       {!sel && !play && (
         <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/75 px-3 py-1 text-[11px] backdrop-blur sm:block" style={{ fontFamily: "var(--font-pixel)", color: "rgba(31,42,68,0.75)" }}>
-          {expanded ? "click a Yun to follow · press “Step inside” to play" : "each avatar is me at a chapter · click the frame to enlarge"}
+          {expanded ? "click a Yun to follow · press “Step inside” to play" : "each avatar is me at a chapter · “Step inside” to play"}
         </p>
       )}
       {play && !dlg && (
@@ -1329,23 +1326,23 @@ export default function ObservationRoom({
             <svg viewBox="0 0 16 16" className="h-3 w-3" fill="currentColor"><path d="M4 2v12l10-6z" /></svg>
           )}
         </button>
-        {expanded ? (
-          <button
-            type="button"
-            onClick={() => {
-              setPlay((p) => !p);
-              setSel(null);
-              keys.current.clear();
-              player.current.path = [];
-            }}
-            className="inline-flex h-8 items-center rounded-full px-4 text-white"
-            style={{ background: play ? "#8a94ad" : "#ff4d6d" }}
-          >
-            {play ? "Exit game" : "Step inside"}
-          </button>
-        ) : (
+        <button
+          type="button"
+          onClick={() => {
+            setPlay((p) => !p);
+            setSel(null);
+            setDlg(null);
+            keys.current.clear();
+            player.current.path = [];
+          }}
+          className="inline-flex h-8 items-center rounded-full px-4 text-white"
+          style={{ background: play ? "#8a94ad" : "#ff4d6d" }}
+        >
+          {play ? "Exit game" : "Step inside"}
+        </button>
+        {!expanded && (
           <button type="button" onClick={expand} className="inline-flex h-8 items-center rounded-full border bg-white px-4 hover:bg-[#fff3b8]" style={{ borderColor: "rgba(31,42,68,0.3)" }}>
-            Enlarge &amp; play
+            Enlarge
           </button>
         )}
         <Link href="/concept/journey" className="inline-flex h-8 items-center rounded-full border bg-white px-4 hover:bg-[#fff3b8]" style={{ borderColor: "rgba(31,42,68,0.3)" }}>

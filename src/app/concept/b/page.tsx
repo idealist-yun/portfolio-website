@@ -85,7 +85,7 @@ export default function ConceptB() {
                 style={{ background: "linear-gradient(135deg,#9a6a38,#6e4520)", boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.18), 0 22px 40px -18px rgba(29,27,24,0.7)" }}
               >
                 <div className="rounded-[2px] bg-[#f8f2e4] p-3">
-                  <ObservationRoom chrome={false} showNotes={false} />
+                  <ObservationRoom chrome={false} showNotes={false} showLanes={false} />
                 </div>
               </div>
               <p className="mt-2 text-center text-[1.35rem] leading-none" style={{ fontFamily: "var(--font-hand)", color: MUTED }}>

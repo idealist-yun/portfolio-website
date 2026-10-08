@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { featured, hrefFor } from "@/data/concept";
@@ -8,62 +7,87 @@ import { featured, hrefFor } from "@/data/concept";
 type Pt = [number, number];
 
 const INK = "#1f2a44";
-const LINE = "#7d92b4"; // soft outline used on the iso scene
+const EDGE = "rgba(70,100,150,0.38)";
 
 // ------------------------------------------------------------ iso projection
-const TW = 72;
-const TH = 36;
-const OX = 430;
-const OY = 190;
-const W = 11; // along gx (right wall length)
-const D = 9; // along gy (left wall length)
-const HZ = 140; // wall height in px
+const TW = 44;
+const TH = 22;
+const OX = 470;
+const OY = 96;
+const N = 20;
+const VW = 940;
+const VH = 560;
 
 const P = (gx: number, gy: number, z = 0): Pt => [OX + ((gx - gy) * TW) / 2, OY + ((gx + gy) * TH) / 2 - z];
 const pts = (a: Pt[]) => a.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
 
-// ------------------------------------------------------------ colours
-const hex = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+const hexv = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const toHex = (c: number[]) => "#" + c.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, "0")).join("");
 const mixc = (h: string, t: string, k: number) => {
-  const a = hex(h);
-  const b = hex(t);
+  const a = hexv(h);
+  const b = hexv(t);
   return toHex(a.map((v, i) => v + (b[i] - v) * k));
 };
-const faces = (base: string) => ({
-  top: mixc(base, "#ffffff", 0.35),
-  left: base,
-  right: mixc(base, "#5b6b8c", 0.22),
-});
 
-// ------------------------------------------------------------ world graph (grid coords)
-const NODES: Record<string, Pt> = {
-  hub: [5.4, 5.0],
-  bed: [3.1, 2.6],
-  ward: [1.9, 6.3],
-  sink: [1.8, 4.8],
-  shower: [9.0, 6.6],
-  sofa: [3.9, 4.45],
-  table: [7.6, 4.6],
-  stove: [7.4, 1.8],
-  fridge: [10.2, 1.9],
+// ------------------------------------------------------------ zones (the "universes")
+type ZoneId = "home" | "clinic" | "mall" | "lobby";
+type Zone = { id: ZoneId; name: string; sub: string; color: string; x0: number; y0: number; x1: number; y1: number; project: number };
+const ZONES: Zone[] = [
+  { id: "home", name: "Home", sub: "daily living", color: "#4c7df0", x0: 1, y0: 1, x1: 8, y1: 8, project: 0 },
+  { id: "clinic", name: "Clinic", sub: "healthcare", color: "#14b8a6", x0: 12, y0: 1, x1: 19, y1: 8, project: 1 },
+  { id: "mall", name: "Mall", sub: "retail", color: "#f5b301", x0: 1, y0: 12, x1: 8, y1: 19, project: 4 },
+  { id: "lobby", name: "Robot lobby", sub: "human-robot", color: "#ff6b4a", x0: 12, y0: 12, x1: 19, y1: 19, project: 2 },
+];
+const zoneColor = (z: ZoneId | "plaza") => (z === "plaza" ? "#c3cddd" : ZONES.find((q) => q.id === z)!.color);
+const zoneOf = (p: Pt): ZoneId | "plaza" => {
+  for (const z of ZONES) if (p[0] >= z.x0 - 0.5 && p[0] <= z.x1 + 0.5 && p[1] >= z.y0 - 0.5 && p[1] <= z.y1 + 0.5) return z.id;
+  return "plaza";
 };
 
-const EDGES: [string, string][] = [
-  ["hub", "bed"],
-  ["hub", "ward"],
-  ["hub", "sink"],
-  ["hub", "shower"],
-  ["hub", "sofa"],
-  ["hub", "table"],
-  ["hub", "stove"],
-  ["bed", "sink"],
-  ["sink", "ward"],
-  ["stove", "fridge"],
-  ["stove", "table"],
-  ["table", "shower"],
-];
+// ------------------------------------------------------------ stations, graph
+type Station = { zone: ZoneId; node: string; label: string; note: string; need: boolean; sit?: boolean; npc?: "robot" | "nurse"; say?: string };
+const STATIONS: Record<string, Station> = {
+  h_bed: { zone: "home", node: "h_bed", label: "waking up", note: "Wakes late: nothing cues the start of the day.", need: true },
+  h_cook: { zone: "home", node: "h_cook", label: "cooking", note: "Skips a step when the recipe isn't visual.", need: true },
+  h_sofa: { zone: "home", node: "h_sofa", label: "relaxing", note: "Long idle stretch: low engagement with the day plan.", need: false, sit: true },
+  c_in: { zone: "clinic", node: "c_in", label: "checking in", note: "The form is hard to read; asks for help.", need: true, npc: "nurse", say: "How can I help?" },
+  c_wait: { zone: "clinic", node: "c_wait", label: "waiting", note: "No sense of how long the wait will be.", need: true, sit: true },
+  c_con: { zone: "clinic", node: "c_con", label: "consultation", note: "Understands more when the nurse uses pictures.", need: false, npc: "nurse", say: "Let's go step by step." },
+  m_browse: { zone: "mall", node: "m_browse", label: "browsing", note: "Can't find the aisle: signs are too abstract.", need: true },
+  m_browse2: { zone: "mall", node: "m_browse2", label: "comparing", note: "Picks the item with the clearest picture.", need: false },
+  m_check: { zone: "mall", node: "m_check", label: "paying", note: "Payment screen moves too fast.", need: true },
+  l_greet: { zone: "lobby", node: "l_greet", label: "greeted by robot", note: "The robot's greeting lands well, though the voice is quick.", need: false, npc: "robot", say: "Welcome!" },
+  l_guide: { zone: "lobby", node: "l_guide", label: "guided tour", note: "Follows the robot confidently, with a clear next step.", need: false, npc: "robot", say: "This way, please." },
+  l_wait: { zone: "lobby", node: "l_wait", label: "waiting", note: "Unsure where to stand while the robot is busy.", need: true, sit: true },
+};
 
+const NODES: Record<string, Pt> = {
+  hub: [10, 10],
+  g_home: [8.7, 8.7],
+  g_clinic: [11.3, 8.7],
+  g_mall: [8.7, 11.3],
+  g_lobby: [11.3, 11.3],
+  h_bed: [3.2, 4.3],
+  h_cook: [3.3, 6.4],
+  h_sofa: [6.5, 5.3],
+  c_in: [14.8, 3.6],
+  c_wait: [14.8, 6.0],
+  c_con: [17.2, 6.4],
+  m_browse: [3.4, 15.4],
+  m_browse2: [5.6, 14.4],
+  m_check: [6.4, 16.9],
+  l_greet: [15.0, 16.0],
+  l_guide: [17.4, 14.4],
+  l_wait: [17.0, 17.6],
+};
+const EDGES: [string, string][] = [
+  ["hub", "g_home"], ["hub", "g_clinic"], ["hub", "g_mall"], ["hub", "g_lobby"],
+  ["g_home", "g_clinic"], ["g_home", "g_mall"], ["g_clinic", "g_lobby"], ["g_mall", "g_lobby"],
+  ["g_home", "h_sofa"], ["h_sofa", "h_cook"], ["h_cook", "h_bed"], ["h_bed", "h_sofa"],
+  ["g_clinic", "c_wait"], ["c_wait", "c_in"], ["c_wait", "c_con"], ["c_in", "c_con"],
+  ["g_mall", "m_browse2"], ["m_browse2", "m_browse"], ["m_browse2", "m_check"], ["m_browse", "m_check"],
+  ["g_lobby", "l_greet"], ["l_greet", "l_guide"], ["l_greet", "l_wait"], ["l_guide", "l_wait"],
+];
 const dist2 = (a: Pt, b: Pt) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 
 function route(from: string, to: string): Pt[] {
@@ -99,25 +123,13 @@ function route(from: string, to: string): Pt[] {
   return out.map((k) => NODES[k]);
 }
 
-type Station = { node: string; label: string; note: string; need: boolean; sit?: boolean };
-const STATIONS: Record<string, Station> = {
-  bed: { node: "bed", label: "waking up", note: "Wakes late: nothing cues the start of the day.", need: true },
-  ward: { node: "ward", label: "choosing clothes", note: "Choosing clothes takes far longer without a visual guide.", need: true },
-  sink: { node: "sink", label: "brushing teeth", note: "Needs a prompt to start, and stops halfway.", need: true },
-  shower: { node: "shower", label: "washing up", note: "Water temperature is hard to read.", need: true },
-  sofa: { node: "sofa", label: "relaxing", note: "Long idle stretch: low engagement with the day plan.", need: false, sit: true },
-  table: { node: "table", label: "eating", note: "Eats alone; meal times drift day to day.", need: false },
-  stove: { node: "stove", label: "cooking", note: "Skips a step when the recipe isn't visual.", need: true },
-  fridge: { node: "fridge", label: "opening the fridge", note: "Can't reach the top shelf: needs support.", need: true },
-};
-
 type Persona = { id: string; color: string; hair: string; routine: [string, number][] };
 const PERSONAS: Persona[] = [
-  { id: "P1", color: "#ff7a6b", hair: "#3b2a20", routine: [["bed", 3], ["ward", 3], ["sink", 3], ["fridge", 2.5], ["stove", 4], ["table", 4], ["sofa", 5]] },
-  { id: "P2", color: "#6a9bff", hair: "#1f2a44", routine: [["stove", 3.5], ["table", 4], ["sofa", 4], ["bed", 3], ["shower", 3.5], ["fridge", 2.5]] },
-  { id: "P3", color: "#ffc93c", hair: "#7a4a1f", routine: [["sofa", 5], ["fridge", 2.5], ["table", 4], ["sink", 3], ["ward", 3], ["bed", 3]] },
-  { id: "P4", color: "#5fc47f", hair: "#2b2b2b", routine: [["shower", 3.5], ["ward", 3], ["stove", 4], ["fridge", 2], ["table", 4], ["sofa", 4]] },
-  { id: "P5", color: "#f58ac0", hair: "#5a2a4a", routine: [["table", 3.5], ["sofa", 4], ["bed", 3.5], ["sink", 3], ["stove", 3.5], ["fridge", 2.5]] },
+  { id: "P1", color: "#ff7a6b", hair: "#3b2a20", routine: [["h_bed", 3], ["h_cook", 3.5], ["c_in", 3], ["c_con", 3.5], ["m_browse", 3], ["m_check", 3], ["l_greet", 3], ["h_sofa", 4]] },
+  { id: "P2", color: "#6a9bff", hair: "#1f2a44", routine: [["m_browse", 3], ["m_check", 3], ["l_greet", 3], ["l_guide", 3.5], ["h_cook", 3.5], ["h_sofa", 4], ["c_wait", 3], ["c_con", 3.5]] },
+  { id: "P3", color: "#ffc93c", hair: "#7a4a1f", routine: [["l_wait", 3], ["l_guide", 3.5], ["c_in", 3], ["c_wait", 3], ["h_bed", 3], ["h_cook", 3.5], ["m_browse2", 3]] },
+  { id: "P4", color: "#5fc47f", hair: "#2b2b2b", routine: [["c_wait", 3], ["c_con", 3.5], ["h_sofa", 4], ["m_check", 3], ["l_greet", 3], ["m_browse", 3]] },
+  { id: "P5", color: "#f58ac0", hair: "#5a2a4a", routine: [["h_sofa", 4], ["h_bed", 3], ["l_greet", 3], ["l_wait", 3], ["m_browse2", 3], ["c_in", 3]] },
 ];
 
 type Agent = {
@@ -135,7 +147,7 @@ type Agent = {
 };
 
 function makeAgent(p: Persona, offset: number): Agent {
-  const i = offset % p.routine.length;
+  const i = (offset * 2) % p.routine.length;
   const st = STATIONS[p.routine[i][0]];
   return {
     p,
@@ -144,7 +156,7 @@ function makeAgent(p: Persona, offset: number): Agent {
     path: [],
     seg: 0,
     pos: [...NODES[st.node]] as Pt,
-    left: p.routine[i][1] * (0.3 + offset * 0.18),
+    left: p.routine[i][1] * (0.3 + offset * 0.2),
     face: 1,
     node: st.node,
     comfort: 0.6,
@@ -152,289 +164,214 @@ function makeAgent(p: Persona, offset: number): Agent {
   };
 }
 
-type Note = { id: number; who: string; time: string; text: string; need: boolean; color: string };
+type Note = { id: number; who: string; time: string; text: string; need: boolean; color: string; zone: ZoneId };
 
-// ------------------------------------------------------------ time of day
-const DAY = 96;
+const DAY = 120;
 const clockAt = (t: number) => {
   const m = 7 * 60 + ((t % DAY) / DAY) * 16 * 60;
   const hh = Math.floor(m / 60);
   const mm = Math.floor(m % 60);
-  return { hh, mm, label: `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}` };
-};
-const mixA = (a: number[], b: number[], k: number) => a.map((v, i) => Math.round(v + (b[i] - v) * k));
-function skyAt(hh: number, mm: number) {
-  const h = hh + mm / 60;
-  const day = [176, 224, 255];
-  const dusk = [250, 188, 140];
-  const night = [48, 64, 108];
-  let c = day;
-  if (h < 8) c = mixA(dusk, day, h - 7);
-  else if (h < 17) c = day;
-  else if (h < 19.5) c = mixA(day, dusk, (h - 17) / 2.5);
-  else c = mixA(dusk, night, Math.min(1, (h - 19.5) / 2));
-  return `rgb(${c[0]},${c[1]},${c[2]})`;
-}
-const nightOpacity = (hh: number, mm: number) => {
-  const h = hh + mm / 60;
-  return h < 19 ? 0 : Math.min(0.3, (h - 19) * 0.1);
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 };
 
-// ------------------------------------------------------------ iso drawing helpers
-type Item = { depth: number; el: ReactNode };
-
+// ------------------------------------------------------------ iso building blocks
 function Box({
-  gx, gy, w, d, h, z = 0, base, stroke = LINE, children,
+  gx, gy, w, d, h, z = 0, base, alpha = 1, children,
 }: {
-  gx: number; gy: number; w: number; d: number; h: number; z?: number; base: string; stroke?: string; children?: ReactNode;
+  gx: number; gy: number; w: number; d: number; h: number; z?: number; base: string; alpha?: number; children?: ReactNode;
 }) {
-  const c = faces(base);
+  const top = mixc(base, "#ffffff", 0.38);
+  const right = mixc(base, "#4d5d82", 0.2);
   return (
-    <g stroke={stroke} strokeWidth="1.3" strokeLinejoin="round">
-      <polygon points={pts([P(gx, gy + d, z), P(gx + w, gy + d, z), P(gx + w, gy + d, z + h), P(gx, gy + d, z + h)])} fill={c.left} />
-      <polygon points={pts([P(gx + w, gy, z), P(gx + w, gy + d, z), P(gx + w, gy + d, z + h), P(gx + w, gy, z + h)])} fill={c.right} />
-      <polygon points={pts([P(gx, gy, z + h), P(gx + w, gy, z + h), P(gx + w, gy + d, z + h), P(gx, gy + d, z + h)])} fill={c.top} />
+    <g stroke={EDGE} strokeWidth="1" strokeLinejoin="round" opacity={alpha}>
+      <polygon points={pts([P(gx, gy + d, z), P(gx + w, gy + d, z), P(gx + w, gy + d, z + h), P(gx, gy + d, z + h)])} fill={base} />
+      <polygon points={pts([P(gx + w, gy, z), P(gx + w, gy + d, z), P(gx + w, gy + d, z + h), P(gx + w, gy, z + h)])} fill={right} />
+      <polygon points={pts([P(gx, gy, z + h), P(gx + w, gy, z + h), P(gx + w, gy + d, z + h), P(gx, gy + d, z + h)])} fill={top} />
       {children}
     </g>
   );
 }
 
-const box = (depth: number, el: ReactNode): Item => ({ depth, el });
+type Item = { depth: number; el: ReactNode };
 
-function buildItems(): Item[] {
-  const it: Item[] = [];
-  const key = (() => {
-    let n = 0;
-    return () => `f${n++}`;
-  })();
-  const add = (gx: number, gy: number, w: number, d: number, depthBias: number, el: ReactNode) =>
-    it.push(box(gx + w / 2 + gy + d / 2 + depthBias, <g key={key()}>{el}</g>));
+function buildProps(): Item[] {
+  const out: Item[] = [];
+  let n = 0;
+  const add = (gx: number, gy: number, w: number, d: number, el: ReactNode, bias = 0) =>
+    out.push({ depth: gx + w / 2 + gy + d / 2 + bias, el: <g key={`p${n++}`}>{el}</g> });
 
-  // bed against the left wall
-  add(0.1, 0.7, 0.25, 3.5, 0, <Box gx={0.1} gy={0.7} w={0.25} d={3.5} h={38} base="#e9c79a" />);
-  add(0.15, 0.8, 2.4, 3.3, 0.1, (
+  // HOME
+  add(1.5, 1.3, 3.2, 1.9, (
     <>
-      <Box gx={0.15} gy={0.8} w={2.4} d={3.3} h={10} base="#e3bf93" />
-      <Box gx={0.25} gy={0.9} w={2.2} d={3.1} z={10} h={8} base="#ffffff" />
-      <Box gx={0.25} gy={2.2} w={2.2} d={1.8} z={18} h={4} base="#ff9aa8" />
-      <Box gx={0.45} gy={1.0} w={1.3} d={0.9} z={18} h={5} base="#f4f8ff" />
+      <Box gx={1.5} gy={1.3} w={3.2} d={1.9} h={5} base="#dbe6ff" />
+      <Box gx={1.6} gy={1.4} w={3.0} d={1.7} z={5} h={4} base="#ffffff" />
+      <Box gx={3.0} gy={1.4} w={1.6} d={1.7} z={9} h={2} base="#ffb3bd" />
+      <Box gx={1.7} gy={1.5} w={0.9} d={1.1} z={9} h={2.5} base="#f4f8ff" />
     </>
   ));
-  // wardrobe
-  add(0.1, 5.5, 1.1, 1.6, 0, <Box gx={0.1} gy={5.5} w={1.1} d={1.6} h={108} base="#e6b98a">
-    <path d={`M${P(0.1 + 1.1, 5.5 + 0.8, 4).join(",")} L${P(0.1 + 1.1, 5.5 + 0.8, 104).join(",")}`} stroke={LINE} fill="none" />
-    <circle cx={P(1.2, 5.5 + 0.55, 56)[0]} cy={P(1.2, 5.5 + 0.55, 56)[1]} r="2" fill="#7d92b4" />
-    <circle cx={P(1.2, 5.5 + 1.05, 56)[0]} cy={P(1.2, 5.5 + 1.05, 56)[1]} r="2" fill="#7d92b4" />
-  </Box>);
-  // washbasin
-  add(0.1, 4.35, 0.9, 0.85, 0, (
+  add(1.2, 4.0, 1.1, 3.1, (
     <>
-      <Box gx={0.1} gy={4.35} w={0.9} d={0.85} h={34} base="#ffffff" />
-      <Box gx={0.2} gy={4.45} w={0.65} d={0.65} z={34} h={4} base="#cfe9f4" />
-    </>
-  ));
-  // TV console + TV
-  add(2.4, 0.1, 2.1, 0.9, 0, (
-    <>
-      <Box gx={2.4} gy={0.1} w={2.1} d={0.9} h={20} base="#e6b98a" />
-      <Box gx={2.75} gy={0.25} w={1.4} d={0.22} z={20} h={40} base="#3a4466">
-        <polygon
-          points={pts([P(2.75, 0.47, 24), P(4.15, 0.47, 24), P(4.15, 0.47, 56), P(2.75, 0.47, 56)])}
-          fill="#8fb4e8"
-          stroke="none"
-        />
-      </Box>
-    </>
-  ));
-  // rug
-  it.push(
-    box(
-      -1,
-      <polygon
-        key={key()}
-        points={pts([P(1.9, 2.3, 0.8), P(6.4, 2.3, 0.8), P(6.4, 6.4, 0.8), P(1.9, 6.4, 0.8)])}
-        fill="#fff3d9"
-        stroke="#f0d9a8"
-        strokeWidth="2"
-      />
-    )
-  );
-  // sofa
-  add(2.8, 3.8, 2.3, 1.7, 0, (
-    <>
-      <Box gx={2.8} gy={3.8} w={2.3} d={1.5} h={14} base="#8eb4ff" />
-      <Box gx={3.15} gy={3.85} w={1.6} d={1.1} z={14} h={6} base="#b3ccff" />
-      <Box gx={2.8} gy={5.05} w={2.3} d={0.45} h={38} base="#7aa2f5" />
-      <Box gx={2.8} gy={3.8} w={0.3} d={1.5} z={14} h={12} base="#7aa2f5" />
-      <Box gx={4.8} gy={3.8} w={0.3} d={1.5} z={14} h={12} base="#7aa2f5" />
-    </>
-  ));
-  // dining table + chairs
-  add(6.6, 2.8, 2.2, 1.2, 0, (
-    <>
-      {[[6.7, 2.9], [8.5, 2.9], [6.7, 3.8], [8.5, 3.8]].map(([x, y], i) => (
-        <Box key={i} gx={x} gy={y} w={0.14} d={0.14} h={26} base="#e3bf93" />
-      ))}
-      <Box gx={6.6} gy={2.8} w={2.2} d={1.2} z={26} h={5} base="#f1d8b3" />
-    </>
-  ));
-  add(7.15, 2.0, 0.8, 0.7, 0, (
-    <>
-      <Box gx={7.15} gy={2.0} w={0.8} d={0.7} h={14} base="#ffb199" />
-      <Box gx={7.15} gy={2.0} w={0.8} d={0.12} z={14} h={20} base="#ffa088" />
-    </>
-  ));
-  add(7.4, 4.1, 0.8, 0.7, 0, (
-    <>
-      <Box gx={7.4} gy={4.1} w={0.8} d={0.7} h={14} base="#ffb199" />
-      <Box gx={7.4} gy={4.62} w={0.8} d={0.12} z={14} h={20} base="#ffa088" />
-    </>
-  ));
-  // kitchen counter + stove + upper cabinet
-  add(6.4, 0.1, 3.0, 1.15, 0, (
-    <>
-      <Box gx={6.4} gy={0.1} w={3.0} d={1.15} h={38} base="#fdfdfb" />
-      <Box gx={6.4} gy={0.1} w={3.0} d={1.15} z={38} h={3} base="#dfe8f2" />
-      {[[7.1, 0.65], [8.1, 0.65]].map(([x, y], i) => (
-        <ellipse key={i} cx={P(x, y, 41)[0]} cy={P(x, y, 41)[1]} rx="12" ry="6" fill="#47507a" stroke="none" />
+      <Box gx={1.2} gy={4.0} w={1.1} d={3.1} h={9} base="#f6f8fc" />
+      <Box gx={1.2} gy={4.0} w={1.1} d={3.1} z={9} h={1.5} base="#cdd8ea" />
+      {[[1.7, 4.9], [1.7, 6.0]].map(([x, y], i) => (
+        <ellipse key={i} cx={P(x, y, 10.5)[0]} cy={P(x, y, 10.5)[1]} rx="5" ry="2.5" fill="#47507a" stroke="none" />
       ))}
     </>
   ));
-  add(6.4, 0.1, 3.0, 0.62, 0.2, <Box gx={6.4} gy={0.1} w={3.0} d={0.62} z={92} h={34} base="#fdfdfb" />);
-  // fridge
-  add(9.6, 0.1, 1.3, 1.25, 0, (
-    <Box gx={9.6} gy={0.1} w={1.3} d={1.25} h={106} base="#eaf1fa">
-      <path d={`M${P(9.6, 1.35, 62).join(",")} L${P(10.9, 1.35, 62).join(",")}`} stroke={LINE} fill="none" />
-      <path d={`M${P(9.78, 1.35, 70).join(",")} L${P(9.78, 1.35, 92).join(",")}`} stroke="#7d92b4" strokeWidth="3" fill="none" />
-      <path d={`M${P(9.78, 1.35, 30).join(",")} L${P(9.78, 1.35, 52).join(",")}`} stroke="#7d92b4" strokeWidth="3" fill="none" />
-    </Box>
-  ));
-  // shower cubicle (glass)
-  add(9.3, 5.0, 1.6, 1.9, 0.4, (
+  add(5.5, 5.9, 2.2, 1.3, (
     <>
-      <Box gx={9.3} gy={5.0} w={1.6} d={1.9} h={4} base="#cfe9f4" />
-      <g stroke={LINE} strokeWidth="1.3" strokeLinejoin="round">
-        <polygon points={pts([P(9.3, 6.9, 4), P(10.9, 6.9, 4), P(10.9, 6.9, 100), P(9.3, 6.9, 100)])} fill="rgba(170,220,240,0.32)" />
-        <polygon points={pts([P(10.9, 5.0, 4), P(10.9, 6.9, 4), P(10.9, 6.9, 100), P(10.9, 5.0, 100)])} fill="rgba(150,205,230,0.38)" />
-        <circle cx={P(10.55, 5.4, 94)[0]} cy={P(10.55, 5.4, 94)[1]} r="6" fill="#dff1f7" />
-      </g>
+      <Box gx={5.5} gy={5.9} w={2.2} d={1.3} h={6} base="#9bbcff" />
+      <Box gx={5.5} gy={6.9} w={2.2} d={0.35} z={6} h={9} base="#86aaf8" />
     </>
   ));
-  // plant
-  add(0.5, 8.0, 0.7, 0.7, 0.5, (
+  add(4.3, 3.9, 1.5, 1.0, (
     <>
-      <Box gx={0.5} gy={8.0} w={0.7} d={0.7} h={16} base="#f2a47f" />
-      <g stroke={LINE} strokeWidth="1.2">
-        {[[-10, -34, "#7fd49a"], [8, -40, "#6cc88a"], [0, -50, "#8fe0a8"]].map(([dx, dy, c], i) => {
-          const b = P(0.85, 8.35, 16);
-          return <ellipse key={i} cx={b[0] + (dx as number)} cy={b[1] + (dy as number)} rx="9" ry="16" fill={c as string} />;
-        })}
-      </g>
+      <Box gx={4.3} gy={3.9} w={1.5} d={1.0} z={6} h={1.5} base="#f4e3c6" />
+      {[[4.4, 4.0], [5.55, 4.0], [4.4, 4.7], [5.55, 4.7]].map(([x, y], i) => (
+        <Box key={i} gx={x} gy={y} w={0.12} d={0.12} h={6} base="#e3cba2" />
+      ))}
     </>
   ));
-  return it;
+  // CLINIC
+  add(13.2, 1.3, 3.4, 1.0, (
+    <>
+      <Box gx={13.2} gy={1.3} w={3.4} d={1.0} h={9} base="#ffffff" />
+      <Box gx={13.2} gy={1.3} w={3.4} d={1.0} z={9} h={1.5} base="#8fe3d6" />
+    </>
+  ));
+  add(16.6, 3.0, 1.9, 2.8, (
+    <>
+      <Box gx={16.6} gy={3.0} w={1.9} d={2.8} h={5} base="#e1f6f2" />
+      <Box gx={16.7} gy={3.1} w={1.7} d={2.6} z={5} h={3} base="#ffffff" />
+      <Box gx={16.7} gy={3.1} w={1.7} d={0.7} z={8} h={2} base="#bfeee6" />
+    </>
+  ));
+  add(13.5, 6.5, 2.7, 0.8, <Box gx={13.5} gy={6.5} w={2.7} d={0.8} h={5} base="#bfeee6" />);
+  // MALL
+  add(1.3, 13.2, 0.8, 2.4, <Box gx={1.3} gy={13.2} w={0.8} d={2.4} h={20} base="#ffe9a8" />);
+  add(1.3, 16.2, 0.8, 2.4, <Box gx={1.3} gy={16.2} w={0.8} d={2.4} h={20} base="#ffdf86" />);
+  add(3.9, 12.8, 0.9, 1.9, <Box gx={3.9} gy={12.8} w={0.9} d={1.9} h={15} base="#fff0c0" />);
+  add(5.3, 17.6, 2.2, 0.9, (
+    <>
+      <Box gx={5.3} gy={17.6} w={2.2} d={0.9} h={9} base="#ffffff" />
+      <Box gx={5.3} gy={17.6} w={2.2} d={0.9} z={9} h={1.5} base="#ffd566" />
+    </>
+  ));
+  // LOBBY
+  add(13.4, 13.2, 3.1, 1.0, (
+    <>
+      <Box gx={13.4} gy={13.2} w={3.1} d={1.0} h={9} base="#ffffff" />
+      <Box gx={13.4} gy={13.2} w={3.1} d={1.0} z={9} h={1.5} base="#ffb199" />
+    </>
+  ));
+  add(17.0, 15.2, 1.7, 0.8, <Box gx={17.0} gy={15.2} w={1.7} d={0.8} h={5} base="#ffd2c4" />);
+  add(12.8, 18.0, 0.8, 0.8, (
+    <>
+      <Box gx={12.8} gy={18.0} w={0.8} d={0.8} h={6} base="#f4a98a" />
+      {[[-6, -16, "#8de0a7"], [5, -20, "#6fcf92"], [0, -26, "#9be8b2"]].map(([dx, dy, c], i) => {
+        const b = P(13.2, 18.4, 6);
+        return <ellipse key={i} cx={b[0] + (dx as number)} cy={b[1] + (dy as number)} rx="5.5" ry="9" fill={c as string} stroke="none" />;
+      })}
+    </>
+  ));
+  return out;
 }
 
-// ------------------------------------------------------------ wall frames (projects)
-type Frame = { plane: "L" | "R"; a: number; b: number; z0: number; z1: number };
-const FRAMES: Frame[] = [
-  { plane: "L", a: 0.9, b: 2.2, z0: 72, z1: 126 },
-  { plane: "L", a: 2.5, b: 3.8, z0: 72, z1: 126 },
-  { plane: "L", a: 7.1, b: 8.5, z0: 64, z1: 120 },
-  { plane: "R", a: 2.55, b: 4.35, z0: 76, z1: 126 },
-  { plane: "R", a: 4.7, b: 6.0, z0: 76, z1: 126 },
-];
-
-function wallQuad(plane: "L" | "R", a: number, b: number, z0: number, z1: number): Pt[] {
-  return plane === "L"
-    ? [P(0, a, z0), P(0, b, z0), P(0, b, z1), P(0, a, z1)]
-    : [P(a, 0, z0), P(b, 0, z0), P(b, 0, z1), P(a, 0, z1)];
-}
-
-function WallImage({ f, href, hot }: { f: Frame; href: string; hot: boolean }) {
-  const pad = 0.07;
-  const aa = f.a + (f.b - f.a) * pad;
-  const bb = f.b - (f.b - f.a) * pad;
-  const zz0 = f.z0 + 6;
-  const zz1 = f.z1 - 6;
-  // image x axis: left->right as seen from inside the room
-  const tl = f.plane === "L" ? P(0, bb, zz1) : P(aa, 0, zz1);
-  const tr = f.plane === "L" ? P(0, aa, zz1) : P(bb, 0, zz1);
-  const h = zz1 - zz0;
-  return (
-    <g transform={`matrix(${tr[0] - tl[0]} ${tr[1] - tl[1]} 0 ${h} ${tl[0]} ${tl[1]})`}>
-      <image href={href} width="1" height="1" preserveAspectRatio="xMidYMid slice" opacity={hot ? 1 : 0.95} />
-    </g>
-  );
-}
-
-// ------------------------------------------------------------ sprite
-function Sprite({ color, hair, face, bob }: { color: string; hair: string; face: 1 | -1; bob: number }) {
+// ------------------------------------------------------------ people
+function Person({ color, hair, face, bob, coat }: { color: string; hair: string; face: 1 | -1; bob: number; coat?: boolean }) {
   return (
     <g transform={`scale(${face} 1)`}>
-      <ellipse cx="0" cy="1" rx="11" ry="4" fill="rgba(60,80,120,0.25)" />
-      <g transform={`translate(0 ${bob})`} stroke={LINE} strokeWidth="1.5" strokeLinejoin="round">
-        <rect x="-5" y="-8" width="4.4" height="8" rx="1.5" fill="#4a5578" />
-        <rect x="0.6" y="-8" width="4.4" height="8" rx="1.5" fill="#4a5578" />
-        <rect x="-7" y="-21" width="14" height="14" rx="4" fill={color} />
-        <rect x="-10" y="-42" width="20" height="21" rx="9" fill="#ffe0c4" />
-        <path d="M-10,-31 Q-10,-45 0,-45 Q10,-45 10,-31 Q4,-37 -3,-36 Q-8,-35 -10,-31 Z" fill={hair} />
-        <circle cx="-4" cy="-30" r="1.7" fill={INK} stroke="none" />
-        <circle cx="4" cy="-30" r="1.7" fill={INK} stroke="none" />
-        <path d="M-2,-26 Q0,-24 2,-26" stroke={INK} strokeWidth="1.1" fill="none" />
-        <circle cx="-7" cy="-27" r="2" fill="#ffb7b7" stroke="none" opacity="0.8" />
-        <circle cx="7" cy="-27" r="2" fill="#ffb7b7" stroke="none" opacity="0.8" />
+      <ellipse cx="0" cy="1.5" rx="8" ry="3" fill="rgba(60,80,120,0.22)" />
+      <g transform={`translate(0 ${bob})`}>
+        <rect x="-4" y="-6" width="3" height="6" rx="1.2" fill="#56618a" />
+        <rect x="1" y="-6" width="3" height="6" rx="1.2" fill="#56618a" />
+        <rect x="-5.5" y="-17" width="11" height="12" rx="4.5" fill={color} />
+        {coat && <path d="M-1.6,-14 h3.2 M0,-15.6 v3.2" stroke="#ff5a5a" strokeWidth="1.6" />}
+        <circle cx="0" cy="-23" r="6.2" fill="#ffe0c4" />
+        <path d="M-6.2,-24 Q-6,-30 0,-30 Q6,-30 6.2,-24 Q2,-27 -1,-26 Q-5,-26 -6.2,-24 Z" fill={hair} />
+        <circle cx="-2.2" cy="-22.5" r="0.9" fill={INK} />
+        <circle cx="2.2" cy="-22.5" r="0.9" fill={INK} />
       </g>
     </g>
   );
 }
 
-// ------------------------------------------------------------ component
+function RobotNpc({ t }: { t: number }) {
+  const bob = Math.sin(t * 3) * 0.8;
+  return (
+    <g>
+      <ellipse cx="0" cy="1.5" rx="9" ry="3.2" fill="rgba(60,80,120,0.22)" />
+      <g transform={`translate(0 ${bob})`}>
+        <rect x="-7" y="-8" width="14" height="8" rx="3" fill="#2f3b5c" />
+        <rect x="-4" y="-22" width="8" height="15" rx="3" fill="#f3f6fb" stroke={EDGE} strokeWidth="0.8" />
+        <rect x="-8" y="-32" width="16" height="11" rx="3.5" fill="#26324f" />
+        <circle cx="-3" cy="-26.5" r="1.5" fill="#6fe3ff" />
+        <circle cx="3" cy="-26.5" r="1.5" fill="#6fe3ff" />
+      </g>
+    </g>
+  );
+}
+
+// ------------------------------------------------------------ snapshot
 type Snap = {
   t: number;
-  a: { id: string; color: string; hair: string; pos: Pt; face: 1 | -1; mode: "walk" | "do"; i: number; routine: [string, number][] }[];
+  a: { id: string; color: string; hair: string; pos: Pt; face: 1 | -1; mode: "walk" | "do"; st: string }[];
+  trail: Record<string, Pt[]>;
+  cam: { x: number; y: number; w: number; h: number };
+  pairs: [Pt, Pt][];
+  npcSay: { at: Pt; text: string; who: "robot" | "nurse" }[];
 };
-const toSnap = (agents: Agent[], t: number): Snap => ({
-  t,
-  a: agents.map((x) => ({
-    id: x.p.id,
-    color: x.p.color,
-    hair: x.p.hair,
-    pos: x.pos,
-    face: x.face,
-    mode: x.mode,
-    i: x.i,
-    routine: x.p.routine,
-  })),
-});
 
-const TABS: [string, string][] = [
-  ["Work", "/project"],
-  ["Research", "/research"],
-  ["Vision", "/vision"],
-  ["Resume", "/resume"],
-];
+type Lane = { z: ZoneId | "plaza"; t0: number; t1: number };
 
-export default function ObservationRoom({ chrome = true, showNotes = true }: { chrome?: boolean; showNotes?: boolean }) {
+export default function ObservationRoom({
+  chrome = true,
+  showNotes = true,
+  showLanes = true,
+}: {
+  chrome?: boolean;
+  showNotes?: boolean;
+  showLanes?: boolean;
+}) {
   const router = useRouter();
   const [init] = useState(() => PERSONAS.map((p, i) => makeAgent(p, i)));
   const agents = useRef<Agent[]>(init);
   const clock = useRef(0);
   const noteId = useRef(0);
   const sample = useRef(0);
-  const [snap, setSnap] = useState<Snap>(() => toSnap(init, 0));
+  const trailT = useRef(0);
+  const trails = useRef<Record<string, Pt[]>>({});
+  const lanesRef = useRef<Record<string, Lane[]>>({});
+  const pairSet = useRef<Set<string>>(new Set());
+  const cam = useRef({ x: 0, y: 0, w: VW, h: VH });
+  const selRef = useRef<string | null>(null);
+
+  const [snap, setSnap] = useState<Snap>({
+    t: 0,
+    a: init.map((x) => ({ id: x.p.id, color: x.p.color, hair: x.p.hair, pos: x.pos, face: x.face, mode: x.mode, st: x.p.routine[x.i][0] })),
+    trail: {},
+    cam: { x: 0, y: 0, w: VW, h: VH },
+    pairs: [],
+    npcSay: [],
+  });
   const [notes, setNotes] = useState<Note[]>([]);
   const [needs, setNeeds] = useState(0);
-  const [curve, setCurve] = useState<number[]>(() => Array(60).fill(0.6));
+  const [met, setMet] = useState(0);
+  const [lanes, setLanes] = useState<Record<string, Lane[]>>({});
+  const [curve, setCurve] = useState<number[]>(() => Array(48).fill(0.6));
   const [playing, setPlaying] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [sel, setSel] = useState<string | null>(null);
   const [hov, setHov] = useState<string | null>(null);
-  const [frameHot, setFrameHot] = useState<number | null>(null);
+  const [bbHot, setBbHot] = useState<ZoneId | null>(null);
   const [visible, setVisible] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
   const last = useRef<number | null>(null);
-  const items = useMemo(() => buildItems(), []);
+  const props = useMemo(() => buildProps(), []);
+
+  useEffect(() => {
+    selRef.current = sel;
+  }, [sel]);
 
   useEffect(() => {
     const el = wrap.current;
@@ -445,9 +382,8 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
   }, []);
 
   const emit = useCallback((a: Agent, st: Station) => {
-    const { label } = clockAt(clock.current);
     setNotes((arr) =>
-      [{ id: ++noteId.current, who: a.p.id, time: label, text: st.note, need: st.need, color: a.p.color }, ...arr].slice(0, 4)
+      [{ id: ++noteId.current, who: a.p.id, time: clockAt(clock.current), text: st.note, need: st.need, color: a.p.color, zone: st.zone }, ...arr].slice(0, 4)
     );
     if (st.need) setNeeds((x) => x + 1);
   }, []);
@@ -460,7 +396,7 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
       a.left = dur;
       a.node = st.node;
       a.nSeen += 1;
-      a.comfort = st.need ? 0.22 : 0.78;
+      a.comfort = st.need ? 0.22 : 0.8;
       if (a.nSeen % 2 === 1 || st.need) emit(a, st);
     },
     [emit]
@@ -481,7 +417,7 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
             a.comfort = 0.55;
           }
         } else {
-          let move = 2.5 * dt;
+          let move = 2.6 * dt;
           while (move > 0 && a.seg < a.path.length - 1) {
             const to = a.path[a.seg + 1];
             const dd = dist2(a.pos, to);
@@ -500,15 +436,96 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
           if (a.seg >= a.path.length - 1) startDo(a);
         }
       });
+
+      // trails
+      trailT.current += dt;
+      if (trailT.current > 0.12) {
+        trailT.current = 0;
+        agents.current.forEach((a) => {
+          const arr = (trails.current[a.p.id] ??= []);
+          const s = P(a.pos[0], a.pos[1]);
+          const l = arr[arr.length - 1];
+          if (!l || Math.hypot(l[0] - s[0], l[1] - s[1]) > 1.5) arr.push(s);
+          if (arr.length > 46) arr.shift();
+        });
+      }
+
+      // lanes + curve
       sample.current += dt;
-      if (sample.current > 0.6) {
+      if (sample.current > 0.5) {
         sample.current = 0;
+        agents.current.forEach((a) => {
+          const z = zoneOf(a.pos);
+          const arr = (lanesRef.current[a.p.id] ??= []);
+          const lastSeg = arr[arr.length - 1];
+          if (lastSeg && lastSeg.z === z) lastSeg.t1 = clock.current;
+          else arr.push({ z, t0: clock.current, t1: clock.current });
+          while (arr.length > 1 && arr[0].t1 < clock.current - 70) arr.shift();
+        });
+        setLanes(Object.fromEntries(Object.entries(lanesRef.current).map(([k, v]) => [k, v.map((s) => ({ ...s }))])));
         const avg = agents.current.reduce((s, a) => s + a.comfort, 0) / agents.current.length;
         setCurve((c) => [...c.slice(1), avg]);
       }
+
+      // encounters
+      const now = new Set<string>();
+      agents.current.forEach((a, i) => {
+        agents.current.forEach((b, j) => {
+          if (j <= i) return;
+          if (zoneOf(a.pos) !== "plaza" && zoneOf(a.pos) === zoneOf(b.pos) && dist2(a.pos, b.pos) < 2.2) now.add(`${i}-${j}`);
+        });
+      });
+      let fresh = 0;
+      now.forEach((k) => {
+        if (!pairSet.current.has(k)) fresh += 1;
+      });
+      pairSet.current = now;
+      if (fresh) setMet((m) => m + fresh);
+
+      // camera follow
+      const target = { x: 0, y: 0, w: VW, h: VH };
+      const f = agents.current.find((a) => a.p.id === selRef.current);
+      if (f) {
+        const s = P(f.pos[0], f.pos[1]);
+        target.w = VW * 0.46;
+        target.h = VH * 0.46;
+        target.x = Math.max(0, Math.min(VW - target.w, s[0] - target.w / 2));
+        target.y = Math.max(0, Math.min(VH - target.h, s[1] - 24 - target.h / 2));
+      }
+      const k = 1 - Math.exp(-dt * 4.5);
+      const c = cam.current;
+      c.x += (target.x - c.x) * k;
+      c.y += (target.y - c.y) * k;
+      c.w += (target.w - c.w) * k;
+      c.h += (target.h - c.h) * k;
     },
     [startDo]
   );
+
+  const makeSnap = useCallback((): Snap => {
+    const trail: Record<string, Pt[]> = {};
+    Object.entries(trails.current).forEach(([k, v]) => (trail[k] = v.slice()));
+    const pairs: [Pt, Pt][] = [];
+    pairSet.current.forEach((k) => {
+      const [i, j] = k.split("-").map(Number);
+      pairs.push([[...agents.current[i].pos] as Pt, [...agents.current[j].pos] as Pt]);
+    });
+    const npcSay: Snap["npcSay"] = [];
+    agents.current.forEach((a) => {
+      const st = STATIONS[a.p.routine[a.i][0]];
+      if (a.mode === "do" && st.npc) {
+        npcSay.push({ at: st.npc === "robot" ? [15.0, 14.7] : [14.8, 2.4], text: st.say ?? "", who: st.npc });
+      }
+    });
+    return {
+      t: clock.current,
+      a: agents.current.map((a) => ({ id: a.p.id, color: a.p.color, hair: a.p.hair, pos: [...a.pos] as Pt, face: a.face, mode: a.mode, st: a.p.routine[a.i][0] })),
+      trail,
+      cam: { ...cam.current },
+      pairs,
+      npcSay,
+    };
+  }, []);
 
   useEffect(() => {
     agents.current.forEach((a, i) => {
@@ -525,142 +542,230 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
     const loop = (now: number) => {
       if (last.current != null) {
         tick(Math.min(0.05, (now - last.current) / 1000) * speed);
-        setSnap(toSnap(agents.current, clock.current));
+        setSnap(makeSnap());
       }
       last.current = now;
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [playing, visible, speed, tick]);
+  }, [playing, visible, speed, tick, makeSnap]);
 
-  const { hh, mm, label } = clockAt(snap.t);
-  const sky = skyAt(hh, mm);
-  const night = nightOpacity(hh, mm);
   const focus = hov ?? sel;
   const focusAgent = snap.a.find((a) => a.id === focus);
+  const label = clockAt(snap.t);
 
-  const chart = useMemo(
-    () => curve.map((v, i) => `${(i / (curve.length - 1)) * 220},${46 - v * 46}`).join(" "),
-    [curve]
-  );
+  // depth-sorted scene (props, NPCs, personas)
+  const peopleItems: Item[] = [
+    { depth: 15.0 + 14.5 + 0.2, el: <g key="robot" transform={`translate(${P(15.0, 14.5)[0]} ${P(15.0, 14.5)[1]})`}><RobotNpc t={snap.t} /></g> },
+    { depth: 14.8 + 2.2 + 0.2, el: <g key="nurse" transform={`translate(${P(14.8, 2.2)[0]} ${P(14.8, 2.2)[1]})`}><Person color="#f4fbff" hair="#14b8a6" face={1} bob={0} coat /></g> },
+    ...snap.a.map((a): Item => {
+      const walking = a.mode === "walk";
+      const sit = !walking && STATIONS[a.st].sit;
+      const sc = P(a.pos[0], a.pos[1]);
+      const bob = walking ? Math.sin(snap.t * 15 + a.id.charCodeAt(1)) * 1.4 : 0;
+      const on = focus === a.id;
+      return {
+        depth: a.pos[0] + a.pos[1] + 0.35,
+        el: (
+          <g
+            key={a.id}
+            transform={`translate(${sc[0]} ${sc[1] - (sit ? 6 : 0)}) scale(1.15)`}
+            className="cursor-pointer"
+            onPointerEnter={() => setHov(a.id)}
+            onPointerLeave={() => setHov(null)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSel((s) => (s === a.id ? null : a.id));
+            }}
+          >
+            <rect x="-14" y="-40" width="28" height="46" fill="transparent" />
+            <Person color={a.color} hair={a.hair} face={a.face} bob={bob} />
+            <g transform={`translate(0 ${-36 - (on ? 3 : 0)})`}>
+              <rect x="-9" y="-8" width="18" height="11" rx="5.5" fill="#fff" stroke={a.color} strokeWidth="1.6" />
+              <text x="0" y="0.4" textAnchor="middle" fontSize="7" fontWeight={700} fill={INK} style={{ fontFamily: "ui-sans-serif, system-ui" }}>
+                {a.id}
+              </text>
+            </g>
+          </g>
+        ),
+      };
+    }),
+  ];
+  const scene = [...props, ...peopleItems].sort((a, b) => a.depth - b.depth);
 
-  // static scene pieces that depend on the sky colour
-  const floorLines = [] as ReactNode[];
-  for (let g = 1; g < D; g++) {
-    floorLines.push(<line key={`a${g}`} x1={P(0, g)[0]} y1={P(0, g)[1]} x2={P(W, g)[0]} y2={P(W, g)[1]} stroke="#ecd0aa" strokeWidth="1" />);
-  }
-  for (let g = 2; g < W; g += 2) {
-    floorLines.push(<line key={`b${g}`} x1={P(g, 0)[0]} y1={P(g, 0)[1]} x2={P(g, D)[0]} y2={P(g, D)[1]} stroke="#f0d9b8" strokeWidth="1" />);
-  }
+  const chartPoints = curve.map((v, i) => `${(i / (curve.length - 1)) * 160},${30 - v * 30}`).join(" ");
 
-  const agentItems: Item[] = snap.a.map((a) => {
-    const walking = a.mode === "walk";
-    const st = STATIONS[a.routine[a.i][0]];
-    const sit = !walking && st.sit;
-    const sc = P(a.pos[0], a.pos[1]);
-    const bob = walking ? Math.sin(snap.t * 16 + a.id.charCodeAt(1)) * 1.8 : 0;
-    const on = focus === a.id;
-    return {
-      depth: a.pos[0] + a.pos[1] + 0.35 + (sit ? 0.6 : 0),
-      el: (
-        <g
-          key={a.id}
-          transform={`translate(${sc[0]} ${sc[1] - (sit ? 12 : 0)}) scale(1.1)`}
-          className="cursor-pointer"
-          onPointerEnter={() => setHov(a.id)}
-          onPointerLeave={() => setHov(null)}
-          onClick={() => setSel((s) => (s === a.id ? null : a.id))}
-        >
-          <rect x="-18" y="-58" width="36" height="66" fill="transparent" />
-          <Sprite color={a.color} hair={a.hair} face={a.face} bob={bob} />
-          <path
-            d={`M0,${-52 - (on ? 3 : 0)} l${on ? 6 : 4.5},7 l${on ? -6 : -4.5},7 l${on ? -6 : -4.5},-7 z`}
-            fill={a.color}
-            stroke={LINE}
-            strokeWidth="1.5"
-            strokeLinejoin="round"
+  const winT = 60;
+  const laneRows = PERSONAS.map((p) => (
+    <g key={p.id}>
+      {(lanes[p.id] ?? []).map((s, i) => {
+        const x0 = Math.max(0, 1 - (snap.t - s.t0) / winT);
+        const x1 = Math.max(0, 1 - (snap.t - s.t1) / winT);
+        if (x1 <= 0) return null;
+        return (
+          <rect
+            key={i}
+            x={x0 * 300}
+            y={0}
+            width={Math.max(2, (x1 - x0) * 300)}
+            height="10"
+            rx="3"
+            fill={zoneColor(s.z)}
+            opacity={s.z === "plaza" ? 0.5 : 0.95}
           />
-        </g>
-      ),
-    };
-  });
+        );
+      })}
+    </g>
+  ));
 
-  const scene = [...items, ...agentItems].sort((a, b) => a.depth - b.depth);
-
-  const room = (
-    <div className="relative overflow-hidden rounded-[18px]" style={{ background: "#d9efff" }}>
-      <svg viewBox="70 30 800 560" className="block h-auto w-full" role="img" aria-label="A simulated home in isometric view, with project pictures hanging on the walls">
+  const scenePanel = (
+    <div className="relative overflow-hidden rounded-[18px]" style={{ background: "linear-gradient(180deg,#f6f9fd,#e9f0f9)" }}>
+      <svg
+        viewBox={`${snap.cam.x.toFixed(1)} ${snap.cam.y.toFixed(1)} ${snap.cam.w.toFixed(1)} ${snap.cam.h.toFixed(1)}`}
+        className="block h-auto w-full"
+        role="img"
+        aria-label="A glass cutaway of four service spaces, with simulated people moving between them while a designer observes"
+        onClick={() => setSel(null)}
+      >
         <defs>
-          <linearGradient id="skyg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#bfe4ff" />
-            <stop offset="1" stopColor="#eaf6ff" />
+          <linearGradient id="gl" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#ffffff" stopOpacity="0.55" />
+            <stop offset="1" stopColor="#dcebff" stopOpacity="0.12" />
           </linearGradient>
-          <pattern id="wl" width="14" height="14" patternUnits="userSpaceOnUse">
-            <rect width="14" height="14" fill="#d8edf9" />
-            <rect width="7" height="14" fill="#cfe7f6" />
-          </pattern>
-          <pattern id="wr" width="16" height="16" patternUnits="userSpaceOnUse">
-            <rect width="16" height="16" fill="#fde9ef" />
-            <circle cx="8" cy="8" r="1.5" fill="#f8cfdb" />
-          </pattern>
+          <linearGradient id="gr" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#ffffff" stopOpacity="0.42" />
+            <stop offset="1" stopColor="#d4e6ff" stopOpacity="0.08" />
+          </linearGradient>
         </defs>
+        <rect x="0" y="0" width={VW} height={VH} fill="transparent" />
 
-        <rect x="70" y="30" width="800" height="560" fill="url(#skyg)" />
-        <ellipse cx="170" cy="92" rx="64" ry="15" fill="#fff" opacity="0.95" />
-        <ellipse cx="208" cy="80" rx="40" ry="13" fill="#fff" opacity="0.95" />
-        <ellipse cx="760" cy="70" rx="56" ry="13" fill="#fff" opacity="0.9" />
-        <ellipse cx="478" cy="555" rx="380" ry="22" fill="rgba(110,150,200,0.28)" />
-
-        {/* slab */}
-        <g stroke={LINE} strokeWidth="1.4" strokeLinejoin="round">
-          <polygon points={pts([P(0, D, 0), P(W, D, 0), P(W, D, -16), P(0, D, -16)])} fill="#e4c39b" />
-          <polygon points={pts([P(W, 0, 0), P(W, D, 0), P(W, D, -16), P(W, 0, -16)])} fill="#c9a479" />
-        </g>
-        {/* floor */}
-        <polygon points={pts([P(0, 0), P(W, 0), P(W, D), P(0, D)])} fill="#f6e2c4" stroke={LINE} strokeWidth="1.4" />
-        {floorLines}
-        {/* walls */}
-        <polygon points={pts([P(0, 0, 0), P(0, D, 0), P(0, D, HZ), P(0, 0, HZ)])} fill="url(#wl)" stroke={LINE} strokeWidth="1.4" />
-        <polygon points={pts([P(0, 0, 0), P(W, 0, 0), P(W, 0, HZ), P(0, 0, HZ)])} fill="url(#wr)" stroke={LINE} strokeWidth="1.4" />
-        <path d={`M${P(0, 0, 18).join(",")} L${P(0, D, 18).join(",")} M${P(0, 0, 18).join(",")} L${P(W, 0, 18).join(",")}`} stroke="#fff" strokeWidth="8" opacity="0.7" fill="none" />
-
-        {/* window (right wall) */}
-        <g stroke={LINE} strokeWidth="1.4" strokeLinejoin="round">
-          <polygon points={pts(wallQuad("R", 0.7, 2.2, 58, 128))} fill="#fff" />
-          <polygon points={pts(wallQuad("R", 0.85, 2.05, 66, 120))} fill={sky} />
-          <path d={`M${P(1.45, 0, 66).join(",")} L${P(1.45, 0, 120).join(",")} M${P(0.85, 0, 93).join(",")} L${P(2.05, 0, 93).join(",")}`} fill="none" />
-          <polygon points={pts(wallQuad("R", 0.5, 0.95, 52, 136))} fill="#ffc7d6" />
-          <polygon points={pts(wallQuad("R", 1.95, 2.4, 52, 136))} fill="#ffc7d6" />
-        </g>
-        {/* mirror (left wall) */}
-        <g stroke={LINE} strokeWidth="1.4" strokeLinejoin="round">
-          <polygon points={pts(wallQuad("L", 4.3, 5.2, 50, 96))} fill="#fff" />
-          <polygon points={pts(wallQuad("L", 4.4, 5.1, 56, 90))} fill="#e6f6fb" />
-        </g>
-
-        {/* picture frames = projects */}
-        {FRAMES.map((fr, i) => {
-          const f = featured[i];
-          if (!f) return null;
-          const hot = frameHot === i;
-          const q = wallQuad(fr.plane, fr.a, fr.b, fr.z0, fr.z1);
-          const c = q.reduce((s, p) => [s[0] + p[0] / 4, s[1] + p[1] / 4], [0, 0]);
+        {/* ground diamond + grid */}
+        <polygon points={pts([P(-0.6, -0.6), P(N + 0.6, -0.6), P(N + 0.6, N + 0.6), P(-0.6, N + 0.6)])} fill="#ffffff" opacity="0.55" stroke={EDGE} strokeWidth="1" />
+        {Array.from({ length: N / 2 - 1 }).map((_, k) => {
+          const g = (k + 1) * 2;
           return (
-            <g
-              key={f.slug}
-              className="cursor-pointer"
-              onPointerEnter={() => setFrameHot(i)}
-              onPointerLeave={() => setFrameHot(null)}
-              onClick={() => router.push(hrefFor(f))}
-            >
-              <polygon points={pts(q)} fill={hot ? "#ff7a6b" : "#fff"} stroke={hot ? "#ff7a6b" : LINE} strokeWidth={hot ? 3 : 1.6} />
-              <WallImage f={fr} href={f.image} hot={hot} />
-              {hot && (
-                <g transform={`translate(${c[0]} ${c[1] - 52})`} pointerEvents="none">
-                  <rect x={-86} y={-13} width={172} height={24} rx={12} fill="#fff" stroke={INK} strokeWidth="2" />
-                  <text x="0" y="3" textAnchor="middle" fontSize="11" fill={INK} style={{ fontFamily: "var(--font-pixel)" }}>
-                    {String(i + 1).padStart(2, "0")} · {f.title.length > 24 ? f.title.slice(0, 23) + "…" : f.title}
+            <g key={g} stroke="rgba(70,100,150,0.10)" strokeWidth="1">
+              <line x1={P(g, 0)[0]} y1={P(g, 0)[1]} x2={P(g, N)[0]} y2={P(g, N)[1]} />
+              <line x1={P(0, g)[0]} y1={P(0, g)[1]} x2={P(N, g)[0]} y2={P(N, g)[1]} />
+            </g>
+          );
+        })}
+        {/* plaza paths */}
+        <polygon points={pts([P(8, 0), P(12, 0), P(12, N), P(8, N)])} fill="#eef3fa" opacity="0.9" />
+        <polygon points={pts([P(0, 8), P(N, 8), P(N, 12), P(0, 12)])} fill="#eef3fa" opacity="0.9" />
+        <polygon points={pts([P(8.4, 8.4), P(11.6, 8.4), P(11.6, 11.6), P(8.4, 11.6)])} fill="#ffffff" stroke={EDGE} strokeWidth="1" />
+        <circle cx={P(10, 10)[0]} cy={P(10, 10)[1]} r="5" fill="none" stroke="#9db3d4" strokeDasharray="2 3" />
+
+        {/* zones: slab, glass walls */}
+        {ZONES.map((z) => (
+          <g key={z.id}>
+            <polygon points={pts([P(z.x0, z.y1, 0), P(z.x1, z.y1, 0), P(z.x1, z.y1, -7), P(z.x0, z.y1, -7)])} fill={mixc(z.color, "#ffffff", 0.7)} stroke={EDGE} strokeWidth="1" />
+            <polygon points={pts([P(z.x1, z.y0, 0), P(z.x1, z.y1, 0), P(z.x1, z.y1, -7), P(z.x1, z.y0, -7)])} fill={mixc(z.color, "#7080a0", 0.4)} opacity="0.55" stroke={EDGE} strokeWidth="1" />
+            <polygon points={pts([P(z.x0, z.y0), P(z.x1, z.y0), P(z.x1, z.y1), P(z.x0, z.y1)])} fill={mixc(z.color, "#ffffff", 0.84)} stroke={EDGE} strokeWidth="1" />
+            <polygon points={pts([P(z.x0, z.y0, 0), P(z.x0, z.y1, 0), P(z.x0, z.y1, 50), P(z.x0, z.y0, 50)])} fill="url(#gl)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" />
+            <polygon points={pts([P(z.x0, z.y0, 0), P(z.x1, z.y0, 0), P(z.x1, z.y0, 50), P(z.x0, z.y0, 50)])} fill="url(#gr)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" />
+            {[0, 1, 2, 3].map((k) => {
+              const g = z.x0 + ((z.x1 - z.x0) * k) / 3;
+              const h = z.y0 + ((z.y1 - z.y0) * k) / 3;
+              return (
+                <g key={k} stroke="rgba(255,255,255,0.85)" strokeWidth="1">
+                  <line x1={P(g, z.y0, 0)[0]} y1={P(g, z.y0, 0)[1]} x2={P(g, z.y0, 50)[0]} y2={P(g, z.y0, 50)[1]} />
+                  <line x1={P(z.x0, h, 0)[0]} y1={P(z.x0, h, 0)[1]} x2={P(z.x0, h, 50)[0]} y2={P(z.x0, h, 50)[1]} />
+                </g>
+              );
+            })}
+            <path d={`M${P(z.x0, z.y0, 50).join(",")} L${P(z.x0, z.y1, 50).join(",")} M${P(z.x0, z.y0, 50).join(",")} L${P(z.x1, z.y0, 50).join(",")}`} stroke={z.color} strokeWidth="2" opacity="0.7" fill="none" />
+          </g>
+        ))}
+
+        {/* journey trails */}
+        {PERSONAS.map((p) => {
+          const tr = snap.trail[p.id] ?? [];
+          if (tr.length < 2) return null;
+          return (
+            <g key={p.id} fill="none" strokeLinecap="round" strokeLinejoin="round">
+              {tr.slice(1).map((pt, i) => (
+                <line
+                  key={i}
+                  x1={tr[i][0]}
+                  y1={tr[i][1]}
+                  x2={pt[0]}
+                  y2={pt[1]}
+                  stroke={p.color}
+                  strokeWidth={focus === p.id ? 3 : 2}
+                  opacity={((i + 1) / tr.length) * (focus && focus !== p.id ? 0.2 : 0.75)}
+                />
+              ))}
+            </g>
+          );
+        })}
+
+        {/* encounters */}
+        {snap.pairs.map(([a, b], i) => {
+          const sa = P(a[0], a[1], 14);
+          const sb = P(b[0], b[1], 14);
+          return (
+            <g key={i} pointerEvents="none">
+              <line x1={sa[0]} y1={sa[1]} x2={sb[0]} y2={sb[1]} stroke={INK} strokeWidth="1.6" strokeDasharray="3 3" />
+              <circle cx={(sa[0] + sb[0]) / 2} cy={(sa[1] + sb[1]) / 2} r="3.4" fill="#ffd75e" stroke={INK} strokeWidth="1" />
+            </g>
+          );
+        })}
+
+        {/* furniture, NPCs and personas, back to front */}
+        {scene.map((s, i) => (
+          <g key={i}>{s.el}</g>
+        ))}
+
+        {/* NPC speech */}
+        {snap.npcSay.map((n, i) => {
+          const s = P(n.at[0], n.at[1], 44);
+          return (
+            <g key={i} transform={`translate(${s[0]} ${s[1]})`} pointerEvents="none">
+              <rect x={-4 - n.text.length * 2.7} y="-11" width={8 + n.text.length * 5.4} height="15" rx="7.5" fill="#fff" stroke={INK} strokeWidth="1.2" />
+              <text x="0" y="0" textAnchor="middle" fontSize="8.5" fill={INK} style={{ fontFamily: "ui-sans-serif, system-ui" }}>
+                {n.text}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* zone labels + project billboards */}
+        {ZONES.map((z) => {
+          const f = featured[z.project];
+          const anchor = P((z.x0 + z.x1) / 2, (z.y0 + z.y1) / 2, 0);
+          const top = P(z.x0, z.y0, 50);
+          const bx = top[0] - 6;
+          const by = top[1] - 34;
+          const hot = bbHot === z.id;
+          return (
+            <g key={z.id}>
+              <text x={anchor[0]} y={P(z.x1 - 0.2, z.y1 - 0.2, 0)[1] + 18} textAnchor="middle" fontSize="11" fontWeight={700} fill={z.color} style={{ fontFamily: "var(--font-bric), ui-sans-serif" }}>
+                {z.name.toUpperCase()} <tspan fill="rgba(31,42,68,0.45)" fontWeight={500}>· {z.sub}</tspan>
+              </text>
+              {f && (
+                <g
+                  className="cursor-pointer"
+                  transform={`translate(${bx} ${by})`}
+                  onPointerEnter={() => setBbHot(z.id)}
+                  onPointerLeave={() => setBbHot(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(hrefFor(f));
+                  }}
+                >
+                  <line x1="0" y1="24" x2="0" y2="34" stroke={z.color} strokeWidth="1.6" />
+                  <rect x="-70" y="-12" width="140" height="38" rx="9" fill="rgba(255,255,255,0.82)" stroke={hot ? z.color : "rgba(255,255,255,0.95)"} strokeWidth={hot ? 2.4 : 1.4} />
+                  <clipPath id={`cp-${z.id}`}>
+                    <rect x="-66" y="-8" width="30" height="30" rx="6" />
+                  </clipPath>
+                  <image href={f.image} x="-66" y="-8" width="30" height="30" preserveAspectRatio="xMidYMid slice" clipPath={`url(#cp-${z.id})`} />
+                  <text x="-30" y="3" fontSize="8.5" fontWeight={700} fill={INK} style={{ fontFamily: "var(--font-bric), ui-sans-serif" }}>
+                    {f.title.length > 20 ? f.title.slice(0, 19) + "…" : f.title}
+                  </text>
+                  <text x="-30" y="15" fontSize="7.5" fill={z.color} style={{ fontFamily: "ui-sans-serif, system-ui" }}>
+                    open project →
                   </text>
                 </g>
               )}
@@ -668,74 +773,74 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
           );
         })}
 
-        {/* furniture + agents, back to front */}
-        {scene.map((s, i) => (
-          <g key={i}>{s.el}</g>
-        ))}
-
-        {/* evening tint */}
-        <polygon
-          points={pts([P(0, 0, HZ), P(W, 0, HZ), P(W, D, 0), P(0, D, 0)])}
-          fill="#0b1a3a"
-          opacity={night}
-          pointerEvents="none"
-        />
-
-        {/* reticle + callout */}
+        {/* reticle */}
         {focusAgent && (
           <g
-            transform={`translate(${P(focusAgent.pos[0], focusAgent.pos[1])[0]} ${P(focusAgent.pos[0], focusAgent.pos[1])[1] - 24})`}
+            transform={`translate(${P(focusAgent.pos[0], focusAgent.pos[1])[0]} ${P(focusAgent.pos[0], focusAgent.pos[1])[1] - 16})`}
             pointerEvents="none"
           >
             {[
-              [-26, -32, 1, 1],
-              [26, -32, -1, 1],
-              [-26, 28, 1, -1],
-              [26, 28, -1, -1],
+              [-17, -26, 1, 1],
+              [17, -26, -1, 1],
+              [-17, 15, 1, -1],
+              [17, 15, -1, -1],
             ].map(([x, y, sx, sy], i) => (
-              <path key={i} d={`M${x},${y + sy * 9} V${y} H${x + sx * 9}`} fill="none" stroke={INK} strokeWidth="2.6" />
+              <path key={i} d={`M${x},${y + sy * 6} V${y} H${x + sx * 6}`} fill="none" stroke={INK} strokeWidth="1.8" />
             ))}
-            <g transform="translate(0 -52)">
-              <rect x="-64" y="-14" width="128" height="22" rx="11" fill="#fff" stroke={INK} strokeWidth="2.2" />
-              <text x="0" y="1" textAnchor="middle" fontSize="11" fill={INK} style={{ fontFamily: "var(--font-pixel)" }}>
-                {focusAgent.id} · {focusAgent.mode === "walk" ? "walking" : STATIONS[focusAgent.routine[focusAgent.i][0]].label}
+            <g transform="translate(0 -48)">
+              <rect x="-52" y="-9" width="104" height="16" rx="8" fill={INK} />
+              <text x="0" y="2.4" textAnchor="middle" fontSize="8.5" fill="#fff" style={{ fontFamily: "ui-sans-serif, system-ui" }}>
+                {focusAgent.id} · {focusAgent.mode === "walk" ? "walking" : STATIONS[focusAgent.st].label}
               </text>
             </g>
           </g>
         )}
       </svg>
 
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-3 text-[12px]"
-        style={{ fontFamily: "var(--font-pixel)", color: "#fff" }}
-      >
-        <span className="flex items-center gap-2 rounded-md bg-[#1f2a44]/80 px-2.5 py-1">
-          <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-[#ff4d4d]" />
-          REC · observation room
-        </span>
-        <span className="rounded-md bg-[#1f2a44]/80 px-2.5 py-1">Day 1 · {label}</span>
+      {/* observation overlay */}
+      <div aria-hidden className="pointer-events-none absolute inset-3">
+        <span className="absolute left-0 top-0 h-4 w-4 border-l-2 border-t-2" style={{ borderColor: INK }} />
+        <span className="absolute right-0 top-0 h-4 w-4 border-r-2 border-t-2" style={{ borderColor: INK }} />
+        <span className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2" style={{ borderColor: INK }} />
+        <span className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2" style={{ borderColor: INK }} />
       </div>
-      <p
-        className="pointer-events-none absolute bottom-2 left-3 rounded-md bg-white/80 px-2 py-0.5 text-[11px] text-[#1f2a44]/80"
-        style={{ fontFamily: "var(--font-pixel)" }}
-      >
-        click a framed picture to open the project
-      </p>
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between px-6 py-5 text-[11px]" style={{ color: INK }}>
+        <span className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
+          <span className="h-2 w-2 animate-pulse rounded-full bg-[#ff4d4d]" />
+          <span className="sm:hidden">OBSERVATION</span>
+          <span className="hidden sm:inline">OBSERVATION DECK · 4 spaces · 5 personas</span>
+        </span>
+        <span className="rounded-full bg-white/80 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
+          {sel ? `FOLLOW ${sel}` : "OVERVIEW"} · {label}
+        </span>
+      </div>
+      {sel && (
+        <button
+          type="button"
+          onClick={() => setSel(null)}
+          className="absolute bottom-5 right-6 rounded-full bg-white/90 px-3 py-1 text-[11px] backdrop-blur hover:bg-white"
+          style={{ fontFamily: "var(--font-pixel)", color: INK }}
+        >
+          × back to overview
+        </button>
+      )}
+      {!sel && (
+        <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/70 px-3 py-1 text-[11px] backdrop-blur sm:block" style={{ fontFamily: "var(--font-pixel)", color: "rgba(31,42,68,0.7)" }}>
+          click a persona to follow · click a billboard to open a project
+        </p>
+      )}
     </div>
   );
 
-  const controls = (
-    <div
-      className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px]"
-      style={{ fontFamily: "var(--font-pixel)", color: INK }}
-    >
-      <div className="flex items-center gap-1.5">
+  const analysis = (
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-3" style={{ color: INK }}>
+      <div className="flex items-center gap-1.5 text-[12px]" style={{ fontFamily: "var(--font-pixel)" }}>
         <button
           type="button"
           onClick={() => setPlaying((p) => !p)}
           aria-label={playing ? "Pause" : "Play"}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md border-2 bg-white hover:bg-[#fff3b8]"
-          style={{ borderColor: INK }}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full border bg-white hover:bg-[#fff3b8]"
+          style={{ borderColor: "rgba(31,42,68,0.3)" }}
         >
           {playing ? (
             <svg viewBox="0 0 16 16" className="h-3 w-3" fill="currentColor"><rect x="3" y="2" width="3.4" height="12" /><rect x="9.6" y="2" width="3.4" height="12" /></svg>
@@ -748,24 +853,59 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
             key={s}
             type="button"
             onClick={() => setSpeed(s)}
-            className="h-7 rounded-md border-2 px-2"
-            style={{ borderColor: INK, background: speed === s ? INK : "#fff", color: speed === s ? "#fff" : INK }}
+            className="h-7 rounded-full border px-2.5"
+            style={{ borderColor: "rgba(31,42,68,0.3)", background: speed === s ? INK : "#fff", color: speed === s ? "#fff" : INK }}
           >
             {s}×
           </button>
         ))}
       </div>
-      <div className="flex items-center gap-2">
-        <span className="opacity-60">journey curve</span>
-        <svg viewBox="0 0 220 46" className="h-7 w-[150px]">
-          <line x1="0" y1="23" x2="220" y2="23" stroke="rgba(31,42,68,0.25)" strokeDasharray="3 4" />
-          <polyline points={chart} fill="none" stroke="#2fb89a" strokeWidth="2.6" strokeLinejoin="round" strokeLinecap="round" />
+
+      <div className="flex items-center gap-4 text-[12px]" style={{ fontFamily: "var(--font-pixel)" }}>
+        <div>
+          <p className="text-[10px] uppercase opacity-55">comfort</p>
+          <svg viewBox="0 0 160 30" className="h-6 w-[96px]">
+            <line x1="0" y1="15" x2="160" y2="15" stroke="rgba(31,42,68,0.2)" strokeDasharray="3 4" />
+            <polyline points={chartPoints} fill="none" stroke="#2fb89a" strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round" />
+          </svg>
+        </div>
+        <div className="text-center">
+          <p className="text-[10px] uppercase opacity-55">needs</p>
+          <span className="rounded-md px-2 py-0.5 text-white" style={{ background: "#ff6b4a" }}>{needs}</span>
+        </div>
+        <div className="text-center">
+          <p className="text-[10px] uppercase opacity-55">encounters</p>
+          <span className="rounded-md px-2 py-0.5 text-white" style={{ background: INK }}>{met}</span>
+        </div>
+      </div>
+      {showLanes && (
+      <div className="min-w-0 basis-full">
+        <div className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "rgba(31,42,68,0.55)" }}>
+          <span>service journey · last {winT}s</span>
+          <span className="flex gap-3">
+            {ZONES.map((z) => (
+              <span key={z.id} className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full" style={{ background: z.color }} />
+                {z.name}
+              </span>
+            ))}
+          </span>
+        </div>
+        <svg viewBox="0 0 330 100" className="h-auto w-full">
+          {PERSONAS.map((p, i) => (
+            <g key={p.id} transform={`translate(24 ${i * 19 + 2})`}>
+              <text x="-4" y="9" textAnchor="end" fontSize="8" fill={INK} style={{ fontFamily: "var(--font-pixel)" }}>
+                {p.id}
+              </text>
+              <rect x="0" y="0" width="300" height="10" rx="3" fill="rgba(31,42,68,0.06)" />
+              {laneRows[i]}
+            </g>
+          ))}
+          <line x1="324" y1="0" x2="324" y2="100" stroke={INK} strokeWidth="1.2" />
         </svg>
       </div>
-      <div className="ml-auto flex items-center gap-2">
-        <span className="opacity-60">unmet needs found</span>
-        <span className="rounded-md px-2 py-0.5 text-[13px] text-white" style={{ background: "#ff6b4a" }}>{needs}</span>
-      </div>
+
+      )}
     </div>
   );
 
@@ -773,44 +913,16 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
     <div ref={wrap} className="w-full">
       {chrome ? (
         <div
-          className="rounded-[30px] border-[3px] p-3"
-          style={{
-            borderColor: INK,
-            boxShadow: `8px 8px 0 ${INK}`,
-            background:
-              "radial-gradient(circle at 12px 12px, #fff 0 4px, transparent 4.5px), radial-gradient(circle at 12px 12px, #ffe27a 0 1.6px, transparent 2px), linear-gradient(#8fd0f7, #72bdf0)",
-            backgroundSize: "36px 36px, 36px 36px, auto",
-          }}
+          className="rounded-[28px] border bg-white/70 p-3 backdrop-blur"
+          style={{ borderColor: "rgba(31,42,68,0.18)", boxShadow: "0 30px 60px -30px rgba(31,42,68,0.35), inset 0 0 0 1px rgba(255,255,255,0.9)" }}
         >
-          <div className="mb-2 flex items-center justify-between gap-2 px-1">
-            <p className="text-[12px] text-white drop-shadow-[0_1px_0_rgba(31,42,68,0.6)]" style={{ fontFamily: "var(--font-pixel)" }}>
-              ♥ yun&apos;s mini room · TODAY {snap.a.length} · notes {notes.length}
-            </p>
-            <nav className="flex gap-1">
-              <span className="rounded-t-lg border-2 border-b-0 bg-white px-2.5 py-1 text-[11px]" style={{ borderColor: INK, fontFamily: "var(--font-pixel)", color: INK }}>
-                Home
-              </span>
-              {TABS.map(([l, h]) => (
-                <Link
-                  key={l}
-                  href={h}
-                  className="hidden rounded-t-lg border-2 border-b-0 bg-[#cfe9fb] px-2.5 py-1 text-[11px] transition-colors hover:bg-white sm:block"
-                  style={{ borderColor: INK, fontFamily: "var(--font-pixel)", color: INK }}
-                >
-                  {l}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <div className="rounded-[20px] border-[3px] bg-white p-2" style={{ borderColor: INK }}>
-            {room}
-            <div className="mt-2 px-1 pb-1">{controls}</div>
-          </div>
+          {scenePanel}
+          <div className="px-2 pb-1">{analysis}</div>
         </div>
       ) : (
         <div>
-          {room}
-          <div className="mt-2">{controls}</div>
+          {scenePanel}
+          {analysis}
         </div>
       )}
 
@@ -821,18 +933,23 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
             {notes.map((n, i) => (
               <div
                 key={n.id}
-                className="relative rounded-[3px] px-4 pb-3 pt-3.5 shadow-[3px_3px_0_rgba(31,42,68,0.9)]"
+                className="relative rounded-xl border bg-white/85 px-4 pb-3 pt-3 shadow-[0_10px_24px_-16px_rgba(31,42,68,0.5)] backdrop-blur"
                 style={{
-                  background: n.need ? "#fff0a8" : "#d9f0e4",
-                  border: `2px solid ${INK}`,
-                  transform: `rotate(${[-1.2, 0.9, -0.6, 1.1][i % 4]}deg)`,
+                  borderColor: `${zoneColor(n.zone)}88`,
+                  borderLeftWidth: 5,
+                  borderLeftColor: zoneColor(n.zone),
+                  transform: `rotate(${[-0.6, 0.5, -0.3, 0.6][i % 4]}deg)`,
                 }}
               >
-                <span className="absolute -top-2 left-3 h-3 w-8 rounded-sm bg-[#1f2a44]/15" />
-                <p className="flex items-center gap-2 text-[11px] text-[#1f2a44]/70" style={{ fontFamily: "var(--font-pixel)" }}>
-                  <span className="h-2.5 w-2.5 rounded-full border border-[#1f2a44]" style={{ background: n.color }} />
-                  {n.who} · {n.time}
-                  {n.need && <span className="ml-auto rounded bg-[#ff6b4a] px-1.5 text-white">need</span>}
+                <p className="flex items-center gap-2 text-[11px] text-[#1f2a44]/65" style={{ fontFamily: "var(--font-pixel)" }}>
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: n.color }} />
+                  {n.who} · {n.time} · {ZONES.find((z) => z.id === n.zone)!.name}
+                  <span
+                    className="ml-auto rounded px-1.5 text-white"
+                    style={{ background: n.need ? "#ff6b4a" : "#2fb89a" }}
+                  >
+                    {n.need ? "need" : "works"}
+                  </span>
                 </p>
                 <p className="mt-1.5 text-[1.28rem] leading-[1.05] text-[#1f2a44]" style={{ fontFamily: "var(--font-hand)" }}>
                   {n.text}
@@ -841,7 +958,7 @@ export default function ObservationRoom({ chrome = true, showNotes = true }: { c
             ))}
           </div>
           <p className="mt-3 text-[11px] text-[#1f2a44]/55">
-            Simulated agents and illustrative field notes. Hover or click a persona to follow them.
+            Simulated personas and illustrative field notes. The same logic drives my real agent simulator.
           </p>
         </>
       )}

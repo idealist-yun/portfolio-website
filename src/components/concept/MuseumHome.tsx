@@ -321,7 +321,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </div>
             </DeskItem>
 
-            <DeskItem left="22%" top="56%" rot={-3} z={5} front={front} onFront={bump} className="md:w-[250px]">
+            <DeskItem left="27%" top="55%" rot={-3} z={5} front={front} onFront={bump} className="md:w-[250px]">
               <PostIt color="#ffe9a0">
                 <p className="text-[1.5rem] leading-[1.1]" style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
                   &ldquo;{whyQuote}&rdquo;
@@ -332,7 +332,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="0%" top="72%" rot={-2} z={4} front={front} onFront={bump} className="md:w-[290px]">
+            <DeskItem left="0%" top="40%" rot={-2} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#bfe0ff">
                 <p className={noteLabel}>now</p>
                 <p className={`mt-1 text-[1.65rem] ${noteHand}`} style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
@@ -344,14 +344,14 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="25%" top="82%" rot={2} z={4} front={front} onFront={bump} className="md:w-[270px]">
+            <DeskItem left="3%" top="62%" rot={2} z={4} front={front} onFront={bump} className="md:w-[270px]">
               <PostIt color="#c4f1d2">
                 <p className={`mb-2 ${noteLabel}`}>time check</p>
                 <ClockPair tone="paper" />
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="53%" top="88%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
+            <DeskItem left="21%" top="80%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#ffd0dc">
                 <p className={`mb-2 ${noteLabel}`}>off hours · play me (a – k, w e t y u)</p>
                 <Piano tone="paper" />

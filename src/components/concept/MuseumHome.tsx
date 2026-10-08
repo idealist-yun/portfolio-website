@@ -141,14 +141,9 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
 
       <header className="sticky top-0 z-40 border-b border-black/10 backdrop-blur-md" style={{ background: "rgba(243,238,226,0.82)" }}>
         <div className="mx-auto flex max-w-[1240px] items-center justify-between px-6 py-3.5">
-          <Link href="/" className="flex items-center gap-3">
-            <span
-              className="inline-flex h-9 w-9 -rotate-3 items-center justify-center rounded-[5px] font-[family-name:var(--font-instrument)] text-xl italic text-white shadow-[inset_0_0_0_2px_rgba(255,255,255,0.35)]"
-              style={{ background: RED }}
-            >
-              Y
-            </span>
-            <span className="font-[family-name:var(--font-instrument)] text-2xl">Ian Lee</span>
+          <Link href="/" className="group flex items-center gap-2.5" title="Everything starts from a dot">
+            <span aria-hidden className="h-3 w-3 rounded-full transition-transform duration-300 group-hover:scale-150" style={{ background: RED }} />
+            <span className="font-[family-name:var(--font-instrument)] text-[1.7rem] leading-none">Ian Lee</span>
           </Link>
           <nav className="hidden gap-7 font-mono text-[11px] uppercase tracking-wider sm:flex" style={{ color: MUTED }}>
             {[

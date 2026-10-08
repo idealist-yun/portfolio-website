@@ -156,7 +156,7 @@ function Opening() {
       hide();
       return;
     }
-    const t = window.setTimeout(hide, 2900);
+    const t = window.setTimeout(hide, 2750);
     el.addEventListener("pointerdown", hide);
     return () => {
       window.clearTimeout(t);
@@ -165,25 +165,43 @@ function Opening() {
   }, []);
   return (
     <div ref={ref} aria-hidden className="open-wrap fixed inset-0 z-[600]">
-      <div className="open-sheet absolute inset-0" style={{ background: PAPER, backgroundImage: grain }} />
-      <span className="open-dot absolute left-1/2 top-1/2 h-[14px] w-[14px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: RED }} />
+      <svg className="absolute inset-0 h-full w-full" viewBox="-160 -160 320 320" preserveAspectRatio="xMidYMid slice">
+        <polygon className="open-blade open-blade-0" points="0,0 0.0,-700.0 606.2,-350.0" style={{ ["--dx" as string]: "250.0px", ["--dy" as string]: "-433.0px" }} />
+        <polygon className="open-blade open-blade-1" points="0,0 606.2,-350.0 606.2,350.0" style={{ ["--dx" as string]: "500.0px", ["--dy" as string]: "0.0px" }} />
+        <polygon className="open-blade open-blade-0" points="0,0 606.2,350.0 0.0,700.0" style={{ ["--dx" as string]: "250.0px", ["--dy" as string]: "433.0px" }} />
+        <polygon className="open-blade open-blade-1" points="0,0 0.0,700.0 -606.2,350.0" style={{ ["--dx" as string]: "-250.0px", ["--dy" as string]: "433.0px" }} />
+        <polygon className="open-blade open-blade-0" points="0,0 -606.2,350.0 -606.2,-350.0" style={{ ["--dx" as string]: "-500.0px", ["--dy" as string]: "0.0px" }} />
+        <polygon className="open-blade open-blade-1" points="0,0 -606.2,-350.0 -0.0,-700.0" style={{ ["--dx" as string]: "-250.0px", ["--dy" as string]: "-433.0px" }} />
+        <line className="open-line" x1="0" y1="0" x2="0.0" y2="-700.0" pathLength={1} />
+        <line className="open-line" x1="0" y1="0" x2="606.2" y2="-350.0" pathLength={1} />
+        <line className="open-line" x1="0" y1="0" x2="606.2" y2="350.0" pathLength={1} />
+        <line className="open-line" x1="0" y1="0" x2="0.0" y2="700.0" pathLength={1} />
+        <line className="open-line" x1="0" y1="0" x2="-606.2" y2="350.0" pathLength={1} />
+        <line className="open-line" x1="0" y1="0" x2="-606.2" y2="-350.0" pathLength={1} />
+        <circle className="open-dot" cx="0" cy="0" r="3" fill={RED} />
+      </svg>
       <p
-        className="open-text absolute left-0 right-0 top-[calc(50%+30px)] text-center font-[family-name:var(--font-instrument)] text-[clamp(1.4rem,3.4vw,2.2rem)] italic"
+        className="open-text absolute left-0 right-0 top-[calc(50%+34px)] text-center font-[family-name:var(--font-instrument)] text-[clamp(1.4rem,3.4vw,2.2rem)] italic"
         style={{ color: INK }}
       >
         Everything starts from a dot.
       </p>
       <style>{`
-        @property --r { syntax: "<length>"; inherits: false; initial-value: 0px; }
-        .open-wrap { animation: openWrap 2.9s linear forwards; }
-        .open-sheet { --r: 0px; -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent var(--r), #000 calc(var(--r) + 1px)); mask-image: radial-gradient(circle at 50% 50%, transparent var(--r), #000 calc(var(--r) + 1px)); animation: openReveal 1.15s 1.6s cubic-bezier(.7,0,.3,1) forwards; }
-        .open-dot { animation: openDot .45s cubic-bezier(.2,.9,.3,1.3) both, openDotOut .2s 1.6s forwards; }
-        .open-text { animation: openText .7s .5s ease-out both, openTextOut .3s 1.45s forwards; }
-        @keyframes openReveal { from { --r: 0px } to { --r: 160vmax } }
-        @keyframes openDot { from { transform: translate(-50%, -50%) scale(0) } to { transform: translate(-50%, -50%) scale(1) } }
-        @keyframes openDotOut { to { opacity: 0 } }
-        @keyframes openText { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
-        @keyframes openTextOut { to { opacity: 0 } }
+        .open-wrap { animation: openWrap 2.7s linear forwards; }
+        .open-blade { fill: ${PAPER}; stroke: ${RED}; stroke-width: 1.5px; vector-effect: non-scaling-stroke; stroke-opacity: 0; animation: bladeStroke .01s 1.25s forwards, bladeOpen .95s 1.55s cubic-bezier(.65,0,.25,1) forwards; }
+        .open-blade-1 { animation: bladeTone .3s 1.25s forwards, bladeStroke .01s 1.25s forwards, bladeOpen .95s 1.55s cubic-bezier(.65,0,.25,1) forwards; }
+        .open-line { stroke: ${RED}; stroke-width: 1.5px; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; animation: lineDraw .7s .55s cubic-bezier(.3,.6,.2,1) forwards, lineOff .01s 1.25s forwards; }
+        .open-dot { transform-box: fill-box; transform-origin: center; animation: dotIn .4s cubic-bezier(.2,.9,.3,1.3) both, dotOut .2s 1.55s forwards; }
+        .open-text { animation: textIn .35s .15s ease-out both, textOut .6s .55s ease-in forwards; }
+        @keyframes dotIn { from { transform: scale(0) } to { transform: scale(1) } }
+        @keyframes dotOut { to { opacity: 0 } }
+        @keyframes textIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+        @keyframes textOut { to { opacity: 0; transform: translateY(-6px) } }
+        @keyframes lineDraw { to { stroke-dashoffset: 0 } }
+        @keyframes lineOff { to { opacity: 0 } }
+        @keyframes bladeStroke { to { stroke-opacity: 1 } }
+        @keyframes bladeTone { to { fill: #ebe4d3 } }
+        @keyframes bladeOpen { to { transform: translate(var(--dx), var(--dy)) } }
         @keyframes openWrap { 0%, 98% { visibility: visible } 100% { visibility: hidden; pointer-events: none } }
       `}</style>
     </div>
@@ -214,7 +232,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
                   style={{ background: RED, left: "0.08em", top: "0.1em" }}
                 />
               </span>
-              an Lee
+              an
             </span>
           </Link>
           <nav className="hidden gap-7 font-mono text-[11px] uppercase tracking-wider sm:flex" style={{ color: MUTED }}>

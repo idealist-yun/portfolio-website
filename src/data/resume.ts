@@ -21,7 +21,7 @@ export type EduEntry = {
 };
 
 export const header = {
-  name: "Sang-yun Lee (Yun)",
+  name: "Sang-yun Lee (Ian)",
 };
 
 export const education: EduEntry[] = [

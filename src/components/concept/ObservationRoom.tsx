@@ -872,7 +872,7 @@ export default function ObservationRoom({
   const player = useRef<{ pos: Pt; face: 1 | -1; path: Pt[]; moving: boolean }>({ pos: START, face: 1, path: [], moving: false });
   const keys = useRef<Set<string>>(new Set());
   const cam = useRef({ x: 0, y: 0, w: VW, h: VH });
-  const st = useRef({ play: true, follow: false, moved: false, talkWho: null as string | null, sel: null as string | null, dlg: null as { who: string; key: string } | null, near: null as string | null });
+  const st = useRef({ play: true, follow: false, moved: false, talkWho: null as string | null, clearSel: false, sel: null as string | null, dlg: null as { who: string; key: string } | null, near: null as string | null });
   const svgRef = useRef<SVGSVGElement>(null);
   const last = useRef<number | null>(null);
 
@@ -992,6 +992,7 @@ export default function ObservationRoom({
         player.current.path = [];
         s.follow = true;
         s.talkWho = null;
+        s.clearSel = true;
         e.preventDefault();
       }
     };
@@ -1218,6 +1219,10 @@ export default function ObservationRoom({
         tick(Math.min(0.05, (now - last.current) / 1000));
         setSnap(makeSnap());
         const sx = st.current;
+        if (sx.clearSel) {
+          sx.clearSel = false;
+          if (sx.sel) setSel(null);
+        }
         if (sx.talkWho && sx.near === sx.talkWho && !sx.dlg) {
           const who = sx.talkWho;
           sx.talkWho = null;
@@ -1229,7 +1234,7 @@ export default function ObservationRoom({
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [playing, run, tick, makeSnap, openDialog]);
+  }, [playing, run, tick, makeSnap, openDialog, setSel]);
 
   const toGrid = (e: React.MouseEvent<SVGSVGElement>): Pt | null => {
     const svg = svgRef.current;
@@ -1267,6 +1272,7 @@ export default function ObservationRoom({
     }
     if (play) {
       if (dlg) return;
+      if (sel) setSel(null);
       const g = toGrid(e);
       if (g) walkTo(g);
       return;
@@ -1328,13 +1334,7 @@ export default function ObservationRoom({
             onClick={(e) => {
               e.stopPropagation();
               if (!expanded && small()) return expand();
-              if (play) {
-                if (snap.near === a.id) openDialog(a.id);
-                else {
-                  st.current.talkWho = a.id;
-                  walkTo([a.pos[0], a.pos[1] + 1.2]);
-                }
-              } else setSel(sel === a.id ? null : a.id);
+              setSel(sel === a.id ? null : a.id);
             }}
           >
             <rect x="-14" y="-42" width="28" height="48" fill="transparent" />
@@ -1364,13 +1364,7 @@ export default function ObservationRoom({
           onClick={(e) => {
             e.stopPropagation();
             if (!expanded && small()) return expand();
-            if (play) {
-              if (snap.near === "D") openDialog("D");
-              else {
-                st.current.talkWho = "D";
-                walkTo([snap.doc.pos[0], snap.doc.pos[1] + 1.2]);
-              }
-            } else setSel(sel === "D" ? null : "D");
+            setSel(sel === "D" ? null : "D");
           }}
         >
           <rect x="-14" y="-42" width="28" height="48" fill="transparent" />
@@ -1506,6 +1500,7 @@ export default function ObservationRoom({
         keys.current.add(dir);
         player.current.path = [];
         st.current.follow = true;
+        st.current.clearSel = true;
       }}
       onPointerUp={() => keys.current.delete(dir)}
       onPointerLeave={() => keys.current.delete(dir)}
@@ -1681,7 +1676,7 @@ export default function ObservationRoom({
           );
         })}
 
-        {focusPos && focusText && !play && (
+        {focusPos && focusText && (
           <g transform={`translate(${P(focusPos[0], focusPos[1])[0]} ${P(focusPos[0], focusPos[1])[1] - 16})`} pointerEvents="none">
             {[
               [-17, -26, 1, 1],
@@ -1741,6 +1736,30 @@ export default function ObservationRoom({
         </span>
       </div>
 
+      {sel && !dlg && (
+        <div className="absolute bottom-5 right-6 z-10 flex gap-2" style={{ fontFamily: "var(--font-pixel)" }}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const pos = sel === "D" ? snap.doc.pos : snap.a.find((x) => x.id === sel)?.pos;
+              if (!pos) return;
+              if (snap.near === sel) openDialog(sel);
+              else {
+                st.current.talkWho = sel;
+                walkTo([pos[0], pos[1] + 1.2]);
+              }
+            }}
+            className="rounded-full px-3 py-1 text-[11px] text-white"
+            style={{ background: INK }}
+          >
+            talk
+          </button>
+          <button type="button" onClick={() => setSel(null)} className="rounded-full bg-white/90 px-3 py-1 text-[11px] backdrop-blur hover:bg-white" style={{ color: INK }}>
+            × overview
+          </button>
+        </div>
+      )}
       {play && !dlg && (
         <>
           <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/80 px-3 py-1 text-[11px] backdrop-blur md:block" style={{ fontFamily: "var(--font-pixel)", color: INK }}>
@@ -1752,7 +1771,7 @@ export default function ObservationRoom({
             {dpad("ArrowLeft", "↙", "bottom-0 left-0")}
             {dpad("ArrowDown", "↘", "bottom-0 right-0")}
           </div>
-          {snap.near && (
+          {snap.near && !sel && (
             <button
               type="button"
               onClick={() => openDialog(snap.near as string)}

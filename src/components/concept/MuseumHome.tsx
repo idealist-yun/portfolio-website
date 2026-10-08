@@ -171,7 +171,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       {/* hero */}
       <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">
         <Stage>
-        <div className="relative md:min-h-[820px]">
+        <div className="relative md:min-h-[900px]">
           <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-instrument)] text-[clamp(2.5rem,10vw,4rem)] leading-[0.98] tracking-[-0.02em] md:max-w-[560px] md:text-[80px]">
             Where business, design &amp; engineering <em style={{ color: RED }}>meet.</em>
           </h1>
@@ -242,14 +242,14 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="53%" top="80%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
+            <DeskItem left="53%" top="88%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#ffd0dc">
                 <p className={`mb-2 ${noteLabel}`}>off hours · play me (a – k, w e t y u)</p>
                 <Piano tone="paper" />
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="46%" top="58%" rot={2} z={6} front={front} onFront={bump} className="md:w-[330px]">
+            <DeskItem left="46%" top="58%" rot={2} z={6} front={front} onFront={bump} className="md:w-[270px]">
               <PostIt color="#fff6d6" pin="#c8431f">
                 <p className={noteLabel}>how it branches</p>
                 <div className="mt-1">

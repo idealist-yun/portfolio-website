@@ -128,6 +128,68 @@ const noteLabel = "text-[10px] font-semibold uppercase tracking-[0.14em] opacity
 const noteHand = "leading-[1.05]";
 
 
+
+// first visit per tab: a red dot, one line, then the dot opens the page like an aperture
+function Opening() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const mark = () => {
+      try {
+        sessionStorage.setItem("opened", "1");
+      } catch {
+        /* storage unavailable */
+      }
+    };
+    const hide = () => {
+      el.style.display = "none";
+      mark();
+    };
+    let seen = false;
+    try {
+      seen = sessionStorage.getItem("opened") === "1";
+    } catch {
+      /* storage unavailable */
+    }
+    if (seen || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      hide();
+      return;
+    }
+    const t = window.setTimeout(hide, 2900);
+    el.addEventListener("pointerdown", hide);
+    return () => {
+      window.clearTimeout(t);
+      el.removeEventListener("pointerdown", hide);
+    };
+  }, []);
+  return (
+    <div ref={ref} aria-hidden className="open-wrap fixed inset-0 z-[600]">
+      <div className="open-sheet absolute inset-0" style={{ background: PAPER, backgroundImage: grain }} />
+      <span className="open-dot absolute left-1/2 top-1/2 h-[14px] w-[14px] -translate-x-1/2 -translate-y-1/2 rounded-full" style={{ background: RED }} />
+      <p
+        className="open-text absolute left-0 right-0 top-[calc(50%+30px)] text-center font-[family-name:var(--font-instrument)] text-[clamp(1.4rem,3.4vw,2.2rem)] italic"
+        style={{ color: INK }}
+      >
+        Everything starts from a dot.
+      </p>
+      <style>{`
+        @property --r { syntax: "<length>"; inherits: false; initial-value: 0px; }
+        .open-wrap { animation: openWrap 2.9s linear forwards; }
+        .open-sheet { --r: 0px; -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent var(--r), #000 calc(var(--r) + 1px)); mask-image: radial-gradient(circle at 50% 50%, transparent var(--r), #000 calc(var(--r) + 1px)); animation: openReveal 1.15s 1.6s cubic-bezier(.7,0,.3,1) forwards; }
+        .open-dot { animation: openDot .45s cubic-bezier(.2,.9,.3,1.3) both, openDotOut .2s 1.6s forwards; }
+        .open-text { animation: openText .7s .5s ease-out both, openTextOut .3s 1.45s forwards; }
+        @keyframes openReveal { from { --r: 0px } to { --r: 160vmax } }
+        @keyframes openDot { from { transform: translate(-50%, -50%) scale(0) } to { transform: translate(-50%, -50%) scale(1) } }
+        @keyframes openDotOut { to { opacity: 0 } }
+        @keyframes openText { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }
+        @keyframes openTextOut { to { opacity: 0 } }
+        @keyframes openWrap { 0%, 98% { visibility: visible } 100% { visibility: hidden; pointer-events: none } }
+      `}</style>
+    </div>
+  );
+}
+
 export default function MuseumHome({ preview = false }: { preview?: boolean }) {
   const [front, setFront] = useState(0);
   const bump = () => setFront((f) => f + 1);
@@ -137,13 +199,23 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       className="fixed inset-0 z-[100] overflow-y-auto overflow-x-hidden"
       style={{ background: PAPER, color: INK, backgroundImage: grain }}
     >
+      <Opening />
       {preview && <Switcher current="b" />}
 
       <header className="sticky top-0 z-40 border-b border-black/10 backdrop-blur-md" style={{ background: "rgba(243,238,226,0.82)" }}>
         <div className="mx-auto flex max-w-[1240px] items-center justify-between px-6 py-3.5">
-          <Link href="/" className="group flex items-center gap-2.5" title="Everything starts from a dot">
-            <span aria-hidden className="h-3 w-3 rounded-full transition-transform duration-300 group-hover:scale-150" style={{ background: RED }} />
-            <span className="font-[family-name:var(--font-instrument)] text-[1.7rem] leading-none">Ian Lee</span>
+          <Link href="/" className="group flex items-center pt-2" title="Everything starts from a dot">
+            <span className="font-[family-name:var(--font-instrument)] text-[1.8rem] leading-none">
+              <span className="relative inline-block">
+                I
+                <span
+                  aria-hidden
+                  className="absolute left-1/2 h-[0.2em] w-[0.2em] -translate-x-1/2 rounded-full transition-transform duration-300 group-hover:scale-150"
+                  style={{ background: RED, top: "-0.2em" }}
+                />
+              </span>
+              an Lee
+            </span>
           </Link>
           <nav className="hidden gap-7 font-mono text-[11px] uppercase tracking-wider sm:flex" style={{ color: MUTED }}>
             {[

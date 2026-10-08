@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DeskItem, InkDiagram } from "@/components/concept/Desk";
 import ObservationRoom from "@/components/concept/ObservationRoom";
 import Switcher from "@/components/concept/Switcher";
@@ -32,6 +32,60 @@ function PostIt({ color, children, pin = "#e2493a", className = "" }: { color: s
         style={{ background: pin }}
       />
       {children}
+    </div>
+  );
+}
+
+// a horizontal strip you can wheel, drag, or step through with arrows
+function HScroll({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ x: number; left: number } | null>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+      const max = el.scrollWidth - el.clientWidth;
+      const next = el.scrollLeft + e.deltaY;
+      if ((e.deltaY > 0 && el.scrollLeft < max - 1) || (e.deltaY < 0 && el.scrollLeft > 1)) {
+        e.preventDefault();
+        el.scrollLeft = Math.max(0, Math.min(max, next));
+      }
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+  const step = (dir: number) => ref.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+  return (
+    <div className="relative">
+      <div
+        ref={ref}
+        className="mt-8 cursor-grab overflow-x-auto pb-6 [scrollbar-width:none] active:cursor-grabbing [&::-webkit-scrollbar]:hidden"
+        onPointerDown={(e) => {
+          if (e.pointerType !== "mouse" || !ref.current) return;
+          drag.current = { x: e.clientX, left: ref.current.scrollLeft };
+        }}
+        onPointerMove={(e) => {
+          if (drag.current && ref.current) ref.current.scrollLeft = drag.current.left - (e.clientX - drag.current.x);
+        }}
+        onPointerUp={() => (drag.current = null)}
+        onPointerLeave={() => (drag.current = null)}
+      >
+        {children}
+      </div>
+      <div className="mt-2 flex justify-end gap-2 px-6 font-mono text-[11px] sm:px-[max(1.5rem,calc((100vw-1240px)/2+1.5rem))]">
+        {[-1, 1].map((d) => (
+          <button
+            key={d}
+            type="button"
+            onClick={() => step(d)}
+            aria-label={d < 0 ? "Scroll left" : "Scroll right"}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/25 transition-colors hover:bg-black hover:text-[#f3eee2]"
+          >
+            {d < 0 ? "←" : "→"}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -234,10 +288,10 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
             A path, <em style={{ color: RED }}>unrolled</em>
           </h2>
           <p className="mt-2 font-mono text-[11px] uppercase tracking-wider" style={{ color: MUTED }}>
-            scroll sideways →
+            scroll, drag, or use the arrows →
           </p>
         </div>
-        <div className="mt-8 overflow-x-auto pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <HScroll>
           <div className="relative flex w-max gap-5 px-6 pt-8 sm:px-[max(1.5rem,calc((100vw-1240px)/2+1.5rem))]">
             <span aria-hidden className="absolute left-0 right-0 top-[1.15rem] h-px bg-black/30" />
             {journey.map((j, i) => {
@@ -264,7 +318,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               );
             })}
           </div>
-        </div>
+        </HScroll>
       </section>
 
       <footer className="mx-auto max-w-[1240px] px-6 pb-32 pt-10">

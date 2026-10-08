@@ -5,7 +5,7 @@ export const profile = {
   title: "Strategic Designer & Researcher",
   tagline: "Data-driven, AI-driven strategic design — at the intersection of disability, business, and human possibility.",
   location: "Philadelphia, PA, USA",
-  email: "ideaist@engineering.upenn.edu",
+  email: "idealist@engineering.upenn.edu",
   phone: "+1 (267) 679-0962",
   affiliation: "University of Pennsylvania, Master of Integrated Product Design (M:IPD)",
   affiliationPeriod: "Aug. 2026 – Present (Expected 2028)",

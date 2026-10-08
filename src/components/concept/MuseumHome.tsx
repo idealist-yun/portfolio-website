@@ -176,7 +176,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
             Where business, design &amp; engineering <em style={{ color: RED }}>meet.</em>
           </h1>
           <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-7" style={{ color: MUTED }}>
-            I&rsquo;m Ian, a service &amp; experience designer working to fill the whole double diamond: from discovering the problem to validating the solution with simulated users (generative agents), before anything ships.
+            I&rsquo;m Ian, a strategic, service &amp; experience designer working to fill the whole double diamond: from discovering the problem to validating the solution with simulated users (generative agents), before anything ships.
           </p>
           <p className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05]" style={{ color: INK }}>
             Discover. Define. Develop. Deliver. Then simulate.

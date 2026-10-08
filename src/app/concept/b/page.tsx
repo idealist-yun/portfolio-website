@@ -89,8 +89,8 @@ export default function ConceptB() {
             Designing for <em style={{ color: RED }}>vulnerability,</em> with data &amp; AI.
           </h1>
           <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-8" style={{ color: MUTED }}>
-            Hi, I&rsquo;m Yun, a strategic designer. Design thinking sits at the centre; data and AI
-            simulation are the instruments I&rsquo;m learning to play it with.
+            Hi, I&rsquo;m Yun, a strategic designer. Welcome to the museum of my work: the army,
+            care, Samsung, robots, the lab and a mall. I&rsquo;m the one watching how visitors walk it.
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">
@@ -104,7 +104,7 @@ export default function ConceptB() {
                 </div>
               </div>
               <p className="mt-2 text-center text-[1.35rem] leading-none" style={{ fontFamily: "var(--font-hand)", color: MUTED }}>
-                five simulated people, one ordinary day (click the pictures on the walls!)
+                the museum of Yun: six halls, five visitors. Click a visitor to follow, an exhibit to open.
               </p>
             </DeskItem>
 

@@ -260,7 +260,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">
         <Stage>
         <div className="relative md:min-h-[900px]">
-          <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-instrument)] text-[clamp(2.5rem,10vw,4rem)] leading-[0.98] tracking-[-0.02em] md:max-w-[540px] md:text-[72px]">
+          <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-dm)] text-[clamp(2.2rem,9vw,3.6rem)] leading-[1.04] tracking-[-0.01em] md:max-w-[540px] md:text-[56px]">
             <span className="block md:whitespace-nowrap">
               Standing on the <em style={{ color: RED }}>edge.</em>
             </span>

@@ -18,10 +18,10 @@ export default function Switcher({ current, dark }: { current: "a" | "b"; dark?:
       }`}
     >
       <Link href="/concept/a" className={item(current === "a")}>
-        A<span className="hidden sm:inline"> · Multiverse</span>
+        A<span className="hidden sm:inline"> · Glass deck</span>
       </Link>
       <Link href="/concept/b" className={item(current === "b")}>
-        B<span className="hidden sm:inline"> · Paper &amp; ink</span>
+        B<span className="hidden sm:inline"> · Blackboard</span>
       </Link>
       <Link href="/" className={item(false)}>
         <span className="sm:hidden">Site</span>

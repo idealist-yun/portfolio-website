@@ -4,11 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { DeskItem } from "@/components/concept/Desk";
-import ObservationRoom from "@/components/concept/ObservationRoom";
+import Blackboard from "@/components/concept/Blackboard";
 import Switcher from "@/components/concept/Switcher";
 import ProjectBento from "@/components/concept/ProjectBento";
 import { ClockPair, Piano } from "@/components/concept/widgets";
-import { journey, whyQuote } from "@/data/concept";
+import { journey } from "@/data/concept";
 import { profile } from "@/data/profile";
 
 const PAPER = "#f3eee2";
@@ -67,100 +67,64 @@ export default function ConceptB() {
         </div>
       </header>
 
-      {/* hero */}
-      <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">
-        <div className="relative md:min-h-[820px]">
-          <h1 className="relative z-[5] max-w-[17ch] font-[family-name:var(--font-instrument)] text-[clamp(3rem,8.6vw,8.4rem)] leading-[0.92] tracking-[-0.02em] md:max-w-[10.9ch]">
-            Designing for <em style={{ color: RED }}>vulnerability,</em> with data &amp; AI.
-          </h1>
-          <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-8" style={{ color: MUTED }}>
-            Hi, I&rsquo;m Yun, a strategic designer. Design thinking sits at the centre; data and AI
-            simulation are the instruments I&rsquo;m learning to play it with.
-          </p>
+      {/* blackboard hero */}
+      <Blackboard />
 
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">
-            <DeskItem left="47%" top="0%" rot={0} z={3} front={front} onFront={bump} className="md:w-[600px]">
-              <div
-                className="rounded-[4px] p-[10px] shadow-[0_22px_40px_-18px_rgba(29,27,24,0.7)]"
-                style={{ background: "linear-gradient(135deg,#9a6a38,#6e4520)", boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.18), 0 22px 40px -18px rgba(29,27,24,0.7)" }}
-              >
-                <div className="rounded-[2px] bg-[#f8f2e4] p-3">
-                  <ObservationRoom chrome={false} showNotes={false} showLanes={false} />
-                </div>
-              </div>
-              <p className="mt-2 text-center text-[1.35rem] leading-none" style={{ fontFamily: "var(--font-hand)", color: MUTED }}>
-                five simulated people, one ordinary day (click the pictures on the walls!)
-              </p>
-            </DeskItem>
-
-            <DeskItem left="76%" top="60%" rot={4} z={4} front={front} onFront={bump} className="md:w-[250px]">
-              <div className="rounded-sm bg-white p-2 pb-8 shadow-[0_14px_30px_-14px_rgba(29,27,24,0.6)]">
-                <Image
-                  src="/images/about-collage.png"
-                  alt="Yun traveling, surfing, playing piano and running a marathon"
-                  width={760}
-                  height={372}
-                  className="h-auto w-full"
-                />
-                <p className="mt-2 text-center text-xl leading-none" style={{ fontFamily: "var(--font-hand)" }}>
-                  travel · piano · running · reading
-                </p>
-              </div>
-            </DeskItem>
-
-            <DeskItem left="24%" top="63%" rot={-3} z={5} front={front} onFront={bump} className="md:w-[250px]">
-              <div className="rounded-[3px] bg-[#f6e7a8] p-5 shadow-[0_12px_26px_-14px_rgba(29,27,24,0.6)]">
-                <p className="text-[1.45rem] leading-[1.15]" style={{ fontFamily: "var(--font-hand)" }}>
-                  &ldquo;{whyQuote}&rdquo;
-                </p>
-                <p className="mt-2 text-lg leading-none" style={{ fontFamily: "var(--font-hand)", color: RED }}>
-                  : the question since childhood
-                </p>
-              </div>
-            </DeskItem>
-
-            <DeskItem left="0%" top="76%" rot={-2} z={4} front={front} onFront={bump} className="md:w-[290px]">
-              <div className={paperCard}>
-                <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: MUTED }}>
-                  Now
-                </p>
-                <p className="mt-2 font-[family-name:var(--font-instrument)] text-2xl leading-tight">
-                  Master of Integrated Product Design, <em>UPenn</em>
-                </p>
-                <p className="mt-1 text-xs" style={{ color: MUTED }}>
-                  Engineering × Design × Wharton · 2026 – 2028
-                </p>
-              </div>
-            </DeskItem>
-
-            <DeskItem left="26%" top="80%" rot={2} z={4} front={front} onFront={bump} className="md:w-[270px]">
-              <div className={paperCard}>
-                <ClockPair tone="paper" />
-              </div>
-            </DeskItem>
-
-            <DeskItem left="56%" top="82%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
-              <div className={paperCard}>
-                <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: MUTED }}>
-                  Off hours · piano (a–k)
-                </p>
-                <Piano tone="paper" />
-              </div>
-            </DeskItem>
-
-            <DeskItem left="82%" top="80%" rot={3} z={6} front={front} onFront={bump} className="md:w-[150px]">
-              <div className="rounded-full border-2 px-4 py-3 text-center" style={{ borderColor: INDIGO, color: INDIGO }}>
-                <p className="font-mono text-[9px] uppercase tracking-[0.18em]">Method</p>
-                <p className="font-[family-name:var(--font-instrument)] text-lg italic leading-tight">
-                  Basic → Data → <span style={{ color: RED }}>AI</span>
-                </p>
-              </div>
-            </DeskItem>
-          </div>
-        </div>
-        <p className="mt-6 hidden font-mono text-[11px] uppercase tracking-[0.18em] md:block" style={{ color: MUTED }}>
-          ↑ everything on the desk is draggable
+      {/* desk */}
+      <section className="mx-auto max-w-[1240px] px-6 pb-4 pt-16">
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em]" style={{ color: MUTED }}>
+          Off the wall, onto the desk · draggable
         </p>
+        <div className="relative mt-4 grid gap-5 sm:grid-cols-2 md:block md:h-[330px]">
+          <DeskItem left="0%" top="4%" rot={-2} z={4} front={front} onFront={bump} className="md:w-[290px]">
+            <div className={paperCard}>
+              <p className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: MUTED }}>
+                Now
+              </p>
+              <p className="mt-2 font-[family-name:var(--font-instrument)] text-2xl leading-tight">
+                Master of Integrated Product Design, <em>UPenn</em>
+              </p>
+              <p className="mt-1 text-xs" style={{ color: MUTED }}>
+                Engineering × Design × Wharton · 2026 – 2028
+              </p>
+            </div>
+          </DeskItem>
+          <DeskItem left="26%" top="40%" rot={2} z={4} front={front} onFront={bump} className="md:w-[270px]">
+            <div className={paperCard}>
+              <ClockPair tone="paper" />
+            </div>
+          </DeskItem>
+          <DeskItem left="29%" top="0%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
+            <div className={paperCard}>
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: MUTED }}>
+                Off hours · piano (a–k)
+              </p>
+              <Piano tone="paper" />
+            </div>
+          </DeskItem>
+          <DeskItem left="58%" top="0%" rot={4} z={4} front={front} onFront={bump} className="md:w-[250px]">
+            <div className="rounded-sm bg-white p-2 pb-8 shadow-[0_14px_30px_-14px_rgba(29,27,24,0.6)]">
+              <Image
+                src="/images/about-collage.png"
+                alt="Yun traveling, surfing, playing piano and running a marathon"
+                width={760}
+                height={372}
+                className="h-auto w-full"
+              />
+              <p className="mt-2 text-center text-xl leading-none" style={{ fontFamily: "var(--font-hand)" }}>
+                travel · piano · running · reading
+              </p>
+            </div>
+          </DeskItem>
+          <DeskItem left="82%" top="18%" rot={3} z={6} front={front} onFront={bump} className="md:w-[150px]">
+            <div className="rounded-full border-2 px-4 py-3 text-center" style={{ borderColor: INDIGO, color: INDIGO }}>
+              <p className="font-mono text-[9px] uppercase tracking-[0.18em]">Method</p>
+              <p className="font-[family-name:var(--font-instrument)] text-lg italic leading-tight">
+                Basic → Data → <span style={{ color: RED }}>AI</span>
+              </p>
+            </div>
+          </DeskItem>
+        </div>
       </section>
 
       {/* work */}

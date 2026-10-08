@@ -30,15 +30,15 @@ const mixc = (h: string, t: string, k: number) => {
 };
 
 // ------------------------------------------------------------ zones (the "universes")
-type ZoneId = "home" | "clinic" | "mall" | "lobby";
+export type ZoneId = "home" | "clinic" | "mall" | "lobby";
 type Zone = { id: ZoneId; name: string; sub: string; color: string; x0: number; y0: number; x1: number; y1: number; project: number };
-const ZONES: Zone[] = [
+export const ZONES: Zone[] = [
   { id: "home", name: "Home", sub: "daily living", color: "#4c7df0", x0: 1, y0: 1, x1: 8, y1: 8, project: 0 },
   { id: "clinic", name: "Clinic", sub: "healthcare", color: "#14b8a6", x0: 12, y0: 1, x1: 19, y1: 8, project: 1 },
   { id: "mall", name: "Mall", sub: "retail", color: "#f5b301", x0: 1, y0: 12, x1: 8, y1: 19, project: 4 },
   { id: "lobby", name: "Robot lobby", sub: "human-robot", color: "#ff6b4a", x0: 12, y0: 12, x1: 19, y1: 19, project: 2 },
 ];
-const zoneColor = (z: ZoneId | "plaza") => (z === "plaza" ? "#c3cddd" : ZONES.find((q) => q.id === z)!.color);
+export const zoneColor = (z: ZoneId | "plaza") => (z === "plaza" ? "#c3cddd" : ZONES.find((q) => q.id === z)!.color);
 const zoneOf = (p: Pt): ZoneId | "plaza" => {
   for (const z of ZONES) if (p[0] >= z.x0 - 0.5 && p[0] <= z.x1 + 0.5 && p[1] >= z.y0 - 0.5 && p[1] <= z.y1 + 0.5) return z.id;
   return "plaza";
@@ -164,9 +164,11 @@ function makeAgent(p: Persona, offset: number): Agent {
   };
 }
 
-type Note = { id: number; who: string; time: string; text: string; need: boolean; color: string; zone: ZoneId };
+export type Note = { id: number; who: string; time: string; hour: number; text: string; need: boolean; color: string; zone: ZoneId };
+
 
 const DAY = 120;
+const hourAt = (t: number) => 7 + ((t % DAY) / DAY) * 16;
 const clockAt = (t: number) => {
   const m = 7 * 60 + ((t % DAY) / DAY) * 16 * 60;
   const hh = Math.floor(m / 60);
@@ -328,10 +330,20 @@ export default function ObservationRoom({
   chrome = true,
   showNotes = true,
   showLanes = true,
+  onNote,
+  hoverId = null,
+  selected,
+  onSelectedChange,
+  active,
 }: {
   chrome?: boolean;
   showNotes?: boolean;
   showLanes?: boolean;
+  onNote?: (n: Note) => void;
+  hoverId?: string | null;
+  selected?: string | null;
+  onSelectedChange?: (id: string | null) => void;
+  active?: boolean;
 }) {
   const router = useRouter();
   const [init] = useState(() => PERSONAS.map((p, i) => makeAgent(p, i)));
@@ -361,7 +373,15 @@ export default function ObservationRoom({
   const [curve, setCurve] = useState<number[]>(() => Array(48).fill(0.6));
   const [playing, setPlaying] = useState(true);
   const [speed, setSpeed] = useState(1);
-  const [sel, setSel] = useState<string | null>(null);
+  const [selInt, setSelInt] = useState<string | null>(null);
+  const sel = selected !== undefined ? selected : selInt;
+  const setSel = useCallback(
+    (v: string | null) => {
+      if (onSelectedChange) onSelectedChange(v);
+      else setSelInt(v);
+    },
+    [onSelectedChange]
+  );
   const [hov, setHov] = useState<string | null>(null);
   const [bbHot, setBbHot] = useState<ZoneId | null>(null);
   const [visible, setVisible] = useState(false);
@@ -382,11 +402,20 @@ export default function ObservationRoom({
   }, []);
 
   const emit = useCallback((a: Agent, st: Station) => {
-    setNotes((arr) =>
-      [{ id: ++noteId.current, who: a.p.id, time: clockAt(clock.current), text: st.note, need: st.need, color: a.p.color, zone: st.zone }, ...arr].slice(0, 4)
-    );
+    const n: Note = {
+      id: ++noteId.current,
+      who: a.p.id,
+      time: clockAt(clock.current),
+      hour: hourAt(clock.current),
+      text: st.note,
+      need: st.need,
+      color: a.p.color,
+      zone: st.zone,
+    };
+    setNotes((arr) => [n, ...arr].slice(0, 4));
     if (st.need) setNeeds((x) => x + 1);
-  }, []);
+    onNote?.(n);
+  }, [onNote]);
 
   const startDo = useCallback(
     (a: Agent) => {
@@ -533,8 +562,9 @@ export default function ObservationRoom({
     });
   }, [startDo]);
 
+  const run = active ?? visible;
   useEffect(() => {
-    if (!playing || !visible) {
+    if (!playing || !run) {
       last.current = null;
       return;
     }
@@ -549,9 +579,9 @@ export default function ObservationRoom({
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [playing, visible, speed, tick, makeSnap]);
+  }, [playing, run, speed, tick, makeSnap]);
 
-  const focus = hov ?? sel;
+  const focus = hov ?? sel ?? hoverId;
   const focusAgent = snap.a.find((a) => a.id === focus);
   const label = clockAt(snap.t);
 
@@ -576,7 +606,7 @@ export default function ObservationRoom({
             onPointerLeave={() => setHov(null)}
             onClick={(e) => {
               e.stopPropagation();
-              setSel((s) => (s === a.id ? null : a.id));
+              setSel(sel === a.id ? null : a.id);
             }}
           >
             <rect x="-14" y="-40" width="28" height="46" fill="transparent" />

@@ -104,7 +104,7 @@ export default function ConceptB() {
                 </div>
               </div>
               <p className="mt-2 text-center text-[1.35rem] leading-none" style={{ fontFamily: "var(--font-hand)", color: MUTED }}>
-                the museum of Yun: six halls, five visitors. Click a visitor to follow, an exhibit to open.
+                the museum of Yun: a docent robot leads the tour, five visitors wander. Click anyone to follow, any picture to open the project.
               </p>
             </DeskItem>
 

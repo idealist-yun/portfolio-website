@@ -859,8 +859,8 @@ export default function ObservationRoom({
               )}
               {z.pics.map(([src, ar], i) => {
                 const side = i === 2 ? "x" : "y";
-                const maxw = side === "x" ? 2.2 : 1.7;
-                const H = Math.min(22, (maxw * 20) / ar);
+                const maxw = side === "x" ? 2.5 : 1.9;
+                const H = Math.min(27, (maxw * 20) / ar);
                 const wu = (ar * H) / 20;
                 const xc = (z.x0 + z.x1) / 2;
                 const c = side === "x" ? (z.y0 + z.y1) / 2 - 0.3 : xc + (i === 0 ? -2 : 2);
@@ -876,7 +876,7 @@ export default function ObservationRoom({
                       router.push(hrefFor(f));
                     }}
                   >
-                    <WallPic src={src} side={side} wall={side === "x" ? z.x0 : z.y0} c={c} wu={wu} z0={16} H={H} hot={bbHot === z.id} color={z.color} />
+                    <WallPic src={src} side={side} wall={side === "x" ? z.x0 : z.y0} c={c} wu={wu} z0={14} H={H} hot={bbHot === z.id} color={z.color} />
                   </g>
                 );
               })}

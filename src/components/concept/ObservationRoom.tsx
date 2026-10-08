@@ -849,6 +849,8 @@ type Snap = {
   cam: { x: number; y: number; w: number; h: number };
 };
 
+// physical keys, so Korean (or any non-Latin) input layouts still work
+const keyOf = (e: KeyboardEvent) => (e.code.startsWith("Key") ? e.code.slice(3).toLowerCase() : e.code.startsWith("Digit") ? e.code.slice(5) : e.key);
 const KEYDIR: Record<string, Pt> = { ArrowUp: [-1, -1], w: [-1, -1], ArrowDown: [1, 1], s: [1, 1], ArrowLeft: [-1, 1], a: [-1, 1], ArrowRight: [1, -1], d: [1, -1] };
 const START: Pt = fixSpot([11.2, 9.7]);
 
@@ -962,7 +964,7 @@ export default function ObservationRoom({
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       const s = st.current;
-      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      const k = keyOf(e);
       if (k === "Escape") {
         if (s.dlg) setDlg(null);
         else if (s.follow) {
@@ -994,7 +996,7 @@ export default function ObservationRoom({
       }
     };
     const up = (e: KeyboardEvent) => {
-      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      const k = keyOf(e);
       keys.current.delete(k);
     };
     window.addEventListener("keydown", down);

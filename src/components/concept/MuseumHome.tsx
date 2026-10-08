@@ -206,12 +206,12 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
         <div className="mx-auto flex max-w-[1240px] items-center justify-between px-6 py-3.5">
           <Link href="/" className="group flex items-center pt-2" title="Everything starts from a dot">
             <span className="font-[family-name:var(--font-instrument)] text-[1.8rem] leading-none">
-              <span className="relative inline-block">
-                I
+              <span className="relative inline-block italic">
+                ı
                 <span
                   aria-hidden
-                  className="absolute left-1/2 h-[0.2em] w-[0.2em] -translate-x-1/2 rounded-full transition-transform duration-300 group-hover:scale-150"
-                  style={{ background: RED, top: "-0.2em" }}
+                  className="absolute h-[0.17em] w-[0.17em] rounded-full transition-transform duration-300 group-hover:scale-150"
+                  style={{ background: RED, left: "0.255em", top: "0.14em" }}
                 />
               </span>
               an Lee

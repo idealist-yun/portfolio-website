@@ -219,15 +219,42 @@ export const publications: Role[] = [
 
 export const extracurricular: Role[] = [
   {
+    org: "IPDGA Career Committee | Integrated Product Design Graduate Association",
+    title: "Member",
+    location: "Philadelphia, USA",
+    period: "Sep. 2026 – Present",
+    bullets: [
+      "Working on the department's alumni-network initiatives: an interest- and career-based alumni dashboard, mentor–mentee matching for first- and second-year students, and a newsletter for alumni.",
+    ],
+  },
+  {
+    org: "TOM | Tikkun Olam Makers, University of Pennsylvania",
+    title: "Member",
+    location: "Philadelphia, USA",
+    period: "Sep. 2026 – Present",
+    bullets: [
+      "Building low-cost assistive devices with clinicians and users. Working on Guided Hands, a mechanical writing aid that turns large arm movements into pen control for people with limited fine-motor ability, redesigned for quiet, tight, low-cost sliding.",
+    ],
+  },
+  {
+    org: "Federation of Korea ROTC 60th Officer",
     title: "President",
+    location: "Seoul, Korea",
+    period: "Mar. 2022 – Present",
+    bullets: [
+      "Represent 3,561 ROTC 60th officers; organized a job fair with Shinhan Financial Group, promoted veteran recruitment with KB Kookmin Bank and E-Land. Partnered with 10 hospitals for their families.",
+    ],
+  },
+  {
     org: "DeepBridge | Regular Customer Management AI Tool Start-up",
+    title: "President",
     location: "Seoul, Korea",
     period: "May 2021 – Oct. 2021",
     bullets: ["Customer mgmt software startup using POS and CCTV data, previously registered in SKKU campus town."],
   },
   {
-    title: "President",
     org: "GRU | Start-up Strategic Consulting Club",
+    title: "President",
     location: "Seoul, Korea",
     period: "Jan. 2020 – May 2021",
     bullets: [

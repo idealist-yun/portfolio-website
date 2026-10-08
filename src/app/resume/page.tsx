@@ -42,16 +42,16 @@ function Bullets({ items }: { items: string[] }) {
   );
 }
 
-function RoleBlock({ r }: { r: Role }) {
+function RoleBlock({ r, lead = "title" }: { r: Role; lead?: "title" | "org" }) {
   return (
     <div className="border-t border-border py-6 first:border-t-0 first:pt-0">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <p className="font-serif text-lg font-semibold text-foreground">{r.title}</p>
+        <p className="font-serif text-lg font-semibold text-foreground">{lead === "org" ? r.org : r.title}</p>
         <p className="text-sm text-muted">{r.period}</p>
       </div>
       {(r.org || r.location) && (
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <p className="text-sm italic text-muted">{r.org}</p>
+          <p className="text-sm italic text-muted">{lead === "org" ? r.title : r.org}</p>
           {r.location && <p className="text-sm italic text-muted">{r.location}</p>}
         </div>
       )}
@@ -160,7 +160,7 @@ export default function ResumePage() {
 
       <Section title="Extra-Curricular Activity">
         {extracurricular.map((r, i) => (
-          <RoleBlock key={i} r={r} />
+          <RoleBlock key={i} r={r} lead="org" />
         ))}
       </Section>
 

@@ -173,13 +173,13 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
         <Stage>
         <div className="relative md:min-h-[820px]">
           <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-instrument)] text-[clamp(2.5rem,10vw,4rem)] leading-[0.98] tracking-[-0.02em] md:max-w-[560px] md:text-[80px]">
-            Design for the people <em style={{ color: RED }}>systems forget.</em>
+            Where business, design &amp; engineering <em style={{ color: RED }}>meet.</em>
           </h1>
           <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-7" style={{ color: MUTED }}>
-            I&rsquo;m Ian: a strategic designer, PM, business developer, and service &amp; experience designer. The army, a design lab, Samsung, now Penn.
+            I&rsquo;m Ian, a service &amp; experience designer working to fill the whole double diamond: from discovering the problem to validating the solution with simulated users (generative agents), before anything ships.
           </p>
           <p className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05]" style={{ color: INK }}>
-            Start with a person. Add data. Test with AI. Make it real.
+            Discover. Define. Develop. Deliver. Then simulate.
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">

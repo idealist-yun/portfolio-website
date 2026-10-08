@@ -185,7 +185,7 @@ function route(from: string, to: string): Pt[] {
 
 
 // ------------------------------------------------------------ the seven Yuns (one per chapter; they live in the wing of their theme)
-type YunId = "army" | "care" | "samsung" | "robots" | "lab" | "mall" | "penn";
+type YunId = "army" | "care" | "robots" | "mall" | "penn";
 type YunInfo = { tag: string; home: ZoneId; doing: string; hi: string; who: string; made: string; href: string; hrefLabel: string };
 const YUN: Record<YunId, YunInfo> = {
   army: {
@@ -208,34 +208,14 @@ const YUN: Record<YunId, YunInfo> = {
     href: hrefFor(featured[0]),
     hrefLabel: "Show me the exhibit",
   },
-  samsung: {
-    tag: "Samsung Yun",
-    home: "samsung",
-    doing: "forecasting demand",
-    hi: "Hi. I'm the Yun at Samsung.",
-    who: journey[5].note,
-    made: "A demand dashboard with an AI chatbot, and a Bixby cooking assistant for screen-based appliances.",
-    href: "/project/samsung-ax-dashboard",
-    hrefLabel: "Show me the exhibit",
-  },
   robots: {
-    tag: "Robot-lab Yun",
+    tag: "Robotics Yun",
     home: "robots",
-    doing: "choreographing robots",
-    hi: "Hi. I'm the Yun from the SDI robot projects.",
+    doing: "choreographing robots and running the simulator",
+    hi: "Hi. I'm the Yun from the robot and simulation projects.",
     who: journey[4].note,
-    made: featured[2].line,
+    made: featured[2].line + " And the simulator: " + featured[1].line,
     href: hrefFor(featured[2]),
-    hrefLabel: "Show me the exhibit",
-  },
-  lab: {
-    tag: "Simulator Yun",
-    home: "lab",
-    doing: "running the simulator",
-    hi: "Hi. I'm the Yun who builds the simulator.",
-    who: "Personas of people with developmental disabilities, augmented by data and run through AI simulation.",
-    made: featured[1].line,
-    href: hrefFor(featured[1]),
     hrefLabel: "Show me the exhibit",
   },
   mall: {
@@ -243,7 +223,7 @@ const YUN: Record<YunId, YunInfo> = {
     home: "mall",
     doing: "turning customer data into strategy",
     hi: "Hi. I'm the Yun who turned customer data into strategy.",
-    who: "The lab where it started: customer data turned into service strategy for malls, appliances and apartment life.",
+    who: "The lab where it started: customer data turned into service strategy for malls, appliances and apartment life. Later, the same habits took me into Samsung.",
     made: featured[4].line,
     href: hrefFor(featured[4]),
     hrefLabel: "Show me the exhibit",
@@ -266,10 +246,8 @@ type Spot = [ZoneId, "a" | "b", number];
 const ROUTES: Record<YunId, Spot[]> = {
   army: [["army", "a", 6], ["army", "b", 4], ["care", "a", 3], ["army", "a", 5], ["army", "b", 4], ["tom", "b", 3]],
   care: [["care", "a", 6], ["care", "b", 4], ["access", "a", 3], ["care", "b", 5], ["tom", "a", 3], ["lab", "a", 3]],
-  samsung: [["samsung", "a", 6], ["samsung", "b", 4], ["lifelog", "b", 3], ["samsung", "a", 5], ["raemian", "b", 3], ["samsung", "b", 4]],
-  robots: [["robots", "a", 6], ["robots", "b", 4], ["lab", "b", 3], ["robots", "a", 5], ["robots", "b", 4], ["tom", "b", 3]],
-  lab: [["lab", "a", 6], ["lab", "b", 4], ["robots", "a", 3], ["lab", "b", 5], ["lab", "a", 4], ["access", "b", 3]],
-  mall: [["mall", "a", 6], ["mall", "b", 4], ["raemian", "a", 3], ["mall", "b", 5], ["fandom", "a", 3], ["lifelog", "a", 3]],
+  robots: [["robots", "a", 6], ["robots", "b", 4], ["lab", "a", 4], ["lab", "b", 4], ["robots", "a", 5], ["tom", "b", 3]],
+  mall: [["mall", "a", 6], ["mall", "b", 4], ["raemian", "a", 3], ["fandom", "a", 3], ["lifelog", "a", 3], ["samsung", "a", 4]],
   penn: [["tom", "a", 6], ["tom", "b", 4], ["access", "a", 3], ["tom", "b", 5], ["care", "a", 3], ["tom", "a", 4]],
 };
 
@@ -280,7 +258,7 @@ const makeYun = (id: YunId, k: number): Yun => {
   return { id, pos: [...NODES[node]] as Pt, path: [], seg: 0, mode: "do", left: 2 + k * 1.2, i: 0, node, face: 1 };
 };
 
-const WELCOME = "Welcome. This museum is about one person, in seven chapters. Follow me!";
+const WELCOME = "Welcome. This museum is about one person, in five chapters. Follow me!";
 const TOUR: ZoneId[] = ["army", "care", "access", "tom", "robots", "lab", "mall", "raemian", "fandom", "lifelog", "samsung"];
 type Docent = { pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1; hall: ZoneId | null };
 
@@ -294,7 +272,7 @@ function dialogNode(who: string, key: string): DNode {
         choices: [{ label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
       };
     return {
-      text: "I'm the docent. Every Yun you see here is Yun at one chapter of their life, living in the wing of their theme. Talk to all seven to fill your passport.",
+      text: "I'm the docent. Every Yun you see here is Yun at one chapter of their life, living in the wing of their theme. Talk to all five to fill your passport.",
       choices: [{ label: "Where do I start?", go: "start" }, { label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
     };
   }
@@ -438,11 +416,6 @@ function buildWorld(): Item[] {
     if (o.solid !== false) OBST.push([gx - 0.2, gy - 0.2, gx + w + 0.2, gy + d + 0.2]);
   };
 
-  ZONES.forEach((z) => {
-    const { cx, cy, color } = z;
-    out.push({ depth: cx + cy - 2.6, el: <g key={`s-${z.id}`}><Spot cx={cx} cy={cy} color={color} /></g> });
-    out.push({ depth: cx + cy + 3, el: <g key={`o-${z.id}`}><Orbs cx={cx} cy={cy} color={color} /></g> });
-  });
   // free-standing picture panels block the floor
   PANELS.filter((p) => !p.wall).forEach((p) => {
     if (p.plane === "y") OBST.push([p.along - p.wu / 2 - 0.15, p.fixed - 0.25, p.along + p.wu / 2 + 0.15, p.fixed + 0.25]);
@@ -734,7 +707,7 @@ const PROPS = buildWorld();
 
 // ------------------------------------------------------------ people
 type Kind = YunId | "you";
-const SHIRT: Record<Kind, string> = { army: "#5b7a46", care: "#6a9bff", samsung: "#eef0ff", robots: "#ff8a66", lab: "#f6f8fb", mall: "#ffd24a", penn: "#2a3f7f", you: "#ff4d6d" };
+const SHIRT: Record<Kind, string> = { army: "#5b7a46", care: "#6a9bff", robots: "#ff8a66", mall: "#ffd24a", penn: "#2a3f7f", you: "#ff4d6d" };
 
 function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) {
   const shirt = SHIRT[kind];
@@ -744,15 +717,7 @@ function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) 
       <g transform={`translate(0 ${bob})`}>
         <rect x="-4" y="-6" width="3" height="6" rx="1.2" fill="#56618a" />
         <rect x="1" y="-6" width="3" height="6" rx="1.2" fill="#56618a" />
-        <rect x="-5.5" y="-17" width="11" height="12" rx="4.5" fill={shirt} stroke={kind === "samsung" || kind === "lab" ? "rgba(70,100,150,0.4)" : "none"} strokeWidth="0.8" />
-        {kind === "lab" && <rect x="-1" y="-17" width="2" height="12" fill="#2fb8a8" />}
-        {kind === "samsung" && (
-          <>
-            <line x1="-1.5" y1="-17" x2="0" y2="-11" stroke="#1f2a44" strokeWidth="0.9" />
-            <line x1="1.5" y1="-17" x2="0" y2="-11" stroke="#1f2a44" strokeWidth="0.9" />
-            <rect x="-1.6" y="-11" width="3.2" height="3.8" rx="0.6" fill="#4a5bd8" />
-          </>
-        )}
+        <rect x="-5.5" y="-17" width="11" height="12" rx="4.5" fill={shirt} stroke="none" strokeWidth="0.8" />
         <circle cx="0" cy="-23" r="6.2" fill="#ffe0c4" />
         <path d="M-6.2,-24 Q-6,-30 0,-30 Q6,-30 6.2,-24 Q2,-27 -1,-26 Q-5,-26 -6.2,-24 Z" fill="#1f2a44" />
         <circle cx="-2.2" cy="-22.5" r="0.9" fill={INK} />
@@ -761,13 +726,6 @@ function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) 
           <>
             <path d="M-6.6,-25 Q-6,-32 0,-32 Q6,-32 6.6,-25 Z" fill="#4a6a38" />
             <rect x="-1" y="-26.4" width="9" height="2" rx="1" fill="#3a5430" />
-          </>
-        )}
-        {kind === "lab" && (
-          <>
-            <circle cx="-2.6" cy="-22.6" r="2.1" fill="none" stroke={INK} strokeWidth="0.8" />
-            <circle cx="2.6" cy="-22.6" r="2.1" fill="none" stroke={INK} strokeWidth="0.8" />
-            <line x1="-0.5" y1="-22.6" x2="0.5" y2="-22.6" stroke={INK} strokeWidth="0.8" />
           </>
         )}
         {kind === "robots" && (
@@ -1398,7 +1356,24 @@ export default function ObservationRoom({
       ),
     };
   });
-  const scene = [...PROPS, ...panelItems, ...peopleItems].sort((a, b) => a.depth - b.depth);
+  const activeId: ZoneId | null = (() => {
+    if (picHot) return picHot;
+    if (snap.doc.hall && snap.doc.mode === "do") return snap.doc.hall;
+    let best: ZoneId | null = null;
+    let bd = 3.4;
+    ZONES.forEach((z) => {
+      const d = dist2(snap.p.pos, [z.cx, z.cy + 1]);
+      if (d < bd) {
+        bd = d;
+        best = z.id;
+      }
+    });
+    return best;
+  })();
+  const activeItems: Item[] = activeId
+    ? [{ depth: hallOf(activeId).cx + hallOf(activeId).cy - 2.6, el: <g key="active-fx"><Spot cx={hallOf(activeId).cx} cy={hallOf(activeId).cy} color={hallOf(activeId).color} /><Orbs cx={hallOf(activeId).cx} cy={hallOf(activeId).cy} color={hallOf(activeId).color} /></g> }]
+    : [];
+  const scene = [...PROPS, ...panelItems, ...activeItems, ...peopleItems].sort((a, b) => a.depth - b.depth);
 
   const dnode = dlg ? dialogNode(dlg.who, dlg.key) : null;
   const dcolor = dlg ? (dlg.who === "D" ? INK : yunColor(dlg.who as YunId)) : INK;
@@ -1512,18 +1487,11 @@ export default function ObservationRoom({
           );
         })}
 
-        {/* rugs under each exhibit */}
-        {ZONES.map((z) => {
-          const stamped = (Object.keys(YUN) as YunId[]).some((id) => met.includes(id) && YUN[id].home === z.id);
-          const here = snap.doc.hall === z.id && snap.doc.mode === "do";
+        {/* a rug appears under the exhibit you are at */}
+        {ZONES.filter((z) => z.id === activeId).map((z) => {
           const x0 = z.cx - z.rw, x1 = z.cx + z.rw, y0 = z.cy - 1.9, y1 = z.cy + 3.3, c = 0.7;
           const oct = [P(x0 + c, y0), P(x1 - c, y0), P(x1, y0 + c), P(x1, y1 - c), P(x1 - c, y1), P(x0 + c, y1), P(x0, y1 - c), P(x0, y0 + c)];
-          return (
-            <g key={z.id}>
-              <polygon points={pts(oct)} fill={mixc(z.color, "#ffffff", stamped ? 0.66 : 0.8)} stroke={z.color} strokeWidth={here ? 3 : 1.4} strokeDasharray={here ? "6 4" : undefined} opacity="0.95" />
-              <polygon points={pts([P(x0 + 0.5, y0 + 0.5), P(x1 - 0.5, y0 + 0.5), P(x1 - 0.5, y1 - 0.5), P(x0 + 0.5, y1 - 0.5)])} fill="none" stroke="#fff" strokeWidth="1" opacity="0.8" />
-            </g>
-          );
+          return <polygon key={z.id} points={pts(oct)} fill={mixc(z.color, "#ffffff", 0.78)} stroke={z.color} strokeWidth="2" strokeDasharray="6 4" opacity="0.95" />;
         })}
 
         {/* pictures hung on the walls */}
@@ -1557,7 +1525,7 @@ export default function ObservationRoom({
           );
         })()}
 
-        {ZONES.map((z) => {
+        {ZONES.filter((z) => z.id === activeId).map((z) => {
           const f = z.link;
           const sp = P(z.cx, z.cy, 84);
           const w = (z.name.length + z.sub.length) * 4.6 + 26;
@@ -1737,7 +1705,7 @@ export default function ObservationRoom({
         </Link>
       </div>
       <div className="flex items-center gap-2 text-[11px]" style={{ fontFamily: "var(--font-pixel)" }}>
-        <span className="uppercase opacity-55">passport {met.length}/7</span>
+        <span className="uppercase opacity-55">passport {met.length}/5</span>
         <span className="flex gap-1">
           {YUN_IDS.map((id) => (
             <span key={id} title={YUN[id].tag} className="h-3.5 w-3.5 rounded-full border" style={{ borderColor: yunColor(id), background: met.includes(id) ? yunColor(id) : "transparent" }} />

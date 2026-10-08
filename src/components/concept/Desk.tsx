@@ -76,7 +76,7 @@ export function InkDiagram() {
   const draw = (delay: number) => ({
     strokeDasharray: 1,
     strokeDashoffset: 1,
-    animation: `inkdraw 1.6s ${delay}s cubic-bezier(.4,.1,.2,1) forwards`,
+    animation: `inkdraw 10s ${delay}s cubic-bezier(.4,.1,.2,1) infinite backwards`,
   });
   const branches = [
     { d: "M262,140 C300,110 318,70 336,44", l: "disability", x: 292, y: 36 },
@@ -88,26 +88,30 @@ export function InkDiagram() {
   ];
   return (
     <svg viewBox="0 0 380 280" className="h-auto w-full" fill="none" stroke="#1d1b18" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <style>{`@keyframes inkdraw{to{stroke-dashoffset:0}}`}</style>
+      <style>{`@keyframes inkdraw{0%{stroke-dashoffset:1}16%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}`}</style>
       <path pathLength={1} style={draw(0)} d="M20,140 L84,66 L148,140 L84,214 Z" />
       <path pathLength={1} style={draw(0.5)} d="M148,140 L205,76 L262,140 L205,204 Z" stroke="#c8431f" />
       <path pathLength={1} style={draw(1)} d="M262,140 L262,140" />
       {branches.map((b, i) => (
         <g key={b.l}>
           <path pathLength={1} style={draw(1 + i * 0.12)} d={b.d} strokeWidth="1.6" />
+          <circle r="2.6" fill="#c8431f" stroke="none">
+            <animateMotion dur={`${3 + (i % 3) * 0.6}s`} begin={`${2.4 + i * 0.5}s`} repeatCount="indefinite" path={b.d} />
+            <animate attributeName="opacity" values="0;1;1;0" dur={`${3 + (i % 3) * 0.6}s`} begin={`${2.4 + i * 0.5}s`} repeatCount="indefinite" />
+          </circle>
           <text
             x={b.x}
             y={b.y}
             fill="#1d1b18"
             stroke="none"
             fontSize="17"
-            style={{ fontFamily: "var(--font-hand)", opacity: 0, animation: `inkfade .6s ${1.6 + i * 0.12}s forwards` }}
+            style={{ fontFamily: "var(--font-hand)", animation: `inkfade 10s ${1.6 + i * 0.12}s infinite backwards` }}
           >
             {b.l}
           </text>
         </g>
       ))}
-      <style>{`@keyframes inkfade{to{opacity:1}}`}</style>
+      <style>{`@keyframes inkfade{0%{opacity:0}6%{opacity:1}100%{opacity:1}}`}</style>
       <text x="64" y="146" fill="#1d1b18" stroke="none" fontSize="15" style={{ fontFamily: "var(--font-hand)" }}>
         discover
       </text>

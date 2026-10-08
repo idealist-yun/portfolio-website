@@ -171,14 +171,14 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">
         <Stage>
         <div className="relative md:min-h-[900px]">
-          <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-instrument)] text-[clamp(2.5rem,10vw,4rem)] leading-[0.98] tracking-[-0.02em] md:max-w-[560px] md:text-[80px]">
-            Where business, design &amp; engineering <em style={{ color: RED }}>meet.</em>
+          <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-instrument)] text-[clamp(2.5rem,10vw,4rem)] leading-[0.98] tracking-[-0.02em] md:max-w-[540px] md:text-[96px]">
+            Design from the <em style={{ color: RED }}>edges.</em>
           </h1>
           <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-7" style={{ color: MUTED }}>
-            I&rsquo;m Ian, a strategic, service &amp; experience designer working to fill the whole double diamond: from discovering the problem to validating the solution with simulated users (generative agents), before anything ships.
+            I&rsquo;m Ian, a strategic, service &amp; experience designer across business, design and engineering. I turn research into strategy, and test it on simulated users (generative agents) before it reaches real ones.
           </p>
           <p className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05]" style={{ color: INK }}>
-            Discover. Define. Develop. Deliver. Then simulate.
+            Derive personas from data. Build agents from them. Simulate the service.
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">

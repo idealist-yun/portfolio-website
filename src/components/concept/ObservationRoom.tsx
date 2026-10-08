@@ -202,65 +202,65 @@ function route(from: string, to: string): Pt[] {
 }
 
 
-// ------------------------------------------------------------ the seven Yuns (one per chapter; they live in the wing of their theme)
+// ------------------------------------------------------------ the seven Ians (one per chapter; they live in the wing of their theme)
 type YunId = "army" | "care" | "robots" | "mall" | "samsung" | "penn";
 type YunInfo = { tag: string; home: ZoneId; doing: string; hi: string; who: string; made: string; href: string; hrefLabel: string };
 const YUN: Record<YunId, YunInfo> = {
   army: {
-    tag: "Army Yun",
+    tag: "Army Ian",
     home: "army",
     doing: "building the terrain trainer",
-    hi: "Hi. I'm the Yun from the Army years.",
+    hi: "Hi. I'm the Ian from the Army years.",
     who: journey[3].note,
     made: featured[3].line,
     href: hrefFor(featured[3]),
     hrefLabel: "Show me the exhibit",
   },
   care: {
-    tag: "Thesis Yun",
+    tag: "Thesis Ian",
     home: "care",
     doing: "interviewing caregivers",
-    hi: "Hi. I'm the Yun who started with a question.",
+    hi: "Hi. I'm the Ian who started with a question.",
     who: `"${whyQuote}" Carried since childhood, shaped by my younger brother's developmental disability.`,
     made: featured[0].line,
     href: hrefFor(featured[0]),
     hrefLabel: "Show me the exhibit",
   },
   robots: {
-    tag: "Robotics Yun",
+    tag: "Robotics Ian",
     home: "robots",
     doing: "choreographing robots and running the simulator",
-    hi: "Hi. I'm the Yun from the robot and simulation projects.",
+    hi: "Hi. I'm the Ian from the robot and simulation projects.",
     who: journey[5].note,
     made: featured[2].line + " And the simulator: " + featured[1].line,
     href: hrefFor(featured[2]),
     hrefLabel: "Show me the exhibit",
   },
   mall: {
-    tag: "SDI-Lab Yun",
+    tag: "SDI-Lab Ian",
     home: "mall",
     doing: "learning data-driven service design",
-    hi: "Hi. I'm the Yun who turned customer data into strategy.",
+    hi: "Hi. I'm the Ian who turned customer data into strategy.",
     who: "In Feb 2021 I joined SDI Lab as an undergraduate researcher; my first project was Starfield. Data-driven service design started here, and I stayed until 2025: malls, appliances, apartments, then robots.",
     made: featured[4].line,
     href: hrefFor(featured[4]),
     hrefLabel: "Show me the exhibit",
   },
   samsung: {
-    tag: "Samsung Yun",
+    tag: "Samsung Ian",
     home: "samsung",
     doing: "forecasting demand",
-    hi: "Hi. I'm the Yun at Samsung.",
+    hi: "Hi. I'm the Ian at Samsung.",
     who: journey[6].note,
     made: "A demand dashboard with an AI chatbot, and a Bixby cooking assistant for screen-based appliances.",
     href: "/project/samsung-ax-dashboard",
     hrefLabel: "Show me the dashboard",
   },
   penn: {
-    tag: "Penn Yun",
+    tag: "Penn Ian",
     home: "tom",
     doing: "building Guided Hands",
-    hi: "Hi. I'm the Yun at Penn, right now.",
+    hi: "Hi. I'm the Ian at Penn, right now.",
     who: journey[7].note,
     made: "A low-cost Guided Hands with TOM: a sliding frame that lets big arm motions become writing.",
     href: "/resume",
@@ -280,8 +280,8 @@ const ROUTES: Record<YunId, Spot[]> = {
   penn: [["tom", "a", 6], ["tom", "b", 4], ["access", "a", 3], ["tom", "b", 5], ["care", "a", 3], ["tom", "a", 4]],
 };
 
-type Yun = { id: YunId; pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1 };
-const makeYun = (id: YunId, k: number): Yun => {
+type Ian = { id: YunId; pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1 };
+const makeYun = (id: YunId, k: number): Ian => {
   const [h, w] = ROUTES[id][0];
   const node = `${h}_${w}`;
   return { id, pos: [...NODES[node]] as Pt, path: [], seg: 0, mode: "do", left: 2 + k * 1.2, i: 0, node, face: 1 };
@@ -303,11 +303,11 @@ function dialogNode(who: string, key: string): DNode {
   if (who === "D") {
     if (key === "start")
       return {
-        text: "Start in the Care & Assistive wing: the question behind everything is there. Then the long SDI Lab wing in front is where it all began. Talk to each Yun on the way.",
+        text: "Start in the Care & Assistive wing: the question behind everything is there. Then the long SDI Lab wing in front is where it all began. Talk to each Ian on the way.",
         choices: [{ label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
       };
     return {
-      text: "I'm the docent. Every Yun you see here is Yun at one chapter of their life, living in the wing of their theme. Talk to all six to fill your passport.",
+      text: "I'm the docent. Every Ian you see here is Ian at one chapter of their life, living in the wing of their theme. Talk to all six to fill your passport.",
       choices: [{ label: "Where do I start?", go: "start" }, { label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
     };
   }
@@ -866,7 +866,7 @@ export default function ObservationRoom({
 }) {
   const router = useRouter();
   const [init] = useState(() => YUN_IDS.map((id, k) => makeYun(id, k)));
-  const agents = useRef<Yun[]>(init);
+  const agents = useRef<Ian[]>(init);
   const clock = useRef(0);
   const docent = useRef<Docent>({ pos: [START[0] - 1.8, START[1] - 0.5] as Pt, path: [], seg: 0, mode: "do", left: 7, i: -1, node: "gate", face: 1, hall: null });
   const player = useRef<{ pos: Pt; face: 1 | -1; path: Pt[]; moving: boolean }>({ pos: START, face: 1, path: [], moving: false });
@@ -1089,7 +1089,7 @@ export default function ObservationRoom({
     }
     s.near = near;
 
-    // the Yuns
+    // the Ians
     agents.current.forEach((a) => {
       if (near === a.id || (s.dlg && s.dlg.who === a.id)) {
         const sx = P(pl.pos[0], pl.pos[1])[0] - P(a.pos[0], a.pos[1])[0];
@@ -1515,7 +1515,7 @@ export default function ObservationRoom({
         className={`block w-full ${expanded ? "" : "h-auto"}`}
         style={expanded ? { height: "calc(100vh - 150px)" } : undefined}
         role="img"
-        aria-label="A museum about Yun: one open gallery with five thematic wings, ten exhibits, seven Yuns, a docent robot, and a visitor you can control, each with a Yun avatar, a docent robot, and a visitor you can control"
+        aria-label="A museum about Ian: one open gallery with five thematic wings, ten exhibits, seven Ians, a docent robot, and a visitor you can control, each with a Ian avatar, a docent robot, and a visitor you can control"
         onClick={onBackground}
       >
         <defs>
@@ -1580,7 +1580,7 @@ export default function ObservationRoom({
           const t = P(0, 11.2, 44);
           return (
             <text transform={`matrix(0.894 -0.447 0 1 ${t[0]} ${t[1]})`} fontSize="6.6" fontWeight={700} fill="#fff" letterSpacing="0.8" style={{ fontFamily: "var(--font-bric), " + SANS }}>
-              THE MUSEUM OF YUN
+              THE MUSEUM OF IAN
             </text>
           );
         })()}
@@ -1701,7 +1701,7 @@ export default function ObservationRoom({
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-2 px-6 py-5 text-[11px]" style={{ color: INK }}>
         <span className="flex items-center gap-2 rounded-full bg-white/85 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
           <span className="h-2 w-2 animate-pulse rounded-full bg-[#ff4d4d]" />
-          <span className="whitespace-nowrap">MUSEUM OF YUN</span>
+          <span className="whitespace-nowrap">MUSEUM OF IAN</span>
         </span>
         <span className="pointer-events-auto flex items-center gap-2">
           <span className="rounded-full bg-white/85 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
@@ -1735,7 +1735,7 @@ export default function ObservationRoom({
       {play && !dlg && (
         <>
           <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/80 px-3 py-1 text-[11px] backdrop-blur md:block" style={{ fontFamily: "var(--font-pixel)", color: INK }}>
-            WASD / arrows to move · click the floor to walk · click a Yun to talk · Space to talk
+            WASD / arrows to move · click the floor to walk · click a Ian to talk · Space to talk
           </p>
           <div className="absolute bottom-3 left-3 h-[84px] w-[84px] md:hidden">
             {dpad("ArrowUp", "↖", "left-0 top-0")}

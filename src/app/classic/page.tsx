@@ -86,7 +86,7 @@ export default function Home() {
         </p>
         <div className="mt-6 max-w-2xl space-y-4 text-lg leading-relaxed text-muted">
           <p>
-            Hi, all. I&apos;m Sangyun Lee – a strategic designer committed to
+            Hi, all. I&apos;m Ian Lee – a strategic designer committed to
             bridging business innovation with social impact.
           </p>
           <p>
@@ -305,7 +305,7 @@ export default function Home() {
         <div className="mt-8 overflow-hidden rounded-2xl border border-border">
           <Image
             src="/images/about-collage.png"
-            alt="Snapshots of Yun traveling, surfing, playing piano, and running a marathon"
+            alt="Snapshots of Ian traveling, surfing, playing piano, and running a marathon"
             width={1520}
             height={744}
             className="w-full h-auto"

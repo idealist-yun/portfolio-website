@@ -65,7 +65,7 @@ export default function ConceptA() {
       <section className="mx-auto grid max-w-[1240px] items-center gap-10 px-6 pb-12 pt-10 lg:grid-cols-[0.8fr_1.2fr] lg:pt-14">
         <div>
           <p className={label} style={{ color: MUTED }}>
-            Sang-yun &ldquo;Yun&rdquo; Lee · strategic designer
+            Ian Lee · strategic designer
           </p>
           <h1 className={`mt-4 text-[clamp(2.6rem,5.4vw,4.7rem)] leading-[0.98] ${display}`}>
             I watch how people{" "}

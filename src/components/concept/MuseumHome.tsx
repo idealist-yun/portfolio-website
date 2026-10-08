@@ -149,7 +149,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
             >
               Y
             </span>
-            <span className="font-[family-name:var(--font-instrument)] text-2xl">Yun Lee</span>
+            <span className="font-[family-name:var(--font-instrument)] text-2xl">Ian Lee</span>
           </Link>
           <nav className="hidden gap-7 font-mono text-[11px] uppercase tracking-wider sm:flex" style={{ color: MUTED }}>
             {[
@@ -174,11 +174,10 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
         <Stage>
         <div className="relative md:min-h-[820px]">
           <h1 className="relative z-[5] max-w-[17ch] font-[family-name:var(--font-instrument)] text-[clamp(3rem,8.6vw,8.4rem)] leading-[0.92] tracking-[-0.02em] md:max-w-[10.9ch] md:text-[93px]">
-            Designing for <em style={{ color: RED }}>vulnerability,</em> with data &amp; AI.
+            Walk through <em style={{ color: RED }}>how I got here.</em>
           </h1>
           <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-8" style={{ color: MUTED }}>
-            Hi, I&rsquo;m Yun, a strategic designer. This is a small museum about me, in five wings:
-            defense, care and assistive tech, robotics and simulation, my lab since 2021, and Samsung. Each avatar inside is me at one chapter. Go talk to them.
+            I&rsquo;m Ian, a strategic designer. This is a small museum about me: every avatar inside is me at one chapter, from the army to Penn. Walk around, talk to them, or just look.
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">
@@ -192,7 +191,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
                 </div>
               </div>
               <p className="mt-2 text-center text-[1.35rem] leading-none" style={{ fontFamily: "var(--font-hand)", color: MUTED }}>
-                the museum of Yun: every avatar is me at one chapter. The avatar in the middle is you: move it with WASD, arrows or a click, and talk to the Yuns.
+                the museum of Ian: every avatar is me at one chapter. The avatar in the middle is you: move it with WASD, arrows or a click, and talk to the Ians.
               </p>
             </DeskItem>
 
@@ -200,7 +199,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               <div className="rounded-sm bg-white p-2 pb-8 shadow-[0_14px_30px_-14px_rgba(29,27,24,0.6)]">
                 <Image
                   src="/images/about-collage.png"
-                  alt="Yun traveling, surfing, playing piano and running a marathon"
+                  alt="Ian traveling, surfing, playing piano and running a marathon"
                   width={760}
                   height={372}
                   className="h-auto w-full"

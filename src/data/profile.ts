@@ -1,7 +1,7 @@
 export const profile = {
-  name: "Sang-yun Lee",
-  shortName: "Yun Lee",
-  handle: "Yun",
+  name: "Ian Lee",
+  shortName: "Ian Lee",
+  handle: "Ian",
   title: "Strategic Designer & Researcher",
   tagline: "Data-driven, AI-driven strategic design — at the intersection of disability, business, and human possibility.",
   location: "Philadelphia, PA, USA",

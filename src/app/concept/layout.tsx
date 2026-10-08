@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ConceptFonts from "@/components/concept/ConceptFonts";
 
 export const metadata: Metadata = {
-  title: "Concept — Yun Lee",
+  title: "Concept — Ian Lee",
   robots: { index: false, follow: false },
 };
 

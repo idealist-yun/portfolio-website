@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { DeskItem } from "@/components/concept/Desk";
+import { DeskItem, InkDiagram } from "@/components/concept/Desk";
 import ObservationRoom from "@/components/concept/ObservationRoom";
 import Switcher from "@/components/concept/Switcher";
 import ProjectBento from "@/components/concept/ProjectBento";
@@ -160,20 +160,12 @@ export default function ConceptB() {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="49%" top="58%" rot={2} z={6} front={front} onFront={bump} className="md:w-[260px]">
-              <PostIt color="#e3d9ff" pin="#6a3fd6">
-                <p className={noteLabel}>journey map</p>
-                <svg viewBox="0 0 232 70" className="mt-2 h-auto w-full" aria-hidden>
-                  {[[0, "#fbe0d6"], [54, "#fbf1d2"], [126, "#dfe6f6"], [180, "#e0f1e4"]].map(([x, f]) => (
-                    <polygon key={x as number} points={`${x},35 ${(x as number) + 26},8 ${(x as number) + 52},35 ${(x as number) + 26},62`} fill={f as string} stroke={INK} strokeWidth="1.6" />
-                  ))}
-                </svg>
-                <p className="mt-1 text-[1.35rem] leading-[1.05]" style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
-                  one diamond, three instruments
-                </p>
-                <Link href="/concept/journey" className="mt-2 inline-block text-lg underline underline-offset-4" style={{ fontFamily: "var(--font-hand)", color: RED, fontWeight: 700 }}>
-                  open the map →
-                </Link>
+            <DeskItem left="46%" top="58%" rot={2} z={6} front={front} onFront={bump} className="md:w-[330px]">
+              <PostIt color="#fff6d6" pin="#c8431f">
+                <p className={noteLabel}>how it branches</p>
+                <div className="mt-1">
+                  <InkDiagram />
+                </div>
               </PostIt>
             </DeskItem>
 

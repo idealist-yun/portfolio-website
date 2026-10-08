@@ -33,15 +33,15 @@ const mixc = (h: string, t: string, k: number) => {
   return toHex(a.map((v, i) => v + (b[i] - v) * k));
 };
 
-// ------------------------------------------------------------ the museum: one open gallery, five wings by theme, ten exhibits
-export type ZoneId = "army" | "care" | "tom" | "samsung" | "mall" | "robots" | "lab";
-type WingId = "defense" | "care" | "consumer" | "robots";
-type Wing = { id: WingId; name: string; sub: string; color: string; tint: string; x0: number; y0: number; x1: number; y1: number };
+// ------------------------------------------------------------ the museum: one open gallery. Back row: defense | care & assistive | robotics & simulation. Front: the long SDI Lab wing
+export type ZoneId = "army" | "care" | "access" | "tom" | "robots" | "lab" | "mall" | "raemian" | "fandom" | "lifelog" | "samsung";
+type WingId = "defense" | "care" | "robots" | "sdi";
+type Wing = { id: WingId; name: string; color: string; tint: string; x0: number; y0: number; x1: number; y1: number };
 const WINGS: Wing[] = [
-  { id: "defense", name: "DEFENSE", sub: "terrain · people data", color: "#3f9a5a", tint: "#e6f1e3", x0: 0.7, y0: 0.7, x1: 7.4, y1: 8.0 },
-  { id: "care", name: "CARE & ASSISTIVE", sub: "disability · assistive tech", color: "#4c7df0", tint: "#e4ebfb", x0: 7.4, y0: 0.7, x1: 16.6, y1: 8.0 },
-  { id: "consumer", name: "CONSUMER & RETAIL", sub: "homes · malls · brands", color: "#d98a0c", tint: "#fbefd6", x0: 16.6, y0: 0.7, x1: 25.3, y1: 8.0 },
-  { id: "robots", name: "ROBOTS & SIMULATION", sub: "machines among people", color: "#ff6b4a", tint: "#fde6de", x0: 6.0, y0: 11.6, x1: 20.0, y1: 19.3 },
+  { id: "defense", name: "DEFENSE", color: "#3f9a5a", tint: "#e6f1e3", x0: 0.7, y0: 0.7, x1: 6.0, y1: 8.0 },
+  { id: "care", name: "CARE & ASSISTIVE", color: "#4c7df0", tint: "#e4ebfb", x0: 6.0, y0: 0.7, x1: 16.8, y1: 8.0 },
+  { id: "robots", name: "ROBOTICS & SIMULATION", color: "#ff6b4a", tint: "#fde6de", x0: 16.8, y0: 0.7, x1: 25.3, y1: 8.0 },
+  { id: "sdi", name: "SDI LAB · WHERE IT STARTED", color: "#d98a0c", tint: "#fbefd6", x0: 0.7, y0: 11.6, x1: 25.3, y1: 19.3 },
 ];
 type Hall = {
   id: ZoneId;
@@ -52,30 +52,39 @@ type Hall = {
   cx: number;
   cy: number;
   rw: number; // rug half-width
-  project: number | null; // index into `featured`
+  link: { href: string; title: string } | null;
   caption: string; // docent line
   plaque: string;
   pics: [string, number][]; // [src, aspect]
 };
 const FULL = "/images/full/";
+const CARD = "/images/cards/";
 const HALL_PICS: Record<ZoneId, [string, number][]> = {
   army: [[FULL + "military-3d-battlefield-mapping-01.jpg", 1400 / 1131], [FULL + "military-3d-battlefield-mapping-03.jpg", 1400 / 950], [FULL + "military-3d-battlefield-mapping-02.jpg", 824 / 1400]],
-  care: [["/images/cards/disability-persona-augmentation.jpg", 1], [FULL + "disability-persona-augmentation-07.jpg", 1400 / 1314]],
+  care: [[CARD + "disability-persona-augmentation.jpg", 1], [FULL + "disability-persona-augmentation-07.jpg", 1400 / 1314]],
+  access: [[CARD + "disability-as-market.jpg", 1]],
   tom: [],
-  samsung: [["/images/cards/samsung-raemian-metaverse.jpg", 1000 / 607], [FULL + "samsung-raemian-metaverse-04.jpg", 1095 / 1400]],
-  mall: [["/images/cards/starfield-existing-branch.jpg", 1000 / 722], [FULL + "starfield-existing-branch-01.jpg", 1400 / 1054]],
-  robots: [["/images/cards/vip-concierge-robot.jpg", 1000 / 776], [FULL + "vip-concierge-robot-02.jpg", 1400 / 662]],
-  lab: [["/images/cards/idd-agent-simulation.jpg", 1000 / 562], [FULL + "disability-persona-augmentation-03.jpg", 1400 / 1054]],
+  robots: [[CARD + "vip-concierge-robot.jpg", 1000 / 776], [FULL + "vip-concierge-robot-02.jpg", 1400 / 662]],
+  lab: [[CARD + "idd-agent-simulation.jpg", 1000 / 562]],
+  mall: [[CARD + "starfield-existing-branch.jpg", 1000 / 722]],
+  raemian: [[CARD + "samsung-raemian-metaverse.jpg", 1000 / 607]],
+  fandom: [[CARD + "samsung-brand-fandom.jpg", 1000 / 562]],
+  lifelog: [[CARD + "samsung-lifelog-minifridge.jpg", 1000 / 750]],
+  samsung: [],
 };
-const PLAQUE: Record<ZoneId, string> = { army: "TERRAIN MODEL", care: "FIVE PERSONAS", tom: "GUIDED HANDS · TOM", samsung: "RAEMIAN TOWER", mall: "STARFIELD MODEL", robots: "ROBES FOR ROBOTS", lab: "IDD VILLAGE" };
+const PLAQUE: Record<ZoneId, string> = { army: "TERRAIN MODEL", care: "FIVE PERSONAS", access: "NRC HACKATHON", tom: "GUIDED HANDS · TOM", robots: "ROBES FOR ROBOTS", lab: "IDD VILLAGE", mall: "STARFIELD MODEL", raemian: "RAEMIAN TOWER", fandom: "BRAND FANDOM", lifelog: "LIFE-LOG FRIDGE", samsung: "DEMAND DASHBOARD" };
 const ZONES_RAW: Omit<Hall, "plaque" | "pics">[] = [
-  { id: "army", wing: "defense", name: "Army", sub: "ROKA · 2022–24", color: "#4caf6a", cx: 4.0, cy: 3.9, rw: 3.1, project: 3, caption: "Led 60+ people, and built a 3D terrain trainer." },
-  { id: "care", wing: "care", name: "Thesis", sub: "disability personas", color: "#4c7df0", cx: 10.6, cy: 3.8, rw: 1.9, project: 0, caption: "It started with my brother. 2,400 profiles, 5 personas." },
-  { id: "tom", wing: "care", name: "Guided Hands", sub: "TOM · assistive", color: "#2fb5d9", cx: 14.5, cy: 3.8, rw: 1.9, project: null, caption: "At Penn, TOM: rebuilding a writing aid for people with limited hand control, at low cost." },
-  { id: "samsung", wing: "consumer", name: "Samsung", sub: "2025–26", color: "#6d5bd0", cx: 19.4, cy: 3.8, rw: 1.9, project: 5, caption: "Demand forecasts to 2030, a dashboard, a Bixby cook." },
-  { id: "mall", wing: "consumer", name: "Starfield", sub: "retail data", color: "#f5b301", cx: 23.2, cy: 4.0, rw: 1.8, project: 4, caption: "Network-analysis personas for a mega mall." },
-  { id: "robots", wing: "robots", name: "VIP Robots", sub: "HRI · SKKU", color: "#ff6b4a", cx: 10.0, cy: 15.4, rw: 2.2, project: 2, caption: "Three serving robots, choreographed like a royal ceremony." },
-  { id: "lab", wing: "robots", name: "IDD Lab", sub: "grad school · SDI", color: "#14b8a6", cx: 15.8, cy: 15.2, rw: 2.0, project: 1, caption: "AI agents living a day in a virtual world." },
+  { id: "army", wing: "defense", name: "Army", sub: "ROKA · 2022–24", color: "#4caf6a", cx: 3.3, cy: 3.9, rw: 2.3, link: { href: hrefFor(featured[3]), title: featured[3].title }, caption: "Led 60+ people, and built a 3D terrain trainer." },
+  { id: "care", wing: "care", name: "Thesis", sub: "disability personas", color: "#4c7df0", cx: 7.9, cy: 3.8, rw: 1.7, link: { href: hrefFor(featured[0]), title: featured[0].title }, caption: "It started with my brother. 2,400 profiles, 5 personas." },
+  { id: "access", wing: "care", name: "NRC hackathon", sub: "three journeys", color: "#3a9bd9", cx: 11.5, cy: 3.8, rw: 1.8, link: { href: "/project/disability-as-market", title: "Disability service design: what I truly wish to carve out" }, caption: "Developmental, stroke, spinal: three daily-life journeys from NRC fieldwork, turned into a hackathon." },
+  { id: "tom", wing: "care", name: "Guided Hands", sub: "TOM · assistive", color: "#2fb5d9", cx: 15.1, cy: 3.8, rw: 1.7, link: null, caption: "At Penn, TOM: rebuilding a writing aid for people with limited hand control, at low cost." },
+  { id: "robots", wing: "robots", name: "VIP Robots", sub: "HRI · SKKU", color: "#ff6b4a", cx: 19.9, cy: 3.9, rw: 1.9, link: { href: hrefFor(featured[2]), title: featured[2].title }, caption: "Three serving robots, choreographed like a royal ceremony." },
+  { id: "lab", wing: "robots", name: "IDD Lab", sub: "simulation testbed", color: "#14b8a6", cx: 23.6, cy: 3.9, rw: 1.7, link: { href: hrefFor(featured[1]), title: featured[1].title }, caption: "AI agents living a day in a virtual world." },
+  { id: "mall", wing: "sdi", name: "Starfield", sub: "retail data", color: "#f5b301", cx: 3.4, cy: 15.3, rw: 2.3, link: { href: hrefFor(featured[4]), title: featured[4].title }, caption: "Network-analysis personas for a mega mall." },
+  { id: "raemian", wing: "sdi", name: "Raemian", sub: "Samsung C&T", color: "#6d5bd0", cx: 8.2, cy: 15.3, rw: 2.3, link: { href: hrefFor(featured[5]), title: featured[5].title }, caption: "Housing data turned into metaverse services for a Samsung C&T complex." },
+  { id: "fandom", wing: "sdi", name: "Fandom", sub: "Samsung vs rivals", color: "#e0457b", cx: 13.0, cy: 15.3, rw: 2.3, link: { href: "/project/samsung-brand-fandom", title: "Brand fandom analysis between Samsung and a competitor" }, caption: "Who loves Samsung, and who loves its rivals? A brand fandom analysis." },
+  { id: "lifelog", wing: "sdi", name: "Life-log", sub: "mini fridge", color: "#3d8bff", cx: 17.8, cy: 15.3, rw: 2.3, link: { href: "/project/samsung-lifelog-minifridge", title: "Life-log analysis for new product service planning" }, caption: "Life-log analysis to plan a new service around a mini fridge." },
+  { id: "samsung", wing: "sdi", name: "Samsung MI", sub: "2025–26", color: "#3a4cc7", cx: 22.6, cy: 15.3, rw: 2.2, link: { href: "/project/samsung-ax-dashboard", title: "Enterprise demand dashboard & AI chatbot" }, caption: "From the lab into Samsung: a demand dashboard with an AI chatbot, and a Bixby cooking assistant." },
 ];
 export const ZONES: Hall[] = ZONES_RAW.map((z) => ({ ...z, plaque: PLAQUE[z.id], pics: HALL_PICS[z.id] }));
 const hallOf = (id: ZoneId) => ZONES.find((z) => z.id === id)!;
@@ -84,22 +93,24 @@ export const zoneColor = (z: ZoneId | "plaza") => (z === "plaza" ? "#c3cddd" : h
 // pictures: hung on the back wall (wall) or standing on free panels
 type Panel = { z: ZoneId; src: string; plane: "x" | "y"; fixed: number; along: number; wall: boolean; wu: number; H: number };
 const PANEL_CFG: Partial<Record<ZoneId, ["x" | "y", number, number, boolean][]>> = {
-  army: [["y", 0, 1.9, true], ["y", 0, 6.0, true], ["x", 0, 5.4, true]],
-  care: [["y", 0, 8.9, true], ["y", 0, 12.2, true]],
-  samsung: [["y", 0, 18.0, true], ["y", 0, 20.6, true]],
-  mall: [["y", 0, 22.6, true], ["y", 0, 24.6, true]],
-  robots: [["y", 12.6, 8.4, false], ["y", 12.6, 11.6, false]],
-  lab: [["y", 12.6, 14.0, false], ["y", 12.6, 17.2, false]],
+  army: [["y", 0, 1.9, true], ["y", 0, 4.9, true], ["x", 0, 5.4, true]],
+  care: [["y", 0, 7.0, true], ["y", 0, 8.9, true]],
+  access: [["y", 0, 11.5, true]],
+  robots: [["y", 0, 18.7, true], ["y", 0, 21.1, true]],
+  lab: [["y", 0, 23.7, true]],
+  mall: [["y", 12.4, 3.4, false]],
+  raemian: [["y", 12.4, 8.2, false]],
+  fandom: [["y", 12.4, 13.0, false]],
+  lifelog: [["y", 12.4, 17.8, false]],
 };
 const PANELS: Panel[] = ZONES.flatMap((z) =>
   (PANEL_CFG[z.id] ?? []).map(([plane, fixed, along, wall], i) => {
     const [src, ar] = z.pics[i];
-    const maxw = plane === "x" ? 2.2 : 1.5;
+    const maxw = wall ? 1.5 : plane === "x" ? 2.2 : 1.9;
     const H = Math.min(27, (maxw * 20) / ar);
     return { z: z.id, src, plane, fixed, along, wall, wu: (ar * H) / 20, H };
   })
 );
-
 
 // ------------------------------------------------------------ floor, obstacles, and the walking graph
 type Rect = [number, number, number, number];
@@ -203,8 +214,8 @@ const YUN: Record<YunId, YunInfo> = {
     doing: "forecasting demand",
     hi: "Hi. I'm the Yun at Samsung.",
     who: journey[5].note,
-    made: featured[5].line,
-    href: hrefFor(featured[5]),
+    made: "A demand dashboard with an AI chatbot, and a Bixby cooking assistant for screen-based appliances.",
+    href: "/project/samsung-ax-dashboard",
     hrefLabel: "Show me the exhibit",
   },
   robots: {
@@ -228,11 +239,11 @@ const YUN: Record<YunId, YunInfo> = {
     hrefLabel: "Show me the exhibit",
   },
   mall: {
-    tag: "Retail Yun",
+    tag: "SDI-Lab Yun",
     home: "mall",
-    doing: "mapping shoppers",
+    doing: "turning customer data into strategy",
     hi: "Hi. I'm the Yun who turned customer data into strategy.",
-    who: "Customer data turned into service strategy for malls, appliances and apartment life.",
+    who: "The lab where it started: customer data turned into service strategy for malls, appliances and apartment life.",
     made: featured[4].line,
     href: hrefFor(featured[4]),
     hrefLabel: "Show me the exhibit",
@@ -254,12 +265,12 @@ const yunColor = (id: YunId) => (id === "penn" ? "#c23d8c" : hallOf(YUN[id].home
 type Spot = [ZoneId, "a" | "b", number];
 const ROUTES: Record<YunId, Spot[]> = {
   army: [["army", "a", 6], ["army", "b", 4], ["care", "a", 3], ["army", "a", 5], ["army", "b", 4], ["tom", "b", 3]],
-  care: [["care", "a", 6], ["care", "b", 4], ["tom", "a", 3], ["care", "b", 5], ["care", "a", 4], ["lab", "a", 3]],
-  samsung: [["samsung", "a", 6], ["samsung", "b", 4], ["mall", "b", 3], ["samsung", "b", 5], ["robots", "b", 3], ["samsung", "a", 4]],
-  robots: [["robots", "a", 6], ["robots", "b", 4], ["lab", "b", 3], ["robots", "a", 5], ["robots", "b", 4], ["mall", "a", 3]],
-  lab: [["lab", "a", 6], ["lab", "b", 4], ["care", "b", 3], ["lab", "b", 5], ["lab", "a", 4], ["robots", "b", 3]],
-  mall: [["mall", "a", 6], ["mall", "b", 4], ["samsung", "a", 3], ["mall", "b", 5], ["robots", "a", 3], ["mall", "a", 4]],
-  penn: [["tom", "a", 6], ["tom", "b", 4], ["care", "a", 3], ["tom", "b", 5], ["lab", "a", 3], ["tom", "a", 4]],
+  care: [["care", "a", 6], ["care", "b", 4], ["access", "a", 3], ["care", "b", 5], ["tom", "a", 3], ["lab", "a", 3]],
+  samsung: [["samsung", "a", 6], ["samsung", "b", 4], ["lifelog", "b", 3], ["samsung", "a", 5], ["raemian", "b", 3], ["samsung", "b", 4]],
+  robots: [["robots", "a", 6], ["robots", "b", 4], ["lab", "b", 3], ["robots", "a", 5], ["robots", "b", 4], ["tom", "b", 3]],
+  lab: [["lab", "a", 6], ["lab", "b", 4], ["robots", "a", 3], ["lab", "b", 5], ["lab", "a", 4], ["access", "b", 3]],
+  mall: [["mall", "a", 6], ["mall", "b", 4], ["raemian", "a", 3], ["mall", "b", 5], ["fandom", "a", 3], ["lifelog", "a", 3]],
+  penn: [["tom", "a", 6], ["tom", "b", 4], ["access", "a", 3], ["tom", "b", 5], ["care", "a", 3], ["tom", "a", 4]],
 };
 
 type Yun = { id: YunId; pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1 };
@@ -270,7 +281,7 @@ const makeYun = (id: YunId, k: number): Yun => {
 };
 
 const WELCOME = "Welcome. This museum is about one person, in seven chapters. Follow me!";
-const TOUR: ZoneId[] = ["army", "care", "tom", "samsung", "mall", "lab", "robots"];
+const TOUR: ZoneId[] = ["army", "care", "access", "tom", "robots", "lab", "mall", "raemian", "fandom", "lifelog", "samsung"];
 type Docent = { pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1; hall: ZoneId | null };
 
 type Choice = { label: string; go?: string; href?: string };
@@ -279,7 +290,7 @@ function dialogNode(who: string, key: string): DNode {
   if (who === "D") {
     if (key === "start")
       return {
-        text: "Start in the Care & Assistive wing: the question behind everything is there. Then walk the other wings in any order, and talk to each Yun.",
+        text: "Start in the Care & Assistive wing: the question behind everything is there. Then the long SDI Lab wing in front is where it all began. Talk to each Yun on the way.",
         choices: [{ label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
       };
     return {
@@ -419,7 +430,6 @@ function Orbs({ cx, cy, color }: { cx: number; cy: number; color: string }) {
 }
 
 // the museum is built once: static artifacts + decor, plus the obstacle map for the walkable avatar
-// the museum is built once: static artifacts + decor, plus the obstacle map for the walkable avatar
 function buildWorld(): Item[] {
   const out: Item[] = [];
   let n = 0;
@@ -432,6 +442,11 @@ function buildWorld(): Item[] {
     const { cx, cy, color } = z;
     out.push({ depth: cx + cy - 2.6, el: <g key={`s-${z.id}`}><Spot cx={cx} cy={cy} color={color} /></g> });
     out.push({ depth: cx + cy + 3, el: <g key={`o-${z.id}`}><Orbs cx={cx} cy={cy} color={color} /></g> });
+  });
+  // free-standing picture panels block the floor
+  PANELS.filter((p) => !p.wall).forEach((p) => {
+    if (p.plane === "y") OBST.push([p.along - p.wu / 2 - 0.15, p.fixed - 0.25, p.along + p.wu / 2 + 0.15, p.fixed + 0.25]);
+    else OBST.push([p.fixed - 0.25, p.along - p.wu / 2 - 0.15, p.fixed + 0.25, p.along + p.wu / 2 + 0.15]);
   });
 
   // ARMY: clay terrain table, a field tent, sandbags, a flag
@@ -448,17 +463,17 @@ function buildWorld(): Item[] {
         <circle cx={P(gx + 1.9, gy + 1.5, 14)[0]} cy={P(gx + 1.9, gy + 1.5, 14)[1]} r="2" fill="#e2493a" stroke="none" />
       </>
     ), { bias: 0.3 });
-    add(cx + 1.9, cy - 2.2, 1.8, 1.4, <Prism gx={cx + 1.9} gy={cy - 2.2} w={1.8} d={1.4} h={15} color="#6f8f5a" />);
-    [0, 0.6, 1.2].forEach((o) => add(cx - 3.0, cy - 0.4 + o, 0.6, 0.5, <Box gx={cx - 3.0} gy={cy - 0.4 + o} w={0.6} d={0.5} h={4} base="#d9cfa8" />, { solid: o === 0 }));
-    add(cx - 2.8, cy - 2.0, 0.2, 0.2, (
+    add(cx - 2.5, cy - 2.5, 1.5, 1.2, <Prism gx={cx - 2.5} gy={cy - 2.5} w={1.5} d={1.2} h={14} color="#6f8f5a" />);
+    [0, 0.55, 1.1].forEach((o) => add(5.0, cy - 1.0 + o, 0.5, 0.5, <Box gx={5.0} gy={cy - 1.0 + o} w={0.5} d={0.5} h={4} base="#d9cfa8" />, { solid: o === 0 }));
+    add(5.2, 1.3, 0.2, 0.2, (
       <>
-        <Box gx={cx - 2.8} gy={cy - 2.0} w={0.2} d={0.2} h={44} base="#dfe6ee" />
-        <polygon points={pts([P(cx - 2.6, cy - 1.9, 43), P(cx - 2.6, cy - 1.9, 35), P(cx - 2.6, cy - 0.7, 39)])} fill="#ff6b4a" stroke={EDGE} strokeWidth="1" />
+        <Box gx={5.2} gy={1.3} w={0.2} d={0.2} h={44} base="#dfe6ee" />
+        <polygon points={pts([P(5.4, 1.4, 43), P(5.4, 1.4, 35), P(5.4, 2.6, 39)])} fill="#ff6b4a" stroke={EDGE} strokeWidth="1" />
       </>
     ));
   }
 
-  // THESIS: five personas, a little house, a floating heart
+  // THESIS: five personas and a floating heart
   {
     const { cx, cy } = hallOf("care");
     const gx = cx - 1.2, gy = cy - 0.9;
@@ -475,19 +490,44 @@ function buildWorld(): Item[] {
         </g>
       </>
     ), { bias: 0.3 });
-    add(cx - 3.3, cy - 2.0, 1.3, 1.1, (
+  }
+
+  // ACCESS: the NRC fieldwork groups as objects: a wheelchair (spinal), a quad cane (stroke), a puzzle piece (developmental)
+  {
+    const { cx, cy } = hallOf("access");
+    const gx = cx - 1.5, gy = cy - 1.1;
+    const wc = P(cx - 0.75, cy - 0.1, 3);
+    const cane = P(cx + 0.35, cy + 0.15, 3);
+    const pz = P(cx + 1.0, cy - 0.2, 3);
+    add(gx, gy, 3.0, 2.2, (
       <>
-        <Box gx={cx - 3.3} gy={cy - 2.0} w={1.3} d={1.1} h={8} base="#fff3e0" />
-        <Prism gx={cx - 3.4} gy={cy - 2.1} w={1.5} d={1.3} z={8} h={7} color="#e8806a" />
+        <Pedestal gx={gx} gy={gy} w={3.0} d={2.2} h={3} plaque={PLAQUE.access} color="#2b78b5" />
+        <g transform={`translate(${wc[0]} ${wc[1]})`} stroke="#2f3b5c" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="-2" cy="-9" r="9" strokeWidth="1.8" fill="rgba(255,255,255,0.35)" />
+          <circle cx="-2" cy="-9" r="6" strokeWidth="0.6" />
+          <line x1="-2" y1="-18" x2="-2" y2="0" strokeWidth="0.6" />
+          <line x1="-11" y1="-9" x2="7" y2="-9" strokeWidth="0.6" />
+          <circle cx="11" cy="-3" r="3" strokeWidth="1.4" fill="#fff" />
+          <path d="M-6,-14 L-6,-26 L-9,-31" strokeWidth="2.2" />
+          <path d="M-6,-14 L6,-14 L10,-4" strokeWidth="2.2" />
+          <rect x="-6" y="-16" width="11" height="3" rx="1" fill="#3a9bd9" stroke="#2f3b5c" strokeWidth="0.8" />
+        </g>
+        <g transform={`translate(${cane[0]} ${cane[1]})`} stroke="#2f3b5c" fill="none" strokeLinecap="round">
+          <path d="M0,-34 C0,-38 6,-38 6,-34" strokeWidth="2.4" />
+          <line x1="0" y1="-34" x2="0" y2="-6" strokeWidth="2.2" stroke="#c9ced8" />
+          <path d="M0,-6 L-5,0 M0,-6 L5,0 M0,-6 L-2,1 M0,-6 L3,1" strokeWidth="1.4" />
+        </g>
+        <g transform={`translate(${pz[0]} ${pz[1] - 4})`}>
+          <path d="M-7,-7 L-2,-7 C-4,-12 4,-12 2,-7 L7,-7 L7,-2 C12,-4 12,4 7,2 L7,7 L-7,7 Z" fill="#5b9bff" stroke="#2f5db3" strokeWidth="1" />
+        </g>
       </>
-    ));
+    ), { bias: 0.3 });
   }
 
   // GUIDED HANDS (TOM): an X-Y sliding frame that turns big arm motions into writing
   {
     const { cx, cy } = hallOf("tom");
     const gx = cx - 1.5, gy = cy - 1.1;
-    const c = P(cx - 0.2, cy, 8);
     add(gx, gy, 3.0, 2.2, (
       <>
         <Pedestal gx={gx} gy={gy} w={3.0} d={2.2} h={6} plaque={PLAQUE.tom} color="#1a8fb0" />
@@ -505,29 +545,51 @@ function buildWorld(): Item[] {
             <line x1="0" y1="2" x2="0" y2="8" stroke="#1f2a44" strokeWidth="1.4" />
           </g>
         </g>
-        <text x={c[0]} y={c[1] - 38} textAnchor="middle" fontSize="0" />
       </>
     ), { bias: 0.3 });
   }
 
-  // SAMSUNG: Raemian tower model, fridge, washer
+  // ROBOTS: three robots in court dress and a small royal gate
   {
-    const { cx, cy } = hallOf("samsung");
-    const gx = cx - 1.2, gy = cy - 0.9;
-    add(gx, gy, 2.4, 1.8, (
+    const { cx, cy } = hallOf("robots");
+    const gx = cx - 1.5, gy = cy - 0.5;
+    add(gx, gy, 3.0, 1.0, (
       <>
-        <Pedestal gx={gx} gy={gy} w={2.4} d={1.8} h={5} plaque={PLAQUE.samsung} color="#5a47b8" />
-        <Box gx={gx + 0.3} gy={gy + 0.35} w={0.8} d={1.1} z={5} h={30} base="#dfe7f7" />
-        <Box gx={gx + 1.3} gy={gy + 0.5} w={0.8} d={0.9} z={5} h={20} base="#e9eefb" />
-        {[9, 14, 19, 24, 29].map((z) => (
-          <line key={z} x1={P(gx + 0.3, gy + 1.45, 5 + z)[0]} y1={P(gx + 0.3, gy + 1.45, 5 + z)[1]} x2={P(gx + 1.1, gy + 1.45, 5 + z)[0]} y2={P(gx + 1.1, gy + 1.45, 5 + z)[1]} stroke="#7e92c4" strokeWidth="1.4" />
-        ))}
+        <Pedestal gx={gx} gy={gy} w={3.0} d={1.0} h={4} plaque={PLAQUE.robots} color="#d9502f" />
+        <MiniRobot x={gx + 0.6} y={gy + 0.5} z={4} robe="#3b6fd8" />
+        <MiniRobot x={gx + 1.5} y={gy + 0.5} z={4} robe="#2f9e7a" />
+        <MiniRobot x={gx + 2.4} y={gy + 0.5} z={4} robe="#2b2b33" />
       </>
     ), { bias: 0.3 });
-    add(cx - 2.6, cy - 2.2, 0.9, 0.9, <Box gx={cx - 2.6} gy={cy - 2.2} w={0.9} d={0.9} h={32} base="#e6ecf8" />);
-    add(cx + 1.5, cy - 2.2, 0.9, 0.9, (
-      <Box gx={cx + 1.5} gy={cy - 2.2} w={0.9} d={0.9} h={18} base="#f3f5fb">
-        <circle cx={P(cx + 1.95, cy - 1.3, 9)[0]} cy={P(cx + 1.95, cy - 1.3, 9)[1]} r="3.6" fill="#bcd0f5" stroke={EDGE} />
+    add(17.6, 2.2, 0.3, 0.3, <Box gx={17.6} gy={2.2} w={0.3} d={0.3} h={34} base="#c8431f" />);
+    add(17.6, 5.4, 0.3, 0.3, <Box gx={17.6} gy={5.4} w={0.3} d={0.3} h={34} base="#c8431f" />);
+    add(17.4, 2.0, 0.7, 3.9, <Box gx={17.4} gy={2.0} w={0.7} d={3.9} z={34} h={4} base="#3a3f52" />, { solid: false, bias: 0.2 });
+  }
+
+  // LAB: the simulator workstation showing the real IDD village, a server rack
+  {
+    const { cx, cy } = hallOf("lab");
+    const gx = cx - 1.4, gy = cy - 0.7;
+    const o = P(gx + 0.2, gy + 0.24, 19);
+    add(gx, gy, 2.8, 1.4, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.8} d={1.4} h={6} plaque={PLAQUE.lab} color="#0f8f80" />
+        <Box gx={gx + 0.1} gy={gy + 0.1} w={2.6} d={0.14} z={6} h={14} base="#2f3b5c" />
+        <g transform={`matrix(${20 * 2.4} ${10 * 2.4} 0 11 ${o[0]} ${o[1]})`}>
+          <image href="/images/cards/idd-agent-simulation.jpg" x="0" y="0" width="1" height="1" preserveAspectRatio="none" />
+        </g>
+        <MiniPerson x={gx + 0.7} y={gy + 0.9} z={6} color="#2fb5d9" />
+        <MiniPerson x={gx + 1.5} y={gy + 1.0} z={6} color="#ff7a6b" />
+        <MiniPerson x={gx + 2.2} y={gy + 0.9} z={6} color="#ffc93c" />
+      </>
+    ), { bias: 0.3 });
+    add(cx - 3.1, cy - 2.2, 0.9, 0.8, (
+      <Box gx={cx - 3.1} gy={cy - 2.2} w={0.9} d={0.8} h={30} base="#2f3b5c">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <circle key={i} cx={P(cx - 2.2, cy - 1.8, 5 + i * 5)[0] - 2} cy={P(cx - 2.2, cy - 1.8, 5 + i * 5)[1]} r="1.2" fill={i % 2 ? "#6fe3ff" : "#8bf59a"}>
+            <animate attributeName="opacity" values="1;0.2;1" dur={`${1.2 + i * 0.3}s`} repeatCount="indefinite" />
+          </circle>
+        ))}
       </Box>
     ));
   }
@@ -547,61 +609,96 @@ function buildWorld(): Item[] {
     ), { bias: 0.3 });
   }
 
-  // ROBOTS: three robots in court dress, a royal gate, a tea table
+  // RAEMIAN: apartment tower with windows
   {
-    const { cx, cy } = hallOf("robots");
-    const gx = cx - 1.5, gy = cy - 0.5;
-    add(gx, gy, 3.0, 1.0, (
+    const { cx, cy } = hallOf("raemian");
+    const gx = cx - 1.2, gy = cy - 0.9;
+    add(gx, gy, 2.4, 1.8, (
       <>
-        <Pedestal gx={gx} gy={gy} w={3.0} d={1.0} h={4} plaque={PLAQUE.robots} color="#d9502f" />
-        <MiniRobot x={gx + 0.6} y={gy + 0.5} z={4} robe="#3b6fd8" />
-        <MiniRobot x={gx + 1.5} y={gy + 0.5} z={4} robe="#2f9e7a" />
-        <MiniRobot x={gx + 2.4} y={gy + 0.5} z={4} robe="#2b2b33" />
+        <Pedestal gx={gx} gy={gy} w={2.4} d={1.8} h={5} plaque={PLAQUE.raemian} color="#5a47b8" />
+        <Box gx={gx + 0.3} gy={gy + 0.35} w={0.8} d={1.1} z={5} h={30} base="#dfe7f7" />
+        <Box gx={gx + 1.3} gy={gy + 0.5} w={0.8} d={0.9} z={5} h={20} base="#e9eefb" />
+        {[9, 14, 19, 24, 29].map((z) => (
+          <line key={z} x1={P(gx + 0.3, gy + 1.45, 5 + z)[0]} y1={P(gx + 0.3, gy + 1.45, 5 + z)[1]} x2={P(gx + 1.1, gy + 1.45, 5 + z)[0]} y2={P(gx + 1.1, gy + 1.45, 5 + z)[1]} stroke="#7e92c4" strokeWidth="1.4" />
+        ))}
+        <circle cx={P(gx + 0.7, gy + 0.9, 40)[0]} cy={P(gx + 0.7, gy + 0.9, 40)[1]} r="2.4" fill="#6fe3ff" stroke="#fff" strokeWidth="1" />
       </>
     ), { bias: 0.3 });
-    add(cx - 3.0, cy - 1.7, 0.3, 0.3, <Box gx={cx - 3.0} gy={cy - 1.7} w={0.3} d={0.3} h={34} base="#c8431f" />);
-    add(cx - 3.0, cy + 1.4, 0.3, 0.3, <Box gx={cx - 3.0} gy={cy + 1.4} w={0.3} d={0.3} h={34} base="#c8431f" />);
-    add(cx - 3.3, cy - 1.9, 0.9, 3.7, <Box gx={cx - 3.3} gy={cy - 1.9} w={0.9} d={3.7} z={34} h={4} base="#3a3f52" />, { solid: false, bias: 0.2 });
-    add(cx + 1.8, cy - 1.7, 1.0, 1.0, (
-      <>
-        <Box gx={cx + 1.8} gy={cy - 1.7} w={1.0} d={1.0} h={6} base="#f1e1c4" />
-        <circle cx={P(cx + 2.1, cy - 1.4, 8)[0]} cy={P(cx + 2.1, cy - 1.4, 8)[1]} r="1.8" fill="#fff" stroke={EDGE} />
-        <circle cx={P(cx + 2.5, cy - 1.1, 8)[0]} cy={P(cx + 2.5, cy - 1.1, 8)[1]} r="1.8" fill="#fff" stroke={EDGE} />
-      </>
-    ));
   }
 
-  // LAB: the simulator workstation showing the real IDD village, a server rack, a glass mini-world
+  // FANDOM: light sticks glowing over a brand-personality radar
   {
-    const { cx, cy } = hallOf("lab");
-    const gx = cx - 1.4, gy = cy - 0.7;
-    const o = P(gx + 0.2, gy + 0.24, 19);
-    add(gx, gy, 2.8, 1.4, (
+    const { cx, cy } = hallOf("fandom");
+    const gx = cx - 1.2, gy = cy - 0.9;
+    const c = P(cx, cy, 4);
+    add(gx, gy, 2.4, 1.8, (
       <>
-        <Pedestal gx={gx} gy={gy} w={2.8} d={1.4} h={6} plaque={PLAQUE.lab} color="#0f8f80" />
-        <Box gx={gx + 0.1} gy={gy + 0.1} w={2.6} d={0.14} z={6} h={14} base="#2f3b5c" />
-        <g transform={`matrix(${20 * 2.4} ${10 * 2.4} 0 11 ${o[0]} ${o[1]})`}>
-          <image href="/images/cards/idd-agent-simulation.jpg" x="0" y="0" width="1" height="1" preserveAspectRatio="none" />
+        <Pedestal gx={gx} gy={gy} w={2.4} d={1.8} h={4} plaque={PLAQUE.fandom} color="#b8305f" />
+        <g transform={`translate(${c[0]} ${c[1]})`}>
+          <polygon points="0,-9 8.6,-2.8 5.3,7.3 -5.3,7.3 -8.6,-2.8" fill="rgba(224,69,123,0.12)" stroke="#e0457b" strokeWidth="1" />
+          <polygon points="0,-5 5,-1.6 2.6,4.4 -3.2,4 -4.6,-1.8" fill="rgba(224,69,123,0.35)" stroke="#e0457b" strokeWidth="1" />
         </g>
-        <MiniPerson x={gx + 0.7} y={gy + 0.9} z={6} color="#2fb5d9" />
-        <MiniPerson x={gx + 1.5} y={gy + 1.0} z={6} color="#ff7a6b" />
-        <MiniPerson x={gx + 2.2} y={gy + 0.9} z={6} color="#ffc93c" />
+        {["#e0457b", "#ffc93c", "#6fe3ff", "#8bf59a", "#b07af0"].map((col, i) => {
+          const p = P(gx + 0.4 + i * 0.4, gy + 0.9 + (i % 2) * 0.4, 4);
+          return (
+            <g key={col} transform={`translate(${p[0]} ${p[1]})`}>
+              <line x1="0" y1="0" x2="0" y2="-20" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+              <circle cx="0" cy="-22" r="4" fill={col}>
+                <animate attributeName="opacity" values="1;0.45;1" dur={`${1.1 + i * 0.25}s`} repeatCount="indefinite" />
+              </circle>
+            </g>
+          );
+        })}
       </>
     ), { bias: 0.3 });
-    add(cx + 1.9, cy - 2.0, 0.9, 0.8, (
-      <Box gx={cx + 1.9} gy={cy - 2.0} w={0.9} d={0.8} h={30} base="#2f3b5c">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <circle key={i} cx={P(cx + 2.8, cy - 1.6, 5 + i * 5)[0] - 2} cy={P(cx + 2.8, cy - 1.6, 5 + i * 5)[1]} r="1.2" fill={i % 2 ? "#6fe3ff" : "#8bf59a"}>
-            <animate attributeName="opacity" values="1;0.2;1" dur={`${1.2 + i * 0.3}s`} repeatCount="indefinite" />
-          </circle>
-        ))}
-      </Box>
-    ));
+  }
+
+  // LIFE-LOG: a mini fridge streaming data
+  {
+    const { cx, cy } = hallOf("lifelog");
+    const gx = cx - 1.0, gy = cy - 0.8;
+    add(gx, gy, 2.0, 1.6, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.0} d={1.6} h={4} plaque={PLAQUE.lifelog} color="#2b6fd1" />
+        <Box gx={gx + 0.45} gy={gy + 0.35} w={1.0} d={0.9} z={4} h={22} base="#eaf1ff" />
+        <line x1={P(gx + 0.5, gy + 1.25, 20)[0]} y1={P(gx + 0.5, gy + 1.25, 20)[1]} x2={P(gx + 0.5, gy + 1.25, 12)[0]} y2={P(gx + 0.5, gy + 1.25, 12)[1]} stroke="#9aa6bc" strokeWidth="2" />
+        <circle cx={P(gx + 1.3, gy + 1.25, 22)[0]} cy={P(gx + 1.3, gy + 1.25, 22)[1]} r="1.4" fill="#6fe3ff" />
+        {[0, 1, 2, 3, 4].map((i) => {
+          const p = P(cx + (i - 2) * 0.35, cy, 30);
+          return (
+            <circle key={i} cx={p[0]} cy={p[1]} r="1.6" fill={["#6fe3ff", "#8bf59a", "#ffc93c", "#ff7a6b", "#b07af0"][i]}>
+              <animate attributeName="cy" values={`${p[1]};${p[1] - 14};${p[1]}`} dur={`${1.6 + i * 0.35}s`} repeatCount="indefinite" />
+              <animate attributeName="opacity" values="0;1;0" dur={`${1.6 + i * 0.35}s`} repeatCount="indefinite" />
+            </circle>
+          );
+        })}
+      </>
+    ), { bias: 0.3 });
+  }
+
+  // SAMSUNG MI: a demand dashboard and a Bixby cooking assistant
+  {
+    const { cx, cy } = hallOf("samsung");
+    const gx = cx - 1.3, gy = cy - 0.9;
+    add(gx, gy, 2.6, 1.8, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.6} d={1.8} h={6} plaque={PLAQUE.samsung} color="#2b3aa8" />
+        <Box gx={gx + 0.2} gy={gy + 0.2} w={1.6} d={0.14} z={6} h={16} base="#232844">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <rect key={i} x={P(gx + 0.4 + i * 0.28, gy + 0.34, 0)[0] - 2} y={P(gx + 0.4 + i * 0.28, gy + 0.34, 9 + i * 2)[1]} width="4" height={3 + i * 2} fill="#6fe3ff" opacity="0.9" stroke="none" />
+          ))}
+        </Box>
+        <Box gx={gx + 1.7} gy={gy + 0.9} w={0.7} d={0.6} z={6} h={7} base="#f3f5fb" />
+        <circle cx={P(gx + 2.05, gy + 1.5, 10)[0]} cy={P(gx + 2.05, gy + 1.5, 10)[1]} r="2.6" fill="#4a5bd8">
+          <animate attributeName="r" values="2;3.4;2" dur="2s" repeatCount="indefinite" />
+        </circle>
+      </>
+    ), { bias: 0.3 });
   }
 
   // decor: plants, benches
-  [[1.2, 1.2], [24.4, 1.2], [7.0, 7.0], [16.1, 7.0], [1.0, 18.6], [24.5, 18.6], [5.2, 12.0], [20.6, 12.0], [1.2, 12.0], [24.6, 11.8], [12.9, 18.5]].forEach(([x, y]) => add(x, y, 0.5, 0.5, <Plant gx={x + 0.25} gy={y + 0.25} />));
-  [[8.4, 10.9], [17.0, 10.9], [2.0, 16.0], [22.2, 16.0]].forEach(([x, y]) =>
+  [[1.2, 1.2], [24.4, 1.2], [5.7, 7.1], [16.3, 7.1], [1.2, 8.4], [24.6, 8.4], [1.0, 18.6], [24.5, 18.6], [6.0, 18.6], [10.8, 18.6], [15.4, 18.6], [20.2, 18.6]].forEach(([x, y]) => add(x, y, 0.5, 0.5, <Plant gx={x + 0.25} gy={y + 0.25} />));
+  [[8.4, 10.9], [17.0, 10.9]].forEach(([x, y]) =>
     add(x, y, 1.6, 0.6, (
       <>
         <Box gx={x} gy={y} w={1.6} d={0.6} h={5} base="#c79f78" />
@@ -617,8 +714,8 @@ function buildWorld(): Item[] {
     NODES[`${z.id}_b`] = fixSpot([z.cx + 2.0, z.cy + 1.1]);
     NODES[`${z.id}_d`] = fixSpot([z.cx + 0.8, z.cy + 2.8]);
   });
-  [1.7, 4.7, 7.7, 10.7, 13.7, 16.7, 19.7, 22.7].forEach((x) =>
-    [1.6, 5.4, 8.7, 10.2, 12.6, 17.9].forEach((y) => {
+  [1.7, 4.7, 7.7, 10.7, 13.7, 16.7, 19.7, 22.7, 24.4].forEach((x) =>
+    [1.6, 5.6, 8.8, 10.2, 13.4, 17.6].forEach((y) => {
       if (walkable(x, y) && !Object.values(NODES).some((p) => dist2(p, [x, y]) < 0.9)) NODES[`l${x}_${y}`] = [x, y];
     })
   );
@@ -631,6 +728,7 @@ function buildWorld(): Item[] {
   return out;
 }
 const PROPS = buildWorld();
+
 
 
 
@@ -1279,8 +1377,8 @@ export default function ObservationRoom({
     onClick: (e: React.MouseEvent) => {
       if (!expanded && !play) return;
       e.stopPropagation();
-      const pr = hallOf(zid).project;
-      if (pr !== null) router.push(hrefFor(featured[pr]));
+      const lk = hallOf(zid).link;
+      if (lk) router.push(lk.href);
     },
   });
   const panelItems: Item[] = PANELS.filter((p) => !p.wall).map((p, i) => {
@@ -1460,7 +1558,7 @@ export default function ObservationRoom({
         })()}
 
         {ZONES.map((z) => {
-          const f = z.project !== null ? featured[z.project] : null;
+          const f = z.link;
           const sp = P(z.cx, z.cy, 84);
           const w = (z.name.length + z.sub.length) * 4.6 + 26;
           return (

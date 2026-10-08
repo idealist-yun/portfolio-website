@@ -1595,10 +1595,10 @@ export default function ObservationRoom({
         <polygon points={pts([P(0, 9.0, 0), P(0, 10.6, 0), P(0, 10.6, 38), P(0, 9.0, 38)])} fill="#ffe9b8" stroke="#1f2a44" strokeWidth="3" />
         <polygon points={pts([P(0, 8.2, 41), P(0, 11.4, 41), P(0, 11.4, 53), P(0, 8.2, 53)])} fill="#1f2a44" />
         {(() => {
-          const t = P(0, 11.2, 44);
+          const t = P(0, 9.8, 44);
           return (
-            <text transform={`matrix(0.894 -0.447 0 1 ${t[0]} ${t[1]})`} fontSize="6.6" fontWeight={700} fill="#fff" letterSpacing="0.8" style={{ fontFamily: "var(--font-bric), " + SANS }}>
-              THE MUSEUM OF IAN
+            <text transform={`matrix(0.894 -0.447 0 1 ${t[0]} ${t[1]})`} textAnchor="middle" fontSize="7.6" fontWeight={700} fill="#fff" letterSpacing="1" style={{ fontFamily: "var(--font-bric), " + SANS }}>
+              THE MUSEUM
             </text>
           );
         })()}

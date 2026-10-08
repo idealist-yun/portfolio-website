@@ -868,7 +868,7 @@ export default function ObservationRoom({
   const [init] = useState(() => YUN_IDS.map((id, k) => makeYun(id, k)));
   const agents = useRef<Yun[]>(init);
   const clock = useRef(0);
-  const docent = useRef<Docent>({ pos: [NODES.gate[0] + 0.8, NODES.gate[1] - 1] as Pt, path: [], seg: 0, mode: "do", left: 4, i: -1, node: "gate", face: 1, hall: null });
+  const docent = useRef<Docent>({ pos: [START[0] - 1.8, START[1] - 0.5] as Pt, path: [], seg: 0, mode: "do", left: 7, i: -1, node: "gate", face: 1, hall: null });
   const player = useRef<{ pos: Pt; face: 1 | -1; path: Pt[]; moving: boolean }>({ pos: START, face: 1, path: [], moving: false });
   const keys = useRef<Set<string>>(new Set());
   const cam = useRef({ x: 0, y: 0, w: VW, h: VH });
@@ -880,7 +880,7 @@ export default function ObservationRoom({
     t: 0,
     a: init.map((a) => ({ id: a.id, pos: a.pos, face: a.face, mode: a.mode, frozen: false })),
     p: { pos: START, face: 1, moving: false },
-    doc: { pos: [NODES.gate[0] + 0.8, NODES.gate[1] - 1] as Pt, face: 1, mode: "do", hall: null, line: WELCOME },
+    doc: { pos: [START[0] - 1.8, START[1] - 0.5] as Pt, face: 1, mode: "do", hall: null, line: WELCOME },
     near: null,
     follow: false,
     moved: false,
@@ -1332,7 +1332,7 @@ export default function ObservationRoom({
           >
             <rect x="-14" y="-42" width="28" height="48" fill="transparent" />
             <Person kind={a.id} face={a.face} bob={bob} />
-            {tag(YUN[a.id].tag.toUpperCase(), ycol, -37, on, YUN[a.id].tag.length * 4.1 + 12)}
+            {(on || snap.near === a.id || hov === a.id || (snap.follow && dist2(snap.p.pos, a.pos) < 6.5)) && tag(YUN[a.id].tag.toUpperCase(), ycol, -37, on, YUN[a.id].tag.length * 4.1 + 12)}
             {a.frozen && play && (
               <g transform="translate(0 -52)">
                 <rect x="-24" y="-8" width="48" height="11" rx="5.5" fill={INK} />

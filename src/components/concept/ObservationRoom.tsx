@@ -1666,21 +1666,6 @@ export default function ObservationRoom({
           );
         })}
 
-        {WINGS.map((w) => {
-          const sp = P((w.x0 + w.x1) / 2, (w.y0 + w.y1) / 2, 122);
-          const wd = w.name.length * 6.2 + 28;
-          return (
-            <g key={w.id} transform={`translate(${sp[0]} ${sp[1]})`} pointerEvents="none">
-              <line x1={-wd / 2 + 6} y1="10" x2={-wd / 2 + 6} y2="30" stroke={w.color} strokeWidth="1" opacity="0.5" />
-              <line x1={wd / 2 - 6} y1="10" x2={wd / 2 - 6} y2="30" stroke={w.color} strokeWidth="1" opacity="0.5" />
-              <rect x={-wd / 2} y="-10" width={wd} height="20" rx="10" fill={w.color} />
-              <text x="0" y="3.6" textAnchor="middle" fontSize="9.4" fontWeight={800} fill="#fff" letterSpacing="1.4" style={{ fontFamily: "var(--font-bric), " + SANS }}>
-                {w.name}
-              </text>
-            </g>
-          );
-        })}
-
         {focusPos && focusText && (
           <g transform={`translate(${P(focusPos[0], focusPos[1])[0]} ${P(focusPos[0], focusPos[1])[1] - 16})`} pointerEvents="none">
             {[

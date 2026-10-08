@@ -166,18 +166,22 @@ function Opening() {
   return (
     <div ref={ref} aria-hidden className="open-wrap fixed inset-0 z-[600]">
       <svg className="absolute inset-0 h-full w-full" viewBox="-160 -160 320 320" preserveAspectRatio="xMidYMid slice">
-        <polygon className="open-blade open-blade-0" points="0,0 0.0,-700.0 606.2,-350.0" style={{ ["--dx" as string]: "250.0px", ["--dy" as string]: "-433.0px" }} />
-        <polygon className="open-blade open-blade-1" points="0,0 606.2,-350.0 606.2,350.0" style={{ ["--dx" as string]: "500.0px", ["--dy" as string]: "0.0px" }} />
-        <polygon className="open-blade open-blade-0" points="0,0 606.2,350.0 0.0,700.0" style={{ ["--dx" as string]: "250.0px", ["--dy" as string]: "433.0px" }} />
-        <polygon className="open-blade open-blade-1" points="0,0 0.0,700.0 -606.2,350.0" style={{ ["--dx" as string]: "-250.0px", ["--dy" as string]: "433.0px" }} />
-        <polygon className="open-blade open-blade-0" points="0,0 -606.2,350.0 -606.2,-350.0" style={{ ["--dx" as string]: "-500.0px", ["--dy" as string]: "0.0px" }} />
-        <polygon className="open-blade open-blade-1" points="0,0 -606.2,-350.0 -0.0,-700.0" style={{ ["--dx" as string]: "-250.0px", ["--dy" as string]: "-433.0px" }} />
-        <line className="open-line" x1="0" y1="0" x2="0.0" y2="-700.0" pathLength={1} />
-        <line className="open-line" x1="0" y1="0" x2="606.2" y2="-350.0" pathLength={1} />
-        <line className="open-line" x1="0" y1="0" x2="606.2" y2="350.0" pathLength={1} />
-        <line className="open-line" x1="0" y1="0" x2="0.0" y2="700.0" pathLength={1} />
-        <line className="open-line" x1="0" y1="0" x2="-606.2" y2="350.0" pathLength={1} />
-        <line className="open-line" x1="0" y1="0" x2="-606.2" y2="-350.0" pathLength={1} />
+        <circle className="open-blade open-blade-0" cx="0.0" cy="-232.5" r="230" style={{ ["--dx" as string]: "215.0px", ["--dy" as string]: "-372.4px" }} />
+        <circle className="open-blade open-blade-1" cx="164.4" cy="-164.4" r="230" style={{ ["--dx" as string]: "415.3px", ["--dy" as string]: "-111.3px" }} />
+        <circle className="open-blade open-blade-0" cx="232.5" cy="0.0" r="230" style={{ ["--dx" as string]: "372.4px", ["--dy" as string]: "215.0px" }} />
+        <circle className="open-blade open-blade-1" cx="164.4" cy="164.4" r="230" style={{ ["--dx" as string]: "111.3px", ["--dy" as string]: "415.3px" }} />
+        <circle className="open-blade open-blade-0" cx="0.0" cy="232.5" r="230" style={{ ["--dx" as string]: "-215.0px", ["--dy" as string]: "372.4px" }} />
+        <circle className="open-blade open-blade-1" cx="-164.4" cy="164.4" r="230" style={{ ["--dx" as string]: "-415.3px", ["--dy" as string]: "111.3px" }} />
+        <circle className="open-blade open-blade-0" cx="-232.5" cy="0.0" r="230" style={{ ["--dx" as string]: "-372.4px", ["--dy" as string]: "-215.0px" }} />
+        <circle className="open-blade open-blade-1" cx="-164.4" cy="-164.4" r="230" style={{ ["--dx" as string]: "-111.3px", ["--dy" as string]: "-415.3px" }} />
+        <path className="open-line" pathLength={1} d="M 0.0 -2.5 A 230 230 0 0 1 -156.8 -64.2" fill="none" />
+        <path className="open-line" pathLength={1} d="M 1.8 -1.8 A 230 230 0 0 1 -65.5 -156.3" fill="none" />
+        <path className="open-line" pathLength={1} d="M 2.5 0.0 A 230 230 0 0 1 64.2 -156.8" fill="none" />
+        <path className="open-line" pathLength={1} d="M 1.8 1.8 A 230 230 0 0 1 156.3 -65.5" fill="none" />
+        <path className="open-line" pathLength={1} d="M 0.0 2.5 A 230 230 0 0 1 156.8 64.2" fill="none" />
+        <path className="open-line" pathLength={1} d="M -1.8 1.8 A 230 230 0 0 1 65.5 156.3" fill="none" />
+        <path className="open-line" pathLength={1} d="M -2.5 0.0 A 230 230 0 0 1 -64.2 156.8" fill="none" />
+        <path className="open-line" pathLength={1} d="M -1.8 -1.8 A 230 230 0 0 1 -156.3 65.5" fill="none" />
         <circle className="open-dot" cx="0" cy="0" r="3" fill={RED} />
       </svg>
       <p
@@ -190,7 +194,7 @@ function Opening() {
         .open-wrap { animation: openWrap 2.7s linear forwards; }
         .open-blade { fill: ${PAPER}; stroke: ${RED}; stroke-width: 1.5px; vector-effect: non-scaling-stroke; stroke-opacity: 0; animation: bladeStroke .01s 1.25s forwards, bladeOpen .95s 1.55s cubic-bezier(.65,0,.25,1) forwards; }
         .open-blade-1 { animation: bladeTone .3s 1.25s forwards, bladeStroke .01s 1.25s forwards, bladeOpen .95s 1.55s cubic-bezier(.65,0,.25,1) forwards; }
-        .open-line { stroke: ${RED}; stroke-width: 1.5px; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; animation: lineDraw .7s .55s cubic-bezier(.3,.6,.2,1) forwards, lineOff .01s 1.25s forwards; }
+        .open-line { stroke: ${RED}; stroke-width: 0.4px; stroke-dasharray: 1; stroke-dashoffset: 1; animation: lineDraw .7s .55s cubic-bezier(.3,.6,.2,1) forwards, lineOff .01s 1.25s forwards; }
         .open-dot { transform-box: fill-box; transform-origin: center; animation: dotIn .4s cubic-bezier(.2,.9,.3,1.3) both, dotOut .2s 1.55s forwards; }
         .open-text { animation: textIn .35s .15s ease-out both, textOut .6s .55s ease-in forwards; }
         @keyframes dotIn { from { transform: scale(0) } to { transform: scale(1) } }

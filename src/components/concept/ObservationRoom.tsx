@@ -936,6 +936,11 @@ export default function ObservationRoom({
     setFrameH(wrap.current?.offsetHeight ?? 0);
     setExpanded(true);
   }, []);
+  // other parts of the page (the hand-drawn "click in" note) can open the museum
+  useEffect(() => {
+    window.addEventListener("museum:enlarge", expand);
+    return () => window.removeEventListener("museum:enlarge", expand);
+  }, [expand]);
   const collapse = useCallback(() => {
     setExpanded(false);
     setDlg(null);

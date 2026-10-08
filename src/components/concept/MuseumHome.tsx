@@ -182,6 +182,24 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">
+            <DeskItem left="33.5%" top="30%" rot={-3} z={7} front={front} onFront={bump} className="max-md:max-w-[220px] md:w-[160px]">
+              <button
+                type="button"
+                onClick={() => window.dispatchEvent(new Event("museum:enlarge"))}
+                className="group block w-full text-left"
+                aria-label="Open the museum"
+              >
+                <svg viewBox="0 0 170 84" className="h-auto w-full animate-[nudge_2.6s_ease-in-out_infinite]" fill="none" stroke={INK} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M10 74 C 36 80, 112 70, 152 14" />
+                  <path d="M152 14 L137 20 M152 14 L155 31" />
+                </svg>
+                <span className="mt-1 block text-[1.55rem] leading-[1.02] transition-colors group-hover:text-[#c8431f]" style={{ fontFamily: "var(--font-hand)", fontWeight: 700 }}>
+                  Click in! A docent will walk you through my journey.
+                </span>
+              </button>
+              <style>{`@keyframes nudge{0%,100%{transform:translate(0,0)}50%{transform:translate(5px,-5px)}}`}</style>
+            </DeskItem>
+
             <DeskItem left="47%" top="0%" rot={0} z={3} front={front} onFront={bump} className="sm:col-span-2 md:w-[600px]">
               <div
                 className="rounded-[4px] p-[10px] shadow-[0_22px_40px_-18px_rgba(29,27,24,0.7)]"

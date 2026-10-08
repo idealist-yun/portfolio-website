@@ -1510,6 +1510,7 @@ export default function ObservationRoom({
     <div className="relative overflow-hidden rounded-[18px]" style={{ background: "linear-gradient(180deg,#f6f9fd,#e9f0f9)" }}>
       <svg
         ref={svgRef}
+        data-nodrag=""
         viewBox={`${snap.cam.x.toFixed(1)} ${snap.cam.y.toFixed(1)} ${snap.cam.w.toFixed(1)} ${snap.cam.h.toFixed(1)}`}
         className={`block w-full ${expanded ? "" : "h-auto"}`}
         style={expanded ? { height: "calc(100vh - 150px)" } : undefined}

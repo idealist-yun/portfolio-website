@@ -267,7 +267,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
             <span className="block md:whitespace-nowrap">Designing from it.</span>
           </h1>
           <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-7" style={{ color: MUTED }}>
-            I&rsquo;m Ian, a strategic, service &amp; experience designer across business, design and engineering. I turn research into strategy, and test it on simulated users (generative agents) before it reaches real ones.
+            Hi, I&rsquo;m Ian, a strategic, service &amp; experience designer across business, design and engineering. I turn research into strategy, and test it on simulated users (generative agents) before it reaches real ones.
           </p>
           <p className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05]" style={{ color: INK }}>
             Define personas from human data. Ideate and prototype the service. Test it with simulated persona agents.

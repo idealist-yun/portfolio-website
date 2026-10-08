@@ -34,14 +34,15 @@ const mixc = (h: string, t: string, k: number) => {
 };
 
 // ------------------------------------------------------------ the museum: one open gallery. Back row: defense | care & assistive | robotics & simulation. Front: the long SDI Lab wing
-export type ZoneId = "army" | "care" | "access" | "tom" | "robots" | "lab" | "mall" | "raemian" | "fandom" | "lifelog" | "samsung";
-type WingId = "defense" | "care" | "robots" | "sdi";
+export type ZoneId = "army" | "care" | "access" | "tom" | "robots" | "lab" | "mall" | "raemian" | "fandom" | "lifelog" | "samsung" | "bixby";
+type WingId = "defense" | "care" | "robots" | "sdi" | "samsung";
 type Wing = { id: WingId; name: string; color: string; tint: string; x0: number; y0: number; x1: number; y1: number };
 const WINGS: Wing[] = [
   { id: "defense", name: "DEFENSE", color: "#3f9a5a", tint: "#e6f1e3", x0: 0.7, y0: 0.7, x1: 6.0, y1: 8.0 },
   { id: "care", name: "CARE & ASSISTIVE", color: "#4c7df0", tint: "#e4ebfb", x0: 6.0, y0: 0.7, x1: 16.8, y1: 8.0 },
   { id: "robots", name: "ROBOTICS & SIMULATION", color: "#ff6b4a", tint: "#fde6de", x0: 16.8, y0: 0.7, x1: 25.3, y1: 8.0 },
-  { id: "sdi", name: "SDI LAB · WHERE IT STARTED", color: "#d98a0c", tint: "#fbefd6", x0: 0.7, y0: 11.6, x1: 25.3, y1: 19.3 },
+  { id: "sdi", name: "SDI LAB · WHERE IT STARTED", color: "#d98a0c", tint: "#fbefd6", x0: 0.7, y0: 11.6, x1: 18.4, y1: 19.3 },
+  { id: "samsung", name: "SAMSUNG ELECTRONICS", color: "#3a4cc7", tint: "#e3e7fb", x0: 18.4, y0: 11.6, x1: 25.3, y1: 19.3 },
 ];
 type Hall = {
   id: ZoneId;
@@ -71,8 +72,9 @@ const HALL_PICS: Record<ZoneId, [string, number][]> = {
   fandom: [[CARD + "samsung-brand-fandom.jpg", 1000 / 562]],
   lifelog: [[CARD + "samsung-lifelog-minifridge.jpg", 1000 / 750]],
   samsung: [],
+  bixby: [],
 };
-const PLAQUE: Record<ZoneId, string> = { army: "TERRAIN MODEL", care: "FIVE PERSONAS", access: "NRC HACKATHON", tom: "GUIDED HANDS · TOM", robots: "ROBES FOR ROBOTS", lab: "IDD VILLAGE", mall: "STARFIELD MODEL", raemian: "RAEMIAN TOWER", fandom: "BRAND FANDOM", lifelog: "LIFE-LOG FRIDGE", samsung: "DEMAND DASHBOARD" };
+const PLAQUE: Record<ZoneId, string> = { army: "TERRAIN MODEL", care: "FIVE PERSONAS", access: "NRC HACKATHON", tom: "GUIDED HANDS · TOM", robots: "ROBES FOR ROBOTS", lab: "IDD VILLAGE", mall: "STARFIELD MODEL", raemian: "RAEMIAN TOWER", fandom: "BRAND FANDOM", lifelog: "LIFE-LOG FRIDGE", samsung: "DEMAND DASHBOARD", bixby: "BIXBY COOK" };
 const ZONES_RAW: Omit<Hall, "plaque" | "pics">[] = [
   { id: "army", wing: "defense", name: "Army", sub: "ROKA · 2022–24", color: "#4caf6a", cx: 3.3, cy: 3.9, rw: 2.3, link: { href: hrefFor(featured[3]), title: featured[3].title }, caption: "Led 60+ people, and built a 3D terrain trainer." },
   { id: "care", wing: "care", name: "Thesis", sub: "disability personas", color: "#4c7df0", cx: 7.9, cy: 3.8, rw: 1.7, link: { href: hrefFor(featured[0]), title: featured[0].title }, caption: "It started with my brother. 2,400 profiles, 5 personas." },
@@ -80,11 +82,12 @@ const ZONES_RAW: Omit<Hall, "plaque" | "pics">[] = [
   { id: "tom", wing: "care", name: "Guided Hands", sub: "TOM · assistive", color: "#2fb5d9", cx: 15.1, cy: 3.8, rw: 1.7, link: null, caption: "At Penn, TOM: rebuilding a writing aid for people with limited hand control, at low cost." },
   { id: "robots", wing: "robots", name: "VIP Robots", sub: "HRI · SKKU", color: "#ff6b4a", cx: 19.9, cy: 3.9, rw: 1.9, link: { href: hrefFor(featured[2]), title: featured[2].title }, caption: "Three serving robots, choreographed like a royal ceremony." },
   { id: "lab", wing: "robots", name: "IDD Lab", sub: "simulation testbed", color: "#14b8a6", cx: 23.6, cy: 3.9, rw: 1.7, link: { href: hrefFor(featured[1]), title: featured[1].title }, caption: "AI agents living a day in a virtual world." },
-  { id: "mall", wing: "sdi", name: "Starfield", sub: "retail data", color: "#f5b301", cx: 3.4, cy: 15.3, rw: 2.3, link: { href: hrefFor(featured[4]), title: featured[4].title }, caption: "Network-analysis personas for a mega mall." },
-  { id: "raemian", wing: "sdi", name: "Raemian", sub: "Samsung C&T", color: "#6d5bd0", cx: 8.2, cy: 15.3, rw: 2.3, link: { href: hrefFor(featured[5]), title: featured[5].title }, caption: "Housing data turned into metaverse services for a Samsung C&T complex." },
-  { id: "fandom", wing: "sdi", name: "Fandom", sub: "Samsung vs rivals", color: "#e0457b", cx: 13.0, cy: 15.3, rw: 2.3, link: { href: "/project/samsung-brand-fandom", title: "Brand fandom analysis between Samsung and a competitor" }, caption: "Who loves Samsung, and who loves its rivals? A brand fandom analysis." },
-  { id: "lifelog", wing: "sdi", name: "Life-log", sub: "mini fridge", color: "#3d8bff", cx: 17.8, cy: 15.3, rw: 2.3, link: { href: "/project/samsung-lifelog-minifridge", title: "Life-log analysis for new product service planning" }, caption: "Life-log analysis to plan a new service around a mini fridge." },
-  { id: "samsung", wing: "sdi", name: "Samsung MI", sub: "2025–26", color: "#3a4cc7", cx: 22.6, cy: 15.3, rw: 2.2, link: { href: "/project/samsung-ax-dashboard", title: "Enterprise demand dashboard & AI chatbot" }, caption: "From the lab into Samsung: a demand dashboard with an AI chatbot, and a Bixby cooking assistant." },
+  { id: "mall", wing: "sdi", name: "Starfield", sub: "retail data", color: "#f5b301", cx: 3.1, cy: 15.3, rw: 1.9, link: { href: hrefFor(featured[4]), title: featured[4].title }, caption: "Network-analysis personas for a mega mall." },
+  { id: "raemian", wing: "sdi", name: "Raemian", sub: "Samsung C&T", color: "#6d5bd0", cx: 7.2, cy: 15.3, rw: 1.9, link: { href: hrefFor(featured[5]), title: featured[5].title }, caption: "Housing data turned into metaverse services for a Samsung C&T complex." },
+  { id: "fandom", wing: "sdi", name: "Fandom", sub: "Samsung vs rivals", color: "#e0457b", cx: 11.3, cy: 15.3, rw: 1.9, link: { href: "/project/samsung-brand-fandom", title: "Brand fandom analysis between Samsung and a competitor" }, caption: "Who loves Samsung, and who loves its rivals? A brand fandom analysis." },
+  { id: "lifelog", wing: "sdi", name: "Life-log", sub: "mini fridge", color: "#3d8bff", cx: 15.4, cy: 15.3, rw: 1.9, link: { href: "/project/samsung-lifelog-minifridge", title: "Life-log analysis for new product service planning" }, caption: "Life-log analysis to plan a new service around a mini fridge." },
+  { id: "samsung", wing: "samsung", name: "Demand dashboard", sub: "Samsung MI · 2025–26", color: "#3a4cc7", cx: 21.0, cy: 15.3, rw: 1.6, link: { href: "/project/samsung-ax-dashboard", title: "Enterprise demand dashboard & AI chatbot" }, caption: "At Samsung: a demand dashboard with an AI chatbot, used across the appliance division." },
+  { id: "bixby", wing: "samsung", name: "Bixby cook", sub: "Samsung · 2025–26", color: "#2f80ed", cx: 24.0, cy: 15.3, rw: 1.3, link: { href: "/project/samsung-bixby-cooking-assistant", title: "Bixby-powered cooking assistant" }, caption: "A Bixby-powered cooking assistant for screen-based appliances." },
 ];
 export const ZONES: Hall[] = ZONES_RAW.map((z) => ({ ...z, plaque: PLAQUE[z.id], pics: HALL_PICS[z.id] }));
 const hallOf = (id: ZoneId) => ZONES.find((z) => z.id === id)!;
@@ -98,10 +101,10 @@ const PANEL_CFG: Partial<Record<ZoneId, ["x" | "y", number, number, boolean][]>>
   access: [["y", 0, 11.5, true]],
   robots: [["y", 0, 18.7, true], ["y", 0, 21.1, true]],
   lab: [["y", 0, 23.7, true]],
-  mall: [["y", 12.4, 3.4, false]],
-  raemian: [["y", 12.4, 8.2, false]],
-  fandom: [["y", 12.4, 13.0, false]],
-  lifelog: [["y", 12.4, 17.8, false]],
+  mall: [["y", 12.4, 3.1, false]],
+  raemian: [["y", 12.4, 7.2, false]],
+  fandom: [["y", 12.4, 11.3, false]],
+  lifelog: [["y", 12.4, 15.4, false]],
 };
 const PANELS: Panel[] = ZONES.flatMap((z) =>
   (PANEL_CFG[z.id] ?? []).map(([plane, fixed, along, wall], i) => {
@@ -185,7 +188,7 @@ function route(from: string, to: string): Pt[] {
 
 
 // ------------------------------------------------------------ the seven Yuns (one per chapter; they live in the wing of their theme)
-type YunId = "army" | "care" | "robots" | "mall" | "penn";
+type YunId = "army" | "care" | "robots" | "mall" | "samsung" | "penn";
 type YunInfo = { tag: string; home: ZoneId; doing: string; hi: string; who: string; made: string; href: string; hrefLabel: string };
 const YUN: Record<YunId, YunInfo> = {
   army: {
@@ -223,10 +226,20 @@ const YUN: Record<YunId, YunInfo> = {
     home: "mall",
     doing: "turning customer data into strategy",
     hi: "Hi. I'm the Yun who turned customer data into strategy.",
-    who: "The lab where it started: customer data turned into service strategy for malls, appliances and apartment life. Later, the same habits took me into Samsung.",
+    who: "The lab where it started: customer data turned into service strategy for malls, appliances and apartment life. Samsung came after.",
     made: featured[4].line,
     href: hrefFor(featured[4]),
     hrefLabel: "Show me the exhibit",
+  },
+  samsung: {
+    tag: "Samsung Yun",
+    home: "samsung",
+    doing: "forecasting demand",
+    hi: "Hi. I'm the Yun at Samsung.",
+    who: journey[5].note,
+    made: "A demand dashboard with an AI chatbot, and a Bixby cooking assistant for screen-based appliances.",
+    href: "/project/samsung-ax-dashboard",
+    hrefLabel: "Show me the dashboard",
   },
   penn: {
     tag: "Penn Yun",
@@ -247,7 +260,8 @@ const ROUTES: Record<YunId, Spot[]> = {
   army: [["army", "a", 6], ["army", "b", 4], ["care", "a", 3], ["army", "a", 5], ["army", "b", 4], ["tom", "b", 3]],
   care: [["care", "a", 6], ["care", "b", 4], ["access", "a", 3], ["care", "b", 5], ["tom", "a", 3], ["lab", "a", 3]],
   robots: [["robots", "a", 6], ["robots", "b", 4], ["lab", "a", 4], ["lab", "b", 4], ["robots", "a", 5], ["tom", "b", 3]],
-  mall: [["mall", "a", 6], ["mall", "b", 4], ["raemian", "a", 3], ["fandom", "a", 3], ["lifelog", "a", 3], ["samsung", "a", 4]],
+  mall: [["mall", "a", 6], ["mall", "b", 4], ["raemian", "a", 3], ["fandom", "a", 3], ["lifelog", "a", 3], ["mall", "a", 4]],
+  samsung: [["samsung", "a", 6], ["samsung", "b", 4], ["bixby", "a", 4], ["bixby", "b", 3], ["samsung", "a", 4], ["mall", "b", 3]],
   penn: [["tom", "a", 6], ["tom", "b", 4], ["access", "a", 3], ["tom", "b", 5], ["care", "a", 3], ["tom", "a", 4]],
 };
 
@@ -258,8 +272,8 @@ const makeYun = (id: YunId, k: number): Yun => {
   return { id, pos: [...NODES[node]] as Pt, path: [], seg: 0, mode: "do", left: 2 + k * 1.2, i: 0, node, face: 1 };
 };
 
-const WELCOME = "Welcome. This museum is about one person, in five chapters. Follow me!";
-const TOUR: ZoneId[] = ["army", "care", "access", "tom", "robots", "lab", "mall", "raemian", "fandom", "lifelog", "samsung"];
+const WELCOME = "Welcome. This museum is about one person, in six chapters. Follow me!";
+const TOUR: ZoneId[] = ["army", "care", "access", "tom", "robots", "lab", "mall", "raemian", "fandom", "lifelog", "samsung", "bixby"];
 type Docent = { pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1; hall: ZoneId | null };
 
 type Choice = { label: string; go?: string; href?: string };
@@ -272,7 +286,7 @@ function dialogNode(who: string, key: string): DNode {
         choices: [{ label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
       };
     return {
-      text: "I'm the docent. Every Yun you see here is Yun at one chapter of their life, living in the wing of their theme. Talk to all five to fill your passport.",
+      text: "I'm the docent. Every Yun you see here is Yun at one chapter of their life, living in the wing of their theme. Talk to all six to fill your passport.",
       choices: [{ label: "Where do I start?", go: "start" }, { label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
     };
   }
@@ -649,22 +663,44 @@ function buildWorld(): Item[] {
     ), { bias: 0.3 });
   }
 
-  // SAMSUNG MI: a demand dashboard and a Bixby cooking assistant
+  // SAMSUNG: the demand dashboard
   {
     const { cx, cy } = hallOf("samsung");
     const gx = cx - 1.3, gy = cy - 0.9;
     add(gx, gy, 2.6, 1.8, (
       <>
         <Pedestal gx={gx} gy={gy} w={2.6} d={1.8} h={6} plaque={PLAQUE.samsung} color="#2b3aa8" />
-        <Box gx={gx + 0.2} gy={gy + 0.2} w={1.6} d={0.14} z={6} h={16} base="#232844">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <rect key={i} x={P(gx + 0.4 + i * 0.28, gy + 0.34, 0)[0] - 2} y={P(gx + 0.4 + i * 0.28, gy + 0.34, 9 + i * 2)[1]} width="4" height={3 + i * 2} fill="#6fe3ff" opacity="0.9" stroke="none" />
+        <Box gx={gx + 0.2} gy={gy + 0.3} w={2.2} d={0.14} z={6} h={18} base="#232844">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <rect key={i} x={P(gx + 0.45 + i * 0.33, gy + 0.44, 0)[0] - 2} y={P(gx + 0.45 + i * 0.33, gy + 0.44, 9 + i * 2)[1]} width="4" height={3 + i * 2} fill="#6fe3ff" opacity="0.9" stroke="none" />
           ))}
         </Box>
-        <Box gx={gx + 1.7} gy={gy + 0.9} w={0.7} d={0.6} z={6} h={7} base="#f3f5fb" />
-        <circle cx={P(gx + 2.05, gy + 1.5, 10)[0]} cy={P(gx + 2.05, gy + 1.5, 10)[1]} r="2.6" fill="#4a5bd8">
-          <animate attributeName="r" values="2;3.4;2" dur="2s" repeatCount="indefinite" />
+        <MiniPerson x={gx + 1.3} y={gy + 1.3} z={6} color="#4a5bd8" />
+      </>
+    ), { bias: 0.3 });
+  }
+
+  // BIXBY: a cooking assistant on a screen-based appliance, with a steaming pot
+  {
+    const { cx, cy } = hallOf("bixby");
+    const gx = cx - 1.1, gy = cy - 0.8;
+    const pot = P(cx + 0.3, cy + 0.1, 10);
+    add(gx, gy, 2.2, 1.6, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.2} d={1.6} h={5} plaque={PLAQUE.bixby} color="#1f5fc0" />
+        <Box gx={gx + 0.25} gy={gy + 0.3} w={1.0} d={0.8} z={5} h={14} base="#eef1f8" />
+        <circle cx={P(gx + 0.75, gy + 1.1, 16)[0]} cy={P(gx + 0.75, gy + 1.1, 16)[1]} r="3.4" fill="#2f80ed">
+          <animate attributeName="r" values="2.6;4;2.6" dur="2s" repeatCount="indefinite" />
         </circle>
+        <g transform={`translate(${pot[0]} ${pot[1]})`}>
+          <ellipse cx="0" cy="0" rx="6" ry="2.4" fill="#9aa6bc" stroke={EDGE} strokeWidth="0.7" />
+          <path d="M-6,0 L-5,-7 L5,-7 L6,0 Z" fill="#c9ced8" stroke={EDGE} strokeWidth="0.7" />
+          {[-2.5, 0, 2.5].map((x, i) => (
+            <path key={i} d={`M${x},-9 q-2,-4 0,-7 q2,-3 0,-6`} fill="none" stroke="#bcc6da" strokeWidth="1.2" strokeLinecap="round">
+              <animate attributeName="opacity" values="0.1;0.9;0.1" dur={`${1.4 + i * 0.4}s`} repeatCount="indefinite" />
+            </path>
+          ))}
+        </g>
       </>
     ), { bias: 0.3 });
   }
@@ -707,7 +743,7 @@ const PROPS = buildWorld();
 
 // ------------------------------------------------------------ people
 type Kind = YunId | "you";
-const SHIRT: Record<Kind, string> = { army: "#5b7a46", care: "#6a9bff", robots: "#ff8a66", mall: "#ffd24a", penn: "#2a3f7f", you: "#ff4d6d" };
+const SHIRT: Record<Kind, string> = { army: "#5b7a46", care: "#6a9bff", samsung: "#eef0ff", robots: "#ff8a66", mall: "#ffd24a", penn: "#2a3f7f", you: "#ff4d6d" };
 
 function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) {
   const shirt = SHIRT[kind];
@@ -717,7 +753,14 @@ function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) 
       <g transform={`translate(0 ${bob})`}>
         <rect x="-4" y="-6" width="3" height="6" rx="1.2" fill="#56618a" />
         <rect x="1" y="-6" width="3" height="6" rx="1.2" fill="#56618a" />
-        <rect x="-5.5" y="-17" width="11" height="12" rx="4.5" fill={shirt} stroke="none" strokeWidth="0.8" />
+        <rect x="-5.5" y="-17" width="11" height="12" rx="4.5" fill={shirt} stroke={kind === "samsung" ? "rgba(70,100,150,0.4)" : "none"} strokeWidth="0.8" />
+        {kind === "samsung" && (
+          <>
+            <line x1="-1.5" y1="-17" x2="0" y2="-11" stroke="#1f2a44" strokeWidth="0.9" />
+            <line x1="1.5" y1="-17" x2="0" y2="-11" stroke="#1f2a44" strokeWidth="0.9" />
+            <rect x="-1.6" y="-11" width="3.2" height="3.8" rx="0.6" fill="#4a5bd8" />
+          </>
+        )}
         <circle cx="0" cy="-23" r="6.2" fill="#ffe0c4" />
         <path d="M-6.2,-24 Q-6,-30 0,-30 Q6,-30 6.2,-24 Q2,-27 -1,-26 Q-5,-26 -6.2,-24 Z" fill="#1f2a44" />
         <circle cx="-2.2" cy="-22.5" r="0.9" fill={INK} />
@@ -1705,7 +1748,7 @@ export default function ObservationRoom({
         </Link>
       </div>
       <div className="flex items-center gap-2 text-[11px]" style={{ fontFamily: "var(--font-pixel)" }}>
-        <span className="uppercase opacity-55">passport {met.length}/5</span>
+        <span className="uppercase opacity-55">passport {met.length}/6</span>
         <span className="flex gap-1">
           {YUN_IDS.map((id) => (
             <span key={id} title={YUN[id].tag} className="h-3.5 w-3.5 rounded-full border" style={{ borderColor: yunColor(id), background: met.includes(id) ? yunColor(id) : "transparent" }} />

@@ -977,11 +977,11 @@ export default function ObservationRoom({
         const n = dialogNode(s.dlg.who, s.dlg.key);
         const idx = parseInt(k, 10);
         if (idx >= 1 && idx <= n.choices.length) choose(n.choices[idx - 1]);
-        else if (k === "e" || k === "Enter") choose(n.choices[0]);
+        else if (k === " " || k === "e" || k === "Enter") choose(n.choices[0]);
         e.preventDefault();
         return;
       }
-      if ((k === "e" || (k === "Enter" && hoverFrame.current)) && s.near) {
+      if ((k === " " || k === "e" || (k === "Enter" && hoverFrame.current)) && s.near) {
         openDialog(s.near);
         e.preventDefault();
         return;
@@ -1335,9 +1335,9 @@ export default function ObservationRoom({
             {tag(YUN[a.id].tag.toUpperCase(), ycol, -37, on, YUN[a.id].tag.length * 4.1 + 12)}
             {a.frozen && play && (
               <g transform="translate(0 -52)">
-                <rect x="-17" y="-8" width="34" height="11" rx="5.5" fill={INK} />
+                <rect x="-24" y="-8" width="48" height="11" rx="5.5" fill={INK} />
                 <text x="0" y="0" textAnchor="middle" fontSize="6.6" fill="#fff" style={{ fontFamily: SANS }}>
-                  E · talk
+                  Space · talk
                 </text>
               </g>
             )}
@@ -1372,9 +1372,9 @@ export default function ObservationRoom({
           {tag("DOCENT", INK, -39, focus === "D", 40)}
           {snap.near === "D" && play && (
             <g transform="translate(0 -54)">
-              <rect x="-17" y="-8" width="34" height="11" rx="5.5" fill={INK} />
+              <rect x="-24" y="-8" width="48" height="11" rx="5.5" fill={INK} />
               <text x="0" y="0" textAnchor="middle" fontSize="6.6" fill="#fff" style={{ fontFamily: SANS }}>
-                E · talk
+                Space · talk
               </text>
             </g>
           )}
@@ -1467,9 +1467,9 @@ export default function ObservationRoom({
           <ellipse cx={c[0]} cy={c[1]} rx="38" ry="26" fill="transparent" />
           {isNear && !dlg && (
             <g transform={`translate(${c[0]} ${c[1] - 34})`} pointerEvents="none">
-              <rect x="-22" y="-8" width="44" height="11" rx="5.5" fill={INK} />
+              <rect x="-26" y="-8" width="52" height="11" rx="5.5" fill={INK} />
               <text x="0" y="0" textAnchor="middle" fontSize="6.6" fill="#fff" style={{ fontFamily: SANS }}>
-                E · look
+                Space · look
               </text>
             </g>
           )}
@@ -1734,7 +1734,7 @@ export default function ObservationRoom({
       {play && !dlg && (
         <>
           <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/80 px-3 py-1 text-[11px] backdrop-blur md:block" style={{ fontFamily: "var(--font-pixel)", color: INK }}>
-            WASD / arrows to move · click the floor to walk · click a Yun to talk · E talk
+            WASD / arrows to move · click the floor to walk · click a Yun to talk · Space to talk
           </p>
           <div className="absolute bottom-3 left-3 h-[84px] w-[84px] md:hidden">
             {dpad("ArrowUp", "↖", "left-0 top-0")}

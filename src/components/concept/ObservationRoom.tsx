@@ -15,12 +15,12 @@ const SANS = "ui-sans-serif, system-ui";
 // ------------------------------------------------------------ iso projection
 const TW = 40;
 const TH = 20;
-const OX = 338;
-const OY = 62;
-const NX = 22;
-const NY = 16;
-const VW = 800;
-const VH = 470;
+const OX = 430;
+const OY = 84;
+const NX = 26;
+const NY = 20;
+const VW = 960;
+const VH = 575;
 
 const P = (gx: number, gy: number, z = 0): Pt => [OX + ((gx - gy) * TW) / 2, OY + ((gx + gy) * TH) / 2 - z];
 const pts = (a: Pt[]) => a.map((p) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(" ");
@@ -33,17 +33,27 @@ const mixc = (h: string, t: string, k: number) => {
   return toHex(a.map((v, i) => v + (b[i] - v) * k));
 };
 
-// ------------------------------------------------------------ the museum: one open gallery, six exhibit clusters = six chapters
-export type ZoneId = "army" | "care" | "samsung" | "robots" | "lab" | "mall";
+// ------------------------------------------------------------ the museum: one open gallery, five wings by theme, ten exhibits
+export type ZoneId = "army" | "care" | "tom" | "samsung" | "mall" | "robots" | "lab" | "bass" | "dance" | "wand";
+type WingId = "defense" | "care" | "consumer" | "robots" | "maker";
+type Wing = { id: WingId; name: string; sub: string; color: string; tint: string; x0: number; y0: number; x1: number; y1: number };
+const WINGS: Wing[] = [
+  { id: "defense", name: "DEFENSE", sub: "terrain · people data", color: "#3f9a5a", tint: "#e6f1e3", x0: 0.7, y0: 0.7, x1: 7.4, y1: 8.0 },
+  { id: "care", name: "CARE & ASSISTIVE", sub: "disability · assistive tech", color: "#4c7df0", tint: "#e4ebfb", x0: 7.4, y0: 0.7, x1: 16.6, y1: 8.0 },
+  { id: "consumer", name: "CONSUMER & RETAIL", sub: "homes · malls · brands", color: "#d98a0c", tint: "#fbefd6", x0: 16.6, y0: 0.7, x1: 25.3, y1: 8.0 },
+  { id: "robots", name: "ROBOTS & SIMULATION", sub: "machines among people", color: "#ff6b4a", tint: "#fde6de", x0: 0.7, y0: 11.6, x1: 11.2, y1: 19.3 },
+  { id: "maker", name: "MAKER & OFF-HOURS", sub: "Penn · Makerspace · music · dance", color: "#c23d8c", tint: "#f8e2ee", x0: 11.2, y0: 11.6, x1: 25.3, y1: 19.3 },
+];
 type Hall = {
   id: ZoneId;
+  wing: WingId;
   name: string;
   sub: string;
   color: string;
   cx: number;
   cy: number;
-  project: number; // index into `featured`
-  doing: string;
+  rw: number; // rug half-width
+  project: number | null; // index into `featured`
   caption: string; // docent line
   plaque: string;
   pics: [string, number][]; // [src, aspect]
@@ -51,39 +61,48 @@ type Hall = {
 const FULL = "/images/full/";
 const HALL_PICS: Record<ZoneId, [string, number][]> = {
   army: [[FULL + "military-3d-battlefield-mapping-01.jpg", 1400 / 1131], [FULL + "military-3d-battlefield-mapping-03.jpg", 1400 / 950], [FULL + "military-3d-battlefield-mapping-02.jpg", 824 / 1400]],
-  care: [["/images/cards/disability-persona-augmentation.jpg", 1], [FULL + "disability-persona-augmentation-07.jpg", 1400 / 1314], [FULL + "disability-persona-augmentation-05.jpg", 1132 / 1400]],
-  samsung: [["/images/cards/samsung-raemian-metaverse.jpg", 1000 / 607], [FULL + "samsung-raemian-metaverse-04.jpg", 1095 / 1400], [FULL + "samsung-raemian-metaverse-06.jpg", 1400 / 515]],
-  robots: [["/images/cards/vip-concierge-robot.jpg", 1000 / 776], [FULL + "vip-concierge-robot-02.jpg", 1400 / 662], [FULL + "vip-concierge-robot-07.jpg", 1049 / 1400]],
-  lab: [["/images/cards/idd-agent-simulation.jpg", 1000 / 562], [FULL + "disability-persona-augmentation-03.jpg", 1400 / 1054], [FULL + "disability-persona-augmentation-09.jpg", 1400 / 1167]],
-  mall: [["/images/cards/starfield-existing-branch.jpg", 1000 / 722], [FULL + "starfield-existing-branch-01.jpg", 1400 / 1054], [FULL + "starfield-existing-branch-09.jpg", 1400 / 823]],
+  care: [["/images/cards/disability-persona-augmentation.jpg", 1], [FULL + "disability-persona-augmentation-07.jpg", 1400 / 1314]],
+  tom: [],
+  samsung: [["/images/cards/samsung-raemian-metaverse.jpg", 1000 / 607], [FULL + "samsung-raemian-metaverse-04.jpg", 1095 / 1400]],
+  mall: [["/images/cards/starfield-existing-branch.jpg", 1000 / 722], [FULL + "starfield-existing-branch-01.jpg", 1400 / 1054]],
+  robots: [["/images/cards/vip-concierge-robot.jpg", 1000 / 776], [FULL + "vip-concierge-robot-02.jpg", 1400 / 662]],
+  lab: [["/images/cards/idd-agent-simulation.jpg", 1000 / 562], [FULL + "disability-persona-augmentation-03.jpg", 1400 / 1054]],
+  bass: [],
+  dance: [],
+  wand: [["/images/about-collage.png", 760 / 372]],
 };
-const PLAQUE: Record<ZoneId, string> = { army: "TERRAIN MODEL", care: "FIVE PERSONAS", samsung: "RAEMIAN TOWER", robots: "ROBES FOR ROBOTS", lab: "IDD VILLAGE", mall: "STARFIELD MODEL" };
+const PLAQUE: Record<ZoneId, string> = { army: "TERRAIN MODEL", care: "FIVE PERSONAS", tom: "GUIDED HANDS · TOM", samsung: "RAEMIAN TOWER", mall: "STARFIELD MODEL", robots: "ROBES FOR ROBOTS", lab: "IDD VILLAGE", bass: "BASS GUITAR", dance: "LOCKING & HOUSE", wand: "WAND · COMING SOON" };
 const ZONES_RAW: Omit<Hall, "plaque" | "pics">[] = [
-  { id: "army", name: "Army", sub: "ROKA · 2022–24", color: "#4caf6a", cx: 3.8, cy: 3.4, project: 3, doing: "studying the terrain model", caption: "Led 60+ people, and built a 3D terrain trainer." },
-  { id: "care", name: "Care", sub: "disability · thesis", color: "#4c7df0", cx: 11, cy: 3.2, project: 0, doing: "reading the story", caption: "It started with my brother. 2,400 profiles, 5 personas." },
-  { id: "samsung", name: "Samsung", sub: "2025–26", color: "#6d5bd0", cx: 18.2, cy: 3.4, project: 5, doing: "reading the numbers", caption: "Demand forecasts to 2030, a dashboard, a Bixby cook." },
-  { id: "robots", name: "Robots", sub: "HRI · SKKU", color: "#ff6b4a", cx: 4.2, cy: 10, project: 2, doing: "watching the robots", caption: "Three serving robots, choreographed like a royal ceremony." },
-  { id: "lab", name: "Lab", sub: "grad school · SDI", color: "#14b8a6", cx: 11, cy: 9.6, project: 1, doing: "trying the simulator", caption: "AI agents living a day in a virtual world." },
-  { id: "mall", name: "Mall", sub: "retail · Starfield", color: "#f5b301", cx: 18, cy: 10, project: 4, doing: "browsing the shelves", caption: "Network-analysis personas for a mega mall." },
+  { id: "army", wing: "defense", name: "Army", sub: "ROKA · 2022–24", color: "#4caf6a", cx: 4.0, cy: 3.9, rw: 3.1, project: 3, caption: "Led 60+ people, and built a 3D terrain trainer." },
+  { id: "care", wing: "care", name: "Thesis", sub: "disability personas", color: "#4c7df0", cx: 10.6, cy: 3.8, rw: 1.9, project: 0, caption: "It started with my brother. 2,400 profiles, 5 personas." },
+  { id: "tom", wing: "care", name: "Guided Hands", sub: "TOM · assistive", color: "#2fb5d9", cx: 14.5, cy: 3.8, rw: 1.9, project: null, caption: "At Penn, TOM: rebuilding a writing aid for people with limited hand control, at low cost." },
+  { id: "samsung", wing: "consumer", name: "Samsung", sub: "2025–26", color: "#6d5bd0", cx: 19.4, cy: 3.8, rw: 1.9, project: 5, caption: "Demand forecasts to 2030, a dashboard, a Bixby cook." },
+  { id: "mall", wing: "consumer", name: "Starfield", sub: "retail data", color: "#f5b301", cx: 23.2, cy: 4.0, rw: 1.8, project: 4, caption: "Network-analysis personas for a mega mall." },
+  { id: "robots", wing: "robots", name: "VIP Robots", sub: "HRI · SKKU", color: "#ff6b4a", cx: 4.1, cy: 15.4, rw: 2.2, project: 2, caption: "Three serving robots, choreographed like a royal ceremony." },
+  { id: "lab", wing: "robots", name: "IDD Lab", sub: "grad school · SDI", color: "#14b8a6", cx: 8.7, cy: 15.2, rw: 2.0, project: 1, caption: "AI agents living a day in a virtual world." },
+  { id: "bass", wing: "maker", name: "Bass", sub: "off-hours", color: "#c8431f", cx: 14.2, cy: 15.4, rw: 1.9, project: null, caption: "Bass guitar, played in a band at Samsung." },
+  { id: "dance", wing: "maker", name: "Street dance", sub: "locking · house", color: "#d6498f", cx: 18.4, cy: 15.4, rw: 2.0, project: null, caption: "Locking, with some house. Street dance at Samsung." },
+  { id: "wand", wing: "maker", name: "The wand", sub: "Makerspace", color: "#8a5cf5", cx: 22.5, cy: 15.4, rw: 2.0, project: null, caption: "A Harry Potter wand, to be built in the Penn Makerspace." },
 ];
 export const ZONES: Hall[] = ZONES_RAW.map((z) => ({ ...z, plaque: PLAQUE[z.id], pics: HALL_PICS[z.id] }));
 const hallOf = (id: ZoneId) => ZONES.find((z) => z.id === id)!;
 export const zoneColor = (z: ZoneId | "plaza") => (z === "plaza" ? "#c3cddd" : hallOf(z).color);
 
-// every exhibit has three pictures: hung on the back walls, or standing on free panels
+// pictures: hung on the back wall (wall) or standing on free panels
 type Panel = { z: ZoneId; src: string; plane: "x" | "y"; fixed: number; along: number; wall: boolean; wu: number; H: number };
-const PANEL_CFG: Record<ZoneId, ["x" | "y", number, number, boolean][]> = {
-  army: [["y", 0, 1.8, true], ["y", 0, 6.1, true], ["x", 0, 6.9, true]],
-  care: [["y", 0, 8.7, true], ["y", 0, 13.2, true], ["x", 14.5, 3.9, false]],
-  samsung: [["y", 0, 15.9, true], ["y", 0, 20.4, true], ["x", 21.1, 4.2, false]],
-  robots: [["y", 7.5, 2.3, false], ["y", 7.5, 6.2, false], ["x", 7.7, 10.4, false]],
-  lab: [["y", 7.1, 9.2, false], ["y", 7.1, 12.9, false], ["x", 14.5, 9.8, false]],
-  mall: [["y", 7.5, 16.0, false], ["y", 7.5, 20.0, false], ["x", 21.1, 10.6, false]],
+const PANEL_CFG: Partial<Record<ZoneId, ["x" | "y", number, number, boolean][]>> = {
+  army: [["y", 0, 1.9, true], ["y", 0, 6.0, true], ["x", 0, 5.4, true]],
+  care: [["y", 0, 8.9, true], ["y", 0, 12.2, true]],
+  samsung: [["y", 0, 18.0, true], ["y", 0, 20.6, true]],
+  mall: [["y", 0, 22.6, true], ["y", 0, 24.6, true]],
+  robots: [["y", 12.6, 2.5, false], ["y", 12.6, 5.7, false]],
+  lab: [["y", 12.6, 7.4, false], ["y", 12.6, 10.0, false]],
+  wand: [["y", 12.6, 22.5, false]],
 };
 const PANELS: Panel[] = ZONES.flatMap((z) =>
-  PANEL_CFG[z.id].map(([plane, fixed, along, wall], i) => {
+  (PANEL_CFG[z.id] ?? []).map(([plane, fixed, along, wall], i) => {
     const [src, ar] = z.pics[i];
-    const maxw = plane === "x" ? 2.2 : 1.7;
+    const maxw = plane === "x" ? 2.2 : 1.5;
     const H = Math.min(27, (maxw * 20) / ar);
     return { z: z.id, src, plane, fixed, along, wall, wu: (ar * H) / 20, H };
   })
@@ -162,68 +181,104 @@ function route(from: string, to: string): Pt[] {
 }
 
 
-// ------------------------------------------------------------ the six Yuns
-type YunInfo = { tag: string; doing: string; hi: string; who: string; made: string };
-const YUN: Record<ZoneId, YunInfo> = {
+// ------------------------------------------------------------ the seven Yuns (one per chapter; they live in the wing of their theme)
+type YunId = "army" | "care" | "samsung" | "robots" | "lab" | "mall" | "penn";
+type YunInfo = { tag: string; home: ZoneId; doing: string; hi: string; who: string; made: string; href: string; hrefLabel: string };
+const YUN: Record<YunId, YunInfo> = {
   army: {
     tag: "Army Yun",
+    home: "army",
     doing: "building the terrain trainer",
     hi: "Hi. I'm the Yun from the Army years.",
     who: journey[2].note,
     made: featured[3].line,
+    href: hrefFor(featured[3]),
+    hrefLabel: "Show me the exhibit",
   },
   care: {
     tag: "Thesis Yun",
+    home: "care",
     doing: "interviewing caregivers",
     hi: "Hi. I'm the Yun who started with a question.",
     who: `"${whyQuote}" Carried since childhood, shaped by my younger brother's developmental disability.`,
     made: featured[0].line,
+    href: hrefFor(featured[0]),
+    hrefLabel: "Show me the exhibit",
   },
   samsung: {
     tag: "Samsung Yun",
+    home: "samsung",
     doing: "forecasting demand",
     hi: "Hi. I'm the Yun at Samsung.",
     who: journey[5].note,
     made: featured[5].line,
+    href: hrefFor(featured[5]),
+    hrefLabel: "Show me the exhibit",
   },
   robots: {
     tag: "Robot-lab Yun",
+    home: "robots",
     doing: "choreographing robots",
     hi: "Hi. I'm the Yun from the SDI robot projects.",
     who: journey[4].note,
     made: featured[2].line,
+    href: hrefFor(featured[2]),
+    hrefLabel: "Show me the exhibit",
   },
   lab: {
     tag: "Simulator Yun",
+    home: "lab",
     doing: "running the simulator",
     hi: "Hi. I'm the Yun who builds the simulator.",
     who: "Personas of people with developmental disabilities, augmented by data and run through AI simulation.",
     made: featured[1].line,
+    href: hrefFor(featured[1]),
+    hrefLabel: "Show me the exhibit",
   },
   mall: {
     tag: "Retail Yun",
+    home: "mall",
     doing: "mapping shoppers",
     hi: "Hi. I'm the Yun who turned customer data into strategy.",
     who: "Customer data turned into service strategy for malls, appliances and apartment life.",
     made: featured[4].line,
+    href: hrefFor(featured[4]),
+    hrefLabel: "Show me the exhibit",
+  },
+  penn: {
+    tag: "Penn Yun",
+    home: "wand",
+    doing: "tinkering in the Makerspace",
+    hi: "Hi. I'm the Yun at Penn, right now.",
+    who: journey[6].note,
+    made: "A low-cost Guided Hands with TOM, and next a wand from the Makerspace. After hours: bass, and locking.",
+    href: "/resume",
+    hrefLabel: "Open my resume",
   },
 };
+const YUN_IDS = Object.keys(YUN) as YunId[];
+const yunColor = (id: YunId) => (id === "penn" ? "#c23d8c" : hallOf(YUN[id].home).color);
 
 type Spot = [ZoneId, "a" | "b", number];
-const ROUTES: Record<ZoneId, Spot[]> = {
-  army: [["army", "a", 6], ["army", "b", 4], ["care", "a", 3], ["army", "a", 5], ["army", "b", 4], ["samsung", "b", 3]],
-  care: [["care", "a", 6], ["care", "b", 4], ["lab", "a", 3], ["care", "b", 5], ["care", "a", 4], ["robots", "a", 3]],
-  samsung: [["samsung", "a", 6], ["samsung", "b", 4], ["mall", "b", 3], ["samsung", "b", 5], ["samsung", "a", 4], ["army", "a", 3]],
-  robots: [["robots", "a", 6], ["robots", "b", 4], ["lab", "b", 3], ["robots", "a", 5], ["robots", "b", 4], ["mall", "a", 3]],
-  lab: [["lab", "a", 6], ["lab", "b", 4], ["care", "a", 3], ["lab", "b", 5], ["lab", "a", 4], ["robots", "b", 3]],
-  mall: [["mall", "a", 6], ["mall", "b", 4], ["samsung", "a", 3], ["mall", "b", 5], ["mall", "a", 4], ["lab", "a", 3]],
+const ROUTES: Record<YunId, Spot[]> = {
+  army: [["army", "a", 6], ["army", "b", 4], ["care", "a", 3], ["army", "a", 5], ["army", "b", 4], ["bass", "a", 3]],
+  care: [["care", "a", 6], ["care", "b", 4], ["tom", "a", 3], ["care", "b", 5], ["care", "a", 4], ["lab", "a", 3]],
+  samsung: [["samsung", "a", 6], ["samsung", "b", 4], ["mall", "b", 3], ["samsung", "b", 5], ["dance", "a", 3], ["samsung", "a", 4]],
+  robots: [["robots", "a", 6], ["robots", "b", 4], ["lab", "b", 3], ["robots", "a", 5], ["robots", "b", 4], ["wand", "a", 3]],
+  lab: [["lab", "a", 6], ["lab", "b", 4], ["care", "b", 3], ["lab", "b", 5], ["lab", "a", 4], ["robots", "b", 3]],
+  mall: [["mall", "a", 6], ["mall", "b", 4], ["samsung", "a", 3], ["mall", "b", 5], ["robots", "a", 3], ["mall", "a", 4]],
+  penn: [["bass", "a", 5], ["bass", "b", 3], ["dance", "a", 4], ["wand", "a", 5], ["tom", "a", 4], ["wand", "b", 3]],
 };
 
-type Yun = { hall: ZoneId; pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1 };
-const makeYun = (hall: ZoneId, k: number): Yun => ({ hall, pos: [...NODES[`${hall}_a`]] as Pt, path: [], seg: 0, mode: "do", left: 2 + k * 1.3, i: 0, node: `${hall}_a`, face: 1 });
+type Yun = { id: YunId; pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1 };
+const makeYun = (id: YunId, k: number): Yun => {
+  const [h, w] = ROUTES[id][0];
+  const node = `${h}_${w}`;
+  return { id, pos: [...NODES[node]] as Pt, path: [], seg: 0, mode: "do", left: 2 + k * 1.2, i: 0, node, face: 1 };
+};
 
-const WELCOME = "Welcome. This museum is about one person, in six chapters. Follow me!";
-const TOUR: ZoneId[] = ["army", "care", "samsung", "mall", "lab", "robots"];
+const WELCOME = "Welcome. This museum is about one person, in seven chapters. Follow me!";
+const TOUR: ZoneId[] = ["army", "care", "tom", "samsung", "mall", "lab", "robots", "wand", "dance", "bass"];
 type Docent = { pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1; hall: ZoneId | null };
 
 type Choice = { label: string; go?: string; href?: string };
@@ -232,18 +287,16 @@ function dialogNode(who: string, key: string): DNode {
   if (who === "D") {
     if (key === "start")
       return {
-        text: "Start at the Care exhibit: the question behind everything is there. Then walk the others in any order, and talk to each Yun.",
+        text: "Start in the Care & Assistive wing: the question behind everything is there. Then walk the other wings in any order, and talk to each Yun.",
         choices: [{ label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
       };
     return {
-      text: "I'm the docent. Every Yun you see here is Yun at one chapter of their life. Talk to all six to fill your passport.",
+      text: "I'm the docent. Every Yun you see here is Yun at one chapter of their life, living in the wing of their theme. Talk to all seven to fill your passport.",
       choices: [{ label: "Where do I start?", go: "start" }, { label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
     };
   }
-  const h = who as ZoneId;
-  const y = YUN[h];
-  const href = hrefFor(featured[hallOf(h).project]);
-  const open: Choice = { label: "Show me the exhibit", href };
+  const y = YUN[who as YunId];
+  const open: Choice = { label: y.hrefLabel, href: y.href };
   if (key === "who") return { text: y.who, choices: [{ label: "What did you make?", go: "made" }, open, { label: "See you" }] };
   if (key === "made") return { text: y.made, choices: [{ label: "Who were you then?", go: "who" }, open, { label: "See you" }] };
   return { text: y.hi, choices: [{ label: "Who were you then?", go: "who" }, { label: "What did you make?", go: "made" }, open, { label: "See you" }] };
@@ -374,6 +427,7 @@ function Orbs({ cx, cy, color }: { cx: number; cy: number; color: string }) {
 }
 
 // the museum is built once: static artifacts + decor, plus the obstacle map for the walkable avatar
+// the museum is built once: static artifacts + decor, plus the obstacle map for the walkable avatar
 function buildWorld(): Item[] {
   const out: Item[] = [];
   let n = 0;
@@ -412,7 +466,7 @@ function buildWorld(): Item[] {
     ));
   }
 
-  // CARE: five personas, a little house, a floating heart
+  // THESIS: five personas, a little house, a floating heart
   {
     const { cx, cy } = hallOf("care");
     const gx = cx - 1.2, gy = cy - 0.9;
@@ -429,16 +483,42 @@ function buildWorld(): Item[] {
         </g>
       </>
     ), { bias: 0.3 });
-    add(cx - 3.8, cy - 1.8, 1.4, 1.2, (
+    add(cx - 3.3, cy - 2.0, 1.3, 1.1, (
       <>
-        <Box gx={cx - 3.8} gy={cy - 1.8} w={1.4} d={1.2} h={8} base="#fff3e0" />
-        <Prism gx={cx - 3.9} gy={cy - 1.9} w={1.6} d={1.4} z={8} h={7} color="#e8806a" />
+        <Box gx={cx - 3.3} gy={cy - 2.0} w={1.3} d={1.1} h={8} base="#fff3e0" />
+        <Prism gx={cx - 3.4} gy={cy - 2.1} w={1.5} d={1.3} z={8} h={7} color="#e8806a" />
       </>
     ));
-    add(cx + 2.0, cy - 2.0, 1.4, 0.9, <Box gx={cx + 2.0} gy={cy - 2.0} w={1.4} d={0.9} h={5} base="#ffd1da" />);
   }
 
-  // SAMSUNG: Raemian tower model, fridge, washer, a dashboard
+  // GUIDED HANDS (TOM): an X-Y sliding frame that turns big arm motions into writing
+  {
+    const { cx, cy } = hallOf("tom");
+    const gx = cx - 1.5, gy = cy - 1.1;
+    const c = P(cx - 0.2, cy, 8);
+    add(gx, gy, 3.0, 2.2, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={3.0} d={2.2} h={6} plaque={PLAQUE.tom} color="#1a8fb0" />
+        <polygon points={pts([P(gx + 0.3, gy + 0.3, 6), P(gx + 2.7, gy + 0.3, 6), P(gx + 2.7, gy + 1.9, 6), P(gx + 0.3, gy + 1.9, 6)])} fill="#fffdf6" stroke={EDGE} strokeWidth="1" />
+        <polyline points={pts([P(gx + 0.7, gy + 1.5, 6.1), P(gx + 1.1, gy + 0.8, 6.1), P(gx + 1.5, gy + 1.4, 6.1), P(gx + 1.9, gy + 0.7, 6.1)])} fill="none" stroke="#2fb5d9" strokeWidth="1.4" />
+        <Box gx={gx + 0.3} gy={gy + 0.3} w={2.4} d={0.14} z={6} h={3} base="#9aa6bc" />
+        <Box gx={gx + 0.3} gy={gy + 1.76} w={2.4} d={0.14} z={6} h={3} base="#9aa6bc" />
+        <Box gx={gx + 0.3} gy={gy + 0.3} w={0.14} d={1.6} z={6} h={3} base="#9aa6bc" />
+        <Box gx={gx + 2.56} gy={gy + 0.3} w={0.14} d={1.6} z={6} h={3} base="#9aa6bc" />
+        <g>
+          <Box gx={gx + 0.3} gy={gy + 1.0} w={2.4} d={0.1} z={9} h={1.4} base="#cdd5e4" />
+          <g transform={`translate(${P(gx + 1.5, gy + 1.0, 11)[0]} ${P(gx + 1.5, gy + 1.0, 11)[1]})`}>
+            <animateTransform attributeName="transform" type="translate" values={`${P(gx + 0.9, gy + 1.0, 11)[0]} ${P(gx + 0.9, gy + 1.0, 11)[1]};${P(gx + 2.1, gy + 1.0, 11)[0]} ${P(gx + 2.1, gy + 1.0, 11)[1]};${P(gx + 0.9, gy + 1.0, 11)[0]} ${P(gx + 0.9, gy + 1.0, 11)[1]}`} dur="5s" repeatCount="indefinite" />
+            <rect x="-4" y="-3" width="8" height="5" rx="1.5" fill="#2fb5d9" stroke={EDGE} strokeWidth="0.8" />
+            <line x1="0" y1="2" x2="0" y2="8" stroke="#1f2a44" strokeWidth="1.4" />
+          </g>
+        </g>
+        <text x={c[0]} y={c[1] - 38} textAnchor="middle" fontSize="0" />
+      </>
+    ), { bias: 0.3 });
+  }
+
+  // SAMSUNG: Raemian tower model, fridge, washer
   {
     const { cx, cy } = hallOf("samsung");
     const gx = cx - 1.2, gy = cy - 0.9;
@@ -452,19 +532,27 @@ function buildWorld(): Item[] {
         ))}
       </>
     ), { bias: 0.3 });
-    add(cx - 3.6, cy - 2.0, 1.0, 1.0, <Box gx={cx - 3.6} gy={cy - 2.0} w={1.0} d={1.0} h={34} base="#e6ecf8" />);
-    add(cx - 2.4, cy - 2.0, 1.0, 1.0, (
-      <Box gx={cx - 2.4} gy={cy - 2.0} w={1.0} d={1.0} h={18} base="#f3f5fb">
-        <circle cx={P(cx - 1.9, cy - 1.0, 9)[0]} cy={P(cx - 1.9, cy - 1.0, 9)[1]} r="4" fill="#bcd0f5" stroke={EDGE} />
+    add(cx - 2.6, cy - 2.2, 0.9, 0.9, <Box gx={cx - 2.6} gy={cy - 2.2} w={0.9} d={0.9} h={32} base="#e6ecf8" />);
+    add(cx + 1.5, cy - 2.2, 0.9, 0.9, (
+      <Box gx={cx + 1.5} gy={cy - 2.2} w={0.9} d={0.9} h={18} base="#f3f5fb">
+        <circle cx={P(cx + 1.95, cy - 1.3, 9)[0]} cy={P(cx + 1.95, cy - 1.3, 9)[1]} r="3.6" fill="#bcd0f5" stroke={EDGE} />
       </Box>
     ));
-    add(cx + 1.7, cy - 2.0, 1.8, 0.2, (
-      <Box gx={cx + 1.7} gy={cy - 2.0} w={1.8} d={0.2} z={7} h={22} base="#2f3b5c">
+  }
+
+  // STARFIELD: the mall model, B1-4F
+  {
+    const { cx, cy } = hallOf("mall");
+    const gx = cx - 1.2, gy = cy - 0.9;
+    add(gx, gy, 2.4, 1.8, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.4} d={1.8} h={4} plaque={PLAQUE.mall} color="#b27d00" />
         {[0, 1, 2, 3].map((i) => (
-          <rect key={i} x={P(cx + 1.9 + i * 0.4, cy - 1.8, 0)[0] - 2} y={P(cx + 1.9 + i * 0.4, cy - 1.8, 11 + i * 3)[1]} width="4" height={4 + i * 3} fill="#6fe3ff" opacity="0.85" stroke="none" />
+          <Box key={i} gx={gx + 0.2} gy={gy + 0.25} w={2.0} d={1.3} z={4 + i * 7} h={4} base={["#fff0c0", "#ffe9a8", "#ffe090", "#ffd566"][i]} />
         ))}
-      </Box>
-    ));
+        <circle cx={P(gx + 1.6, gy + 0.9, 36)[0]} cy={P(gx + 1.6, gy + 0.9, 36)[1]} r="3" fill="#ff6b4a" stroke="#fff" strokeWidth="1" />
+      </>
+    ), { bias: 0.3 });
   }
 
   // ROBOTS: three robots in court dress, a royal gate, a tea table
@@ -508,51 +596,113 @@ function buildWorld(): Item[] {
         <MiniPerson x={gx + 2.2} y={gy + 0.9} z={6} color="#ffc93c" />
       </>
     ), { bias: 0.3 });
-    add(cx + 2.0, cy - 1.8, 0.9, 0.8, (
-      <Box gx={cx + 2.0} gy={cy - 1.8} w={0.9} d={0.8} h={30} base="#2f3b5c">
+    add(cx + 1.9, cy - 2.0, 0.9, 0.8, (
+      <Box gx={cx + 1.9} gy={cy - 2.0} w={0.9} d={0.8} h={30} base="#2f3b5c">
         {[0, 1, 2, 3, 4].map((i) => (
-          <circle key={i} cx={P(cx + 2.9, cy - 1.4, 5 + i * 5)[0] - 2} cy={P(cx + 2.9, cy - 1.4, 5 + i * 5)[1]} r="1.2" fill={i % 2 ? "#6fe3ff" : "#8bf59a"}>
+          <circle key={i} cx={P(cx + 2.8, cy - 1.6, 5 + i * 5)[0] - 2} cy={P(cx + 2.8, cy - 1.6, 5 + i * 5)[1]} r="1.2" fill={i % 2 ? "#6fe3ff" : "#8bf59a"}>
             <animate attributeName="opacity" values="1;0.2;1" dur={`${1.2 + i * 0.3}s`} repeatCount="indefinite" />
           </circle>
         ))}
       </Box>
     ));
-    add(cx - 3.6, cy + 0.2, 1.1, 1.1, (
-      <>
-        <Box gx={cx - 3.6} gy={cy + 0.2} w={1.1} d={1.1} h={10} base="#bfeee6" />
-        {[[0.3, 0.3], [0.7, 0.6], [0.4, 0.8]].map(([a, b], i) => (
-          <circle key={i} cx={P(cx - 3.6 + a, cy + 0.2 + b, 12)[0]} cy={P(cx - 3.6 + a, cy + 0.2 + b, 12)[1]} r="2.2" fill={["#ff7a6b", "#6a9bff", "#ffc93c"][i]} stroke="none" />
-        ))}
-      </>
-    ));
   }
 
-  // MALL: Starfield model (B1-4F), shelves, a cart
+  // BASS: a bass guitar on a stand next to a small amp
   {
-    const { cx, cy } = hallOf("mall");
-    const gx = cx - 1.2, gy = cy - 0.9;
-    add(gx, gy, 2.4, 1.8, (
+    const { cx, cy } = hallOf("bass");
+    const p = P(cx, cy, 6);
+    add(cx - 1.4, cy - 0.8, 2.8, 1.6, (
       <>
-        <Pedestal gx={gx} gy={gy} w={2.4} d={1.8} h={4} plaque={PLAQUE.mall} color="#b27d00" />
-        {[0, 1, 2, 3].map((i) => (
-          <Box key={i} gx={gx + 0.2} gy={gy + 0.25} w={2.0} d={1.3} z={4 + i * 7} h={4} base={["#fff0c0", "#ffe9a8", "#ffe090", "#ffd566"][i]} />
-        ))}
-        <circle cx={P(gx + 1.6, gy + 0.9, 36)[0]} cy={P(gx + 1.6, gy + 0.9, 36)[1]} r="3" fill="#ff6b4a" stroke="#fff" strokeWidth="1" />
+        <Pedestal gx={cx - 1.4} gy={cy - 0.8} w={2.8} d={1.6} h={4} plaque={PLAQUE.bass} color="#a3341a" />
+        <Box gx={cx + 0.5} gy={cy - 0.5} w={0.8} d={0.7} z={4} h={12} base="#2b2b33">
+          <circle cx={P(cx + 0.9, cy + 0.2, 10)[0]} cy={P(cx + 0.9, cy + 0.2, 10)[1]} r="3.2" fill="#3f4152" stroke={EDGE} />
+        </Box>
+        <g transform={`translate(${p[0] - 8} ${p[1] - 2})`}>
+          <g transform="rotate(-18)">
+            <rect x="-1.4" y="-46" width="2.8" height="34" rx="1" fill="#6b4a2f" stroke={EDGE} strokeWidth="0.6" />
+            <rect x="-2.6" y="-52" width="5.2" height="8" rx="1.4" fill="#4a3320" />
+            {[0, 1, 2, 3].map((i) => (
+              <line key={i} x1={-1 + i * 0.7} y1="-44" x2={-1 + i * 0.7} y2="-8" stroke="#e8e2d0" strokeWidth="0.4" />
+            ))}
+            <path d="M-9,-12 C-14,-6 -12,6 -6,8 C-3,12 4,12 7,8 C13,6 14,-6 8,-12 C5,-15 -6,-15 -9,-12 Z" fill="#c8431f" stroke="#7a2511" strokeWidth="0.8" />
+            <rect x="-4.5" y="-6" width="9" height="3.2" rx="1.2" fill="#2b2b33" />
+            <rect x="-4.5" y="0" width="9" height="3.2" rx="1.2" fill="#2b2b33" />
+          </g>
+        </g>
       </>
     ), { bias: 0.3 });
-    add(cx - 3.8, cy - 1.6, 0.8, 2.6, (
-      <Box gx={cx - 3.8} gy={cy - 1.6} w={0.8} d={2.6} h={22} base="#ffe9a8">
-        {[0, 1, 2].map((i) => (
-          <rect key={i} x={P(cx - 3.0, cy - 1.0 + i * 0.8, 0)[0] - 3} y={P(cx - 3.0, cy - 1.0 + i * 0.8, 15)[1]} width="6" height="4" fill={["#ff7a6b", "#6a9bff", "#4caf6a"][i]} stroke="none" />
+  }
+
+  // DANCE: a floor to dance on, a boombox with live bars, a pair of sneakers
+  {
+    const { cx, cy } = hallOf("dance");
+    const gx = cx - 1.5, gy = cy - 1.1;
+    const bb = P(cx - 0.2, cy - 0.3, 2);
+    add(gx, gy, 3.0, 2.2, (
+      <>
+        <Box gx={gx} gy={gy} w={3.0} d={2.2} h={2} base="#2b2f4a" />
+        {[0, 1, 2, 3, 4, 5].flatMap((i) => [0, 1, 2].map((j) => ((i + j) % 2 ? <polygon key={`${i}${j}`} points={pts([P(gx + i * 0.5, gy + j * 0.73, 2), P(gx + i * 0.5 + 0.5, gy + j * 0.73, 2), P(gx + i * 0.5 + 0.5, gy + j * 0.73 + 0.73, 2), P(gx + i * 0.5, gy + j * 0.73 + 0.73, 2)])} fill="#d6498f" opacity="0.75" /> : null)))}
+        <Box gx={cx - 0.9} gy={cy - 0.7} w={1.4} d={0.7} z={2} h={9} base="#3a4466">
+          <circle cx={P(cx - 0.55, cy, 6.5)[0]} cy={P(cx - 0.55, cy, 6.5)[1]} r="3" fill="#232844" stroke="#8a93b8" strokeWidth="0.8" />
+          <circle cx={P(cx + 0.15, cy, 6.5)[0]} cy={P(cx + 0.15, cy, 6.5)[1]} r="3" fill="#232844" stroke="#8a93b8" strokeWidth="0.8" />
+        </Box>
+        <g transform={`translate(${bb[0]} ${bb[1] - 14})`}>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <rect key={i} x={-9 + i * 4} y="-10" width="2.6" height="10" rx="1" fill={["#ff6b8a", "#ffc93c", "#6fe3ff", "#8bf59a", "#b07af0"][i]}>
+              <animate attributeName="height" values="3;12;5;10;3" dur={`${0.7 + i * 0.13}s`} repeatCount="indefinite" />
+              <animate attributeName="y" values="-3;-12;-5;-10;-3" dur={`${0.7 + i * 0.13}s`} repeatCount="indefinite" />
+            </rect>
+          ))}
+        </g>
+        {[0, 1].map((i) => {
+          const s = P(cx + 0.6 + i * 0.5, cy + 0.55 - i * 0.12, 2);
+          return (
+            <g key={i} transform={`translate(${s[0]} ${s[1]})`}>
+              <path d="M-5,0 L-5,-3 Q-1,-6 3,-3 L6,-2 L6,0 Z" fill="#fff" stroke={EDGE} strokeWidth="0.7" />
+              <rect x="-5" y="-1" width="11" height="1.6" fill="#d6498f" />
+            </g>
+          );
+        })}
+      </>
+    ), { bias: 0.3 });
+  }
+
+  // WAND: a workbench with a wand that is still being imagined
+  {
+    const { cx, cy } = hallOf("wand");
+    const gx = cx - 1.3, gy = cy - 0.8;
+    const w = P(cx, cy, 24);
+    add(gx, gy, 2.6, 1.6, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.6} d={1.6} h={7} plaque={PLAQUE.wand} color="#6d3fd6" />
+        <Box gx={gx + 0.2} gy={gy + 0.3} w={1.0} d={0.5} z={7} h={2} base="#c99a64" />
+        {[[1.4, 0.4], [1.7, 0.9], [1.1, 1.1]].map(([a, b], i) => (
+          <circle key={i} cx={P(gx + a, gy + b, 7.5)[0]} cy={P(gx + a, gy + b, 7.5)[1]} r="0.9" fill="#d9b98a" />
         ))}
-      </Box>
-    ));
-    add(cx + 1.9, cy - 1.8, 1.0, 0.7, <Box gx={cx + 1.9} gy={cy - 1.8} w={1.0} d={0.7} h={6} base="#d9dde6" />);
+        <g transform={`translate(${w[0]} ${w[1]})`}>
+          <g>
+            <animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="3.4s" repeatCount="indefinite" />
+            <g transform="rotate(-38)">
+              <rect x="-1.4" y="-17" width="2.8" height="34" rx="1.2" fill="#7a5230" stroke="#4a3320" strokeWidth="0.6" />
+              <rect x="-1.9" y="9" width="3.8" height="8" rx="1.2" fill="#4a3320" />
+              <circle cx="0" cy="-18" r="2.2" fill="#fff6c2">
+                <animate attributeName="r" values="1.6;3.2;1.6" dur="1.4s" repeatCount="indefinite" />
+              </circle>
+            </g>
+            {[[-12, -18], [10, -22], [-6, -30], [14, -8]].map(([a, b], i) => (
+              <path key={i} d={`M${a},${b - 3} L${a + 1},${b} L${a + 4},${b + 1} L${a + 1},${b + 2} L${a},${b + 5} L${a - 1},${b + 2} L${a - 4},${b + 1} L${a - 1},${b} Z`} fill="#ffd75e" opacity="0.8">
+                <animate attributeName="opacity" values="0.15;0.95;0.15" dur={`${1.1 + i * 0.4}s`} repeatCount="indefinite" />
+              </path>
+            ))}
+          </g>
+        </g>
+      </>
+    ), { bias: 0.3 });
   }
 
   // decor: plants, benches
-  [[1.2, 1.2], [21, 1.2], [0.95, 14.7], [5.4, 14.9], [7.7, 6.1], [14.6, 6.2], [7.2, 13.0], [14.9, 12.9], [21, 14.6]].forEach(([x, y]) => add(x, y, 0.5, 0.5, <Plant gx={x + 0.25} gy={y + 0.25} />));
-  [[7.4, 12.0], [14.0, 12.0]].forEach(([x, y]) =>
+  [[1.2, 1.2], [24.4, 1.2], [7.0, 7.0], [16.1, 7.0], [1.0, 18.6], [24.5, 18.6], [11.0, 18.5], [11.3, 12.0], [1.2, 12.0], [24.6, 11.8]].forEach(([x, y]) => add(x, y, 0.5, 0.5, <Plant gx={x + 0.25} gy={y + 0.25} />));
+  [[8.4, 10.9], [17.0, 10.9]].forEach(([x, y]) =>
     add(x, y, 1.6, 0.6, (
       <>
         <Box gx={x} gy={y} w={1.6} d={0.6} h={5} base="#c79f78" />
@@ -561,30 +711,15 @@ function buildWorld(): Item[] {
     ))
   );
 
-  // the entrance arch with its sign
-  add(1.6, 15.4, 0.3, 0.3, <Box gx={1.6} gy={15.4} w={0.3} d={0.3} h={58} base="#dfe6ee" />, { solid: false });
-  add(4.5, 15.4, 0.3, 0.3, <Box gx={4.5} gy={15.4} w={0.3} d={0.3} h={58} base="#dfe6ee" />, { solid: false });
-  {
-    const t = P(1.75, 15.7, 55);
-    add(1.6, 15.4, 3.2, 0.3, (
-      <>
-        <Box gx={1.6} gy={15.4} w={3.2} d={0.3} z={50} h={11} base="#1f2a44" />
-        <text transform={`matrix(0.894 0.447 0 1 ${t[0]} ${t[1]})`} fontSize="6.4" fontWeight={700} fill="#fff" letterSpacing="1" style={{ fontFamily: "var(--font-bric), " + SANS }}>
-          THE MUSEUM OF YUN
-        </text>
-      </>
-    ), { solid: false, bias: 0.4 });
-  }
-
   // ---- walking graph: exhibit spots + a lane grid, linked wherever the floor is clear
-  NODES.gate = fixSpot([3.0, 14.3]);
+  NODES.gate = fixSpot([3.0, 9.8]);
   ZONES.forEach((z) => {
     NODES[`${z.id}_a`] = fixSpot([z.cx - 0.9, z.cy + 2.0]);
-    NODES[`${z.id}_b`] = fixSpot([z.cx + 2.3, z.cy + 1.0]);
+    NODES[`${z.id}_b`] = fixSpot([z.cx + 2.0, z.cy + 1.1]);
     NODES[`${z.id}_d`] = fixSpot([z.cx + 0.8, z.cy + 2.8]);
   });
-  [1.7, 4.7, 7.7, 10.7, 13.7, 16.7, 19.7].forEach((x) =>
-    [1.5, 5.5, 8.2, 11.6, 14.4].forEach((y) => {
+  [1.7, 4.7, 7.7, 10.7, 13.7, 16.7, 19.7, 22.7].forEach((x) =>
+    [1.6, 5.4, 8.7, 10.2, 12.6, 17.9].forEach((y) => {
       if (walkable(x, y) && !Object.values(NODES).some((p) => dist2(p, [x, y]) < 0.9)) NODES[`l${x}_${y}`] = [x, y];
     })
   );
@@ -599,9 +734,10 @@ function buildWorld(): Item[] {
 const PROPS = buildWorld();
 
 
+
 // ------------------------------------------------------------ people
-type Kind = ZoneId | "you";
-const SHIRT: Record<Kind, string> = { army: "#5b7a46", care: "#6a9bff", samsung: "#eef0ff", robots: "#ff8a66", lab: "#f6f8fb", mall: "#ffd24a", you: "#ff4d6d" };
+type Kind = YunId | "you";
+const SHIRT: Record<Kind, string> = { army: "#5b7a46", care: "#6a9bff", samsung: "#eef0ff", robots: "#ff8a66", lab: "#f6f8fb", mall: "#ffd24a", penn: "#2a3f7f", you: "#ff4d6d" };
 
 function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) {
   const shirt = SHIRT[kind];
@@ -644,6 +780,13 @@ function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) 
           </>
         )}
         {kind === "care" && <path d="M0,-9.5 C-3,-12.5 -3.6,-14.2 -1.8,-14.8 C-0.8,-15 0,-14.2 0,-14.2 C0,-14.2 0.8,-15 1.8,-14.8 C3.6,-14.2 3,-12.5 0,-9.5 Z" fill="#ff6b8a" />}
+        {kind === "penn" && (
+          <>
+            <path d="M-6.4,-24 Q0,-34 6.4,-24" fill="none" stroke="#c23d8c" strokeWidth="1.6" />
+            <circle cx="-6.6" cy="-22" r="2.2" fill="#c23d8c" />
+            <circle cx="0" cy="-12" r="2.4" fill="#d6283a" />
+          </>
+        )}
         {kind === "mall" && (
           <>
             <rect x="5" y="-12" width="6.5" height="8" rx="1" fill="#ff6b4a" stroke={EDGE} strokeWidth="0.6" />
@@ -675,7 +818,7 @@ function Docent({ t }: { t: number }) {
 
 
 // ------------------------------------------------------------ snapshot
-type SnapAgent = { id: ZoneId; pos: Pt; face: 1 | -1; mode: "walk" | "do"; frozen: boolean };
+type SnapAgent = { id: YunId; pos: Pt; face: 1 | -1; mode: "walk" | "do"; frozen: boolean };
 type Snap = {
   t: number;
   a: SnapAgent[];
@@ -688,7 +831,7 @@ type Snap = {
 };
 
 const KEYDIR: Record<string, Pt> = { ArrowUp: [-1, -1], w: [-1, -1], ArrowDown: [1, 1], s: [1, 1], ArrowLeft: [-1, 1], a: [-1, 1], ArrowRight: [1, -1], d: [1, -1] };
-const START: Pt = fixSpot([10.4, 12.5]);
+const START: Pt = fixSpot([11.2, 9.7]);
 
 export default function ObservationRoom({
   active,
@@ -701,7 +844,7 @@ export default function ObservationRoom({
   onSelectedChange?: (id: string | null) => void;
 }) {
   const router = useRouter();
-  const [init] = useState(() => ZONES.map((z, k) => makeYun(z.id, k)));
+  const [init] = useState(() => YUN_IDS.map((id, k) => makeYun(id, k)));
   const agents = useRef<Yun[]>(init);
   const clock = useRef(0);
   const docent = useRef<Docent>({ pos: [NODES.gate[0] + 0.8, NODES.gate[1] - 1] as Pt, path: [], seg: 0, mode: "do", left: 4, i: -1, node: "gate", face: 1, hall: null });
@@ -714,7 +857,7 @@ export default function ObservationRoom({
 
   const [snap, setSnap] = useState<Snap>({
     t: 0,
-    a: init.map((a) => ({ id: a.hall, pos: a.pos, face: a.face, mode: a.mode, frozen: false })),
+    a: init.map((a) => ({ id: a.id, pos: a.pos, face: a.face, mode: a.mode, frozen: false })),
     p: { pos: START, face: 1, moving: false },
     doc: { pos: [NODES.gate[0] + 0.8, NODES.gate[1] - 1] as Pt, face: 1, mode: "do", hall: null, line: WELCOME },
     near: null,
@@ -727,7 +870,7 @@ export default function ObservationRoom({
   const hoverFrame = useRef(false);
   const [expanded, setExpanded] = useState(false);
   const [dlg, setDlg] = useState<{ who: string; key: string } | null>(null);
-  const [met, setMet] = useState<ZoneId[]>([]);
+  const [met, setMet] = useState<YunId[]>([]);
   const [selInt, setSelInt] = useState<string | null>(null);
   const sel = selected !== undefined ? selected : selInt;
   const setSel = useCallback(
@@ -781,7 +924,7 @@ export default function ObservationRoom({
 
   const openDialog = useCallback((who: string) => {
     setDlg({ who, key: "root" });
-    if (who !== "D") setMet((m) => (m.includes(who as ZoneId) ? m : [...m, who as ZoneId]));
+    if (who !== "D") setMet((m) => (m.includes(who as YunId) ? m : [...m, who as YunId]));
   }, [setDlg]);
 
   const choose = useCallback(
@@ -908,7 +1051,7 @@ export default function ObservationRoom({
         const d = dist2(pl.pos, a.pos);
         if (d < bd) {
           bd = d;
-          near = a.hall;
+          near = a.id;
         }
       });
       if (dist2(pl.pos, docent.current.pos) < bd) near = "D";
@@ -917,7 +1060,7 @@ export default function ObservationRoom({
 
     // the Yuns
     agents.current.forEach((a) => {
-      if (near === a.hall || (s.dlg && s.dlg.who === a.hall)) {
+      if (near === a.id || (s.dlg && s.dlg.who === a.id)) {
         const sx = P(pl.pos[0], pl.pos[1])[0] - P(a.pos[0], a.pos[1])[0];
         if (Math.abs(sx) > 1) a.face = sx > 0 ? 1 : -1;
         return;
@@ -925,8 +1068,8 @@ export default function ObservationRoom({
       if (a.mode === "do") {
         a.left -= dt;
         if (a.left <= 0) {
-          a.i = (a.i + 1) % ROUTES[a.hall].length;
-          const [nh, nw] = ROUTES[a.hall][a.i];
+          a.i = (a.i + 1) % ROUTES[a.id].length;
+          const [nh, nw] = ROUTES[a.id][a.i];
           a.path = route(a.node, `${nh}_${nw}`);
           a.seg = 0;
           a.mode = "walk";
@@ -949,7 +1092,7 @@ export default function ObservationRoom({
           }
         }
         if (a.seg >= a.path.length - 1) {
-          const [h, w, dur] = ROUTES[a.hall][a.i];
+          const [h, w, dur] = ROUTES[a.id][a.i];
           a.node = `${h}_${w}`;
           a.mode = "do";
           a.left = dur;
@@ -999,7 +1142,7 @@ export default function ObservationRoom({
     const target = { x: 0, y: 0, w: VW, h: VH };
     let f: Pt | undefined;
     if (s.sel === "D") f = d.pos;
-    else if (s.sel) f = agents.current.find((a) => a.hall === s.sel)?.pos;
+    else if (s.sel) f = agents.current.find((a) => a.id === s.sel)?.pos;
     else if (s.follow) f = pl.pos;
     if (f) {
       const z = s.follow && !s.sel ? 0.5 : 0.46;
@@ -1022,7 +1165,7 @@ export default function ObservationRoom({
     const s = st.current;
     return {
       t: clock.current,
-      a: agents.current.map((a) => ({ id: a.hall, pos: [...a.pos] as Pt, face: a.face, mode: a.mode, frozen: s.near === a.hall })),
+      a: agents.current.map((a) => ({ id: a.id, pos: [...a.pos] as Pt, face: a.face, mode: a.mode, frozen: s.near === a.id })),
       p: { pos: [...player.current.pos] as Pt, face: player.current.face, moving: player.current.moving },
       doc: { pos: [...dc.pos] as Pt, face: dc.face, mode: dc.mode, hall: dc.hall, line: dc.hall ? hallOf(dc.hall).caption : WELCOME },
       near: s.near,
@@ -1135,7 +1278,7 @@ export default function ObservationRoom({
       const walking = a.mode === "walk";
       const bob = walking ? Math.sin(snap.t * 14 + a.id.length * 3) * 1.4 : 0;
       const on = focus === a.id;
-      const h = hallOf(a.id);
+      const ycol = yunColor(a.id);
       return {
         depth: a.pos[0] + a.pos[1] + 0.35,
         el: (
@@ -1158,7 +1301,7 @@ export default function ObservationRoom({
           >
             <rect x="-14" y="-42" width="28" height="48" fill="transparent" />
             <Person kind={a.id} face={a.face} bob={bob} />
-            {tag(YUN[a.id].tag.toUpperCase(), h.color, -37, on, YUN[a.id].tag.length * 4.1 + 12)}
+            {tag(YUN[a.id].tag.toUpperCase(), ycol, -37, on, YUN[a.id].tag.length * 4.1 + 12)}
             {a.frozen && play && (
               <g transform="translate(0 -52)">
                 <rect x="-17" y="-8" width="34" height="11" rx="5.5" fill={INK} />
@@ -1210,7 +1353,7 @@ export default function ObservationRoom({
     {
       depth: snap.p.pos[0] + snap.p.pos[1] + 0.35,
       el: (
-        <g key="you" transform={`translate(${P(snap.p.pos[0], snap.p.pos[1])[0]} ${P(snap.p.pos[0], snap.p.pos[1])[1]}) scale(1.5)`} pointerEvents="none">
+        <g key="you" transform={`translate(${P(snap.p.pos[0], snap.p.pos[1])[0]} ${P(snap.p.pos[0], snap.p.pos[1])[1]}) scale(1.2)`} pointerEvents="none">
           <ellipse cx="0" cy="1.5" rx="11" ry="4" fill="none" stroke="#ff4d6d" strokeWidth="1.4" opacity={0.5 + 0.4 * Math.sin(snap.t * 4)} />
           <Person kind="you" face={snap.p.face} bob={snap.p.moving ? Math.sin(snap.t * 16) * 1.4 : 0} />
           {tag("YOU", "#ff4d6d", -37, true, 28)}
@@ -1237,7 +1380,8 @@ export default function ObservationRoom({
     onClick: (e: React.MouseEvent) => {
       if (!expanded && !play) return;
       e.stopPropagation();
-      router.push(hrefFor(featured[hallOf(zid).project]));
+      const pr = hallOf(zid).project;
+      if (pr !== null) router.push(hrefFor(featured[pr]));
     },
   });
   const panelItems: Item[] = PANELS.filter((p) => !p.wall).map((p, i) => {
@@ -1260,8 +1404,8 @@ export default function ObservationRoom({
   const scene = [...PROPS, ...panelItems, ...peopleItems].sort((a, b) => a.depth - b.depth);
 
   const dnode = dlg ? dialogNode(dlg.who, dlg.key) : null;
-  const dcolor = dlg ? (dlg.who === "D" ? INK : hallOf(dlg.who as ZoneId).color) : INK;
-  const dname = dlg ? (dlg.who === "D" ? "Docent robot" : YUN[dlg.who as ZoneId].tag) : "";
+  const dcolor = dlg ? (dlg.who === "D" ? INK : yunColor(dlg.who as YunId)) : INK;
+  const dname = dlg ? (dlg.who === "D" ? "Docent robot" : YUN[dlg.who as YunId].tag) : "";
 
   const dpad = (dir: string, label: string, cls: string) => (
     <button
@@ -1291,7 +1435,7 @@ export default function ObservationRoom({
         className={`block w-full ${expanded ? "" : "h-auto"}`}
         style={expanded ? { height: "calc(100vh - 150px)" } : undefined}
         role="img"
-        aria-label="A museum about Yun: one open gallery with six exhibits for six chapters, each with a Yun avatar, a docent robot, and a visitor you can control"
+        aria-label="A museum about Yun: one open gallery with five thematic wings, ten exhibits, seven Yuns, a docent robot, and a visitor you can control, each with a Yun avatar, a docent robot, and a visitor you can control"
         onClick={onBackground}
       >
         <defs>
@@ -1305,34 +1449,62 @@ export default function ObservationRoom({
           </linearGradient>
         </defs>
 
-        {/* floor, walls, windows, runner */}
-        <polygon points={pts([P(-0.2, -0.2), P(NX + 0.2, -0.2), P(NX + 0.2, NY + 0.2), P(-0.2, NY + 0.2)])} fill="#f3ede0" stroke={EDGE} strokeWidth="1" />
-        {Array.from({ length: NX / 2 }).flatMap((_, i) =>
-          Array.from({ length: NY / 2 }).map((_, j) =>
-            (i + j) % 2 ? <polygon key={`t${i}-${j}`} points={pts([P(i * 2, j * 2), P(i * 2 + 2, j * 2), P(i * 2 + 2, j * 2 + 2), P(i * 2, j * 2 + 2)])} fill="#ebe3d1" /> : null
-          )
-        )}
-        <polygon points={pts([P(5, 13.1), P(20.4, 13.1), P(20.4, 14.4), P(5, 14.4)])} fill="#f7e7c6" stroke="#c99a2e" strokeWidth="1" strokeDasharray="4 3" />
+        {/* floor: corridor + five wings */}
+        <polygon points={pts([P(-0.2, -0.2), P(NX + 0.2, -0.2), P(NX + 0.2, NY + 0.2), P(-0.2, NY + 0.2)])} fill="#f1ece0" stroke={EDGE} strokeWidth="1" />
+        <polygon points={pts([P(0, 8.0), P(NX, 8.0), P(NX, 11.6), P(0, 11.6)])} fill="#f5f1e7" />
+        {WINGS.map((w) => {
+          const tiles: ReactNode[] = [];
+          for (let i = 0; w.x0 + i * 1.5 < w.x1; i++)
+            for (let j = 0; w.y0 + j * 1.5 < w.y1; j++)
+              if ((i + j) % 2) {
+                const x = w.x0 + i * 1.5, y = w.y0 + j * 1.5;
+                tiles.push(<polygon key={`${i}-${j}`} points={pts([P(x, y), P(Math.min(x + 1.5, w.x1), y), P(Math.min(x + 1.5, w.x1), Math.min(y + 1.5, w.y1)), P(x, Math.min(y + 1.5, w.y1))])} fill="#ffffff" opacity="0.38" />);
+              }
+          const ty = w.y0 < 5 ? w.y1 - 0.4 : w.y1 - 0.5;
+          const t = P(w.x0 + 0.7, ty, 0);
+          return (
+            <g key={w.id}>
+              <polygon points={pts([P(w.x0, w.y0), P(w.x1, w.y0), P(w.x1, w.y1), P(w.x0, w.y1)])} fill={w.tint} stroke={w.color} strokeWidth="1.6" opacity="0.98" />
+              {tiles}
+              <text transform={`matrix(0.894 0.447 0 1 ${t[0]} ${t[1]})`} fontSize="11" fontWeight={800} fill={w.color} opacity="0.5" letterSpacing="2.4" style={{ fontFamily: "var(--font-bric), " + SANS }}>
+                {w.name}
+              </text>
+            </g>
+          );
+        })}
+        <polygon points={pts([P(4.5, 9.1), P(23.5, 9.1), P(23.5, 10.3), P(4.5, 10.3)])} fill="#f7e7c6" stroke="#c99a2e" strokeWidth="1" strokeDasharray="4 3" />
         {journey.map((j, i) => {
-          const gx = 5.8 + i * 2.25;
+          const gx = 5.6 + i * 2.7;
           const u = universeOf(j.universe);
-          const t = P(gx - 0.3, 14.15, 0);
+          const t = P(gx - 0.3, 10.1, 0);
           return (
             <g key={j.year + j.title}>
-              <circle cx={P(gx, 13.45)[0]} cy={P(gx, 13.45)[1]} r="2.6" fill={u.color} stroke="#fff" strokeWidth="1" />
+              <circle cx={P(gx, 9.45)[0]} cy={P(gx, 9.45)[1]} r="2.6" fill={u.color} stroke="#fff" strokeWidth="1" />
               <text transform={`matrix(0.894 0.447 0 1 ${t[0]} ${t[1]})`} fontSize="6.4" fontWeight={700} fill={INK} style={{ fontFamily: SANS }}>
                 {j.year}
               </text>
             </g>
           );
         })}
+
+        {/* walls, door, windows */}
         <polygon points={pts([P(0, 0, 0), P(0, NY, 0), P(0, NY, 64), P(0, 0, 64)])} fill="#f6efe2" stroke={EDGE} strokeWidth="1" />
         <polygon points={pts([P(0, 0, 0), P(NX, 0, 0), P(NX, 0, 64), P(0, 0, 64)])} fill="#efe6d4" stroke={EDGE} strokeWidth="1" />
         <polygon points={pts([P(0, 0, 0), P(0, NY, 0), P(0, NY, 5), P(0, 0, 5)])} fill="#d8c9ac" />
         <polygon points={pts([P(0, 0, 0), P(NX, 0, 0), P(NX, 0, 5), P(0, 0, 5)])} fill="#cdbd9d" />
         <polygon points={pts([P(0, 0, 58), P(0, NY, 58), P(0, NY, 64), P(0, 0, 64)])} fill="#1f2a44" opacity="0.9" />
         <polygon points={pts([P(0, 0, 58), P(NX, 0, 58), P(NX, 0, 64), P(0, 0, 64)])} fill="#1f2a44" opacity="0.9" />
-        {[10.4, 13.6].map((c) => {
+        <polygon points={pts([P(0, 9.0, 0), P(0, 10.6, 0), P(0, 10.6, 38), P(0, 9.0, 38)])} fill="#ffe9b8" stroke="#1f2a44" strokeWidth="3" />
+        <polygon points={pts([P(0, 8.2, 41), P(0, 11.4, 41), P(0, 11.4, 53), P(0, 8.2, 53)])} fill="#1f2a44" />
+        {(() => {
+          const t = P(0, 11.2, 44);
+          return (
+            <text transform={`matrix(0.894 -0.447 0 1 ${t[0]} ${t[1]})`} fontSize="6.6" fontWeight={700} fill="#fff" letterSpacing="0.8" style={{ fontFamily: "var(--font-bric), " + SANS }}>
+              THE MUSEUM OF YUN
+            </text>
+          );
+        })()}
+        {[2.4, 14.4, 17.4].map((c) => {
           const o = P(0, c + 0.9, 46);
           return (
             <g key={c} transform={`matrix(${20 * 1.8} ${-10 * 1.8} 0 30 ${o[0]} ${o[1]})`}>
@@ -1345,9 +1517,9 @@ export default function ObservationRoom({
 
         {/* rugs under each exhibit */}
         {ZONES.map((z) => {
-          const stamped = met.includes(z.id);
+          const stamped = (Object.keys(YUN) as YunId[]).some((id) => met.includes(id) && YUN[id].home === z.id);
           const here = snap.doc.hall === z.id && snap.doc.mode === "do";
-          const x0 = z.cx - 3.2, x1 = z.cx + 3.2, y0 = z.cy - 1.9, y1 = z.cy + 3.3, c = 0.7;
+          const x0 = z.cx - z.rw, x1 = z.cx + z.rw, y0 = z.cy - 1.9, y1 = z.cy + 3.3, c = 0.7;
           const oct = [P(x0 + c, y0), P(x1 - c, y0), P(x1, y0 + c), P(x1, y1 - c), P(x1 - c, y1), P(x0 + c, y1), P(x0, y1 - c), P(x0, y0 + c)];
           return (
             <g key={z.id}>
@@ -1389,7 +1561,7 @@ export default function ObservationRoom({
         })()}
 
         {ZONES.map((z) => {
-          const f = featured[z.project];
+          const f = z.project !== null ? featured[z.project] : null;
           const sp = P(z.cx, z.cy, 84);
           const w = (z.name.length + z.sub.length) * 4.6 + 26;
           return (
@@ -1398,9 +1570,9 @@ export default function ObservationRoom({
               <line x1="8" y1="8" x2="8" y2="26" stroke={z.color} strokeWidth="1" opacity="0.6" />
               <rect x={-w / 2} y="-8" width={w} height="16" rx="8" fill="#fff" stroke={z.color} strokeWidth="1.8" />
               <text x="0" y="3" textAnchor="middle" fontSize="8.4" fontWeight={700} fill={z.color} style={{ fontFamily: "var(--font-bric), " + SANS }}>
-                {met.includes(z.id) ? "✓ " : ""}{z.name.toUpperCase()} <tspan fill="rgba(31,42,68,0.55)" fontWeight={500}>· {z.sub}</tspan>
+                {(Object.keys(YUN) as YunId[]).some((id) => met.includes(id) && YUN[id].home === z.id) ? "✓ " : ""}{z.name.toUpperCase()} <tspan fill="rgba(31,42,68,0.55)" fontWeight={500}>· {z.sub}</tspan>
               </text>
-              {picHot === z.id && (
+              {f && picHot === z.id && (
                 <g transform="translate(0 -18)">
                   <rect x="-96" y="-10" width="192" height="15" rx="7.5" fill={INK} />
                   <text x="0" y="0.5" textAnchor="middle" fontSize="8" fill="#fff" style={{ fontFamily: SANS }}>
@@ -1408,6 +1580,21 @@ export default function ObservationRoom({
                   </text>
                 </g>
               )}
+            </g>
+          );
+        })}
+
+        {WINGS.map((w) => {
+          const sp = P((w.x0 + w.x1) / 2, (w.y0 + w.y1) / 2, 122);
+          const wd = w.name.length * 6.2 + 28;
+          return (
+            <g key={w.id} transform={`translate(${sp[0]} ${sp[1]})`} pointerEvents="none">
+              <line x1={-wd / 2 + 6} y1="10" x2={-wd / 2 + 6} y2="30" stroke={w.color} strokeWidth="1" opacity="0.5" />
+              <line x1={wd / 2 - 6} y1="10" x2={wd / 2 - 6} y2="30" stroke={w.color} strokeWidth="1" opacity="0.5" />
+              <rect x={-wd / 2} y="-10" width={wd} height="20" rx="10" fill={w.color} />
+              <text x="0" y="3.6" textAnchor="middle" fontSize="9.4" fontWeight={800} fill="#fff" letterSpacing="1.4" style={{ fontFamily: "var(--font-bric), " + SANS }}>
+                {w.name}
+              </text>
             </g>
           );
         })}
@@ -1553,10 +1740,10 @@ export default function ObservationRoom({
         </Link>
       </div>
       <div className="flex items-center gap-2 text-[11px]" style={{ fontFamily: "var(--font-pixel)" }}>
-        <span className="uppercase opacity-55">passport {met.length}/6</span>
+        <span className="uppercase opacity-55">passport {met.length}/7</span>
         <span className="flex gap-1">
-          {ZONES.map((z) => (
-            <span key={z.id} title={YUN[z.id].tag} className="h-3.5 w-3.5 rounded-full border" style={{ borderColor: z.color, background: met.includes(z.id) ? z.color : "transparent" }} />
+          {YUN_IDS.map((id) => (
+            <span key={id} title={YUN[id].tag} className="h-3.5 w-3.5 rounded-full border" style={{ borderColor: yunColor(id), background: met.includes(id) ? yunColor(id) : "transparent" }} />
           ))}
         </span>
       </div>

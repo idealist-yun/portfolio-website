@@ -9,6 +9,7 @@ export type Role = {
   period: string;
   bullets: string[];
   href?: string;
+  links?: { label: string; href: string }[];
 };
 
 export type EduEntry = {
@@ -200,7 +201,7 @@ export const publications: Role[] = [
     title: "Data-driven Disability Persona Augmentation for Service Journey Inference",
     org: "Published, Sungkyunkwan University",
     period: "Jun. 2025",
-    href: "/research/disability-persona-augmentation",
+    links: [{ label: "Read the research page", href: "/research/disability-persona-augmentation" }],
     bullets: [
       "Developed a computational framework for studying disability service needs where experiments and data are hard to obtain.",
       "Augmented Vineland-adaptive behavior data from 9 individuals with developmental disabilities to 2,400 cases; derived 5 persona clusters and ran AI-driven daily life scenario (ADL/IADL) simulations that compute support-need levels and causes, visualized as a journey map.",
@@ -210,12 +211,27 @@ export const publications: Role[] = [
     title: "Patterning Military Experience for Quality Improvement of Enlisted Soldiers",
     org: "Published, Korean Academy of Military Social Welfare",
     period: "Dec. 2024",
+    links: [
+      { label: "Read the research page", href: "/research/military-life-cycle-pattern" },
+      { label: "Related project", href: "/project/military-hr-big-data" },
+    ],
     bullets: [
       "Developed a pattern model of high-performing soldiers' military life to give soldiers who struggle to adapt a clear path to follow.",
       "Interviewed 18 high-performing soldiers, combining longitudinal direct observation; yielded a 5-stage military life-cycle pattern model.",
     ],
   },
 ];
+
+export const bookChapter: Role = {
+  title: "2023 Social Trends: Universal Design — disability as market strategy, not welfare",
+  org: "Book chapter, 2023 Social Trends (graduate-student publishing project)",
+  period: "Mar. 2023",
+  links: [{ label: "Read the project page", href: "/project/disability-as-market" }],
+  bullets: [
+    "Reframed disability as a market-expansion strategy rather than welfare, using the Kano model: universal design as must-be quality, assistive technology as one-dimensional quality, and service design as the missing attractive quality.",
+    "Used the Bradley Timepiece, a tactile watch for blind users funded with $600,000 on Kickstarter whose sales came 98% from sighted customers, as the case that turns a disability need into a mainstream want.",
+  ],
+};
 
 export const extracurricular: Role[] = [
   {
@@ -224,7 +240,8 @@ export const extracurricular: Role[] = [
     location: "Philadelphia, USA",
     period: "Sep. 2026 – Present",
     bullets: [
-      "Working on the department's alumni-network initiatives: an interest- and career-based alumni dashboard, mentor–mentee matching for first- and second-year students, and a newsletter for alumni.",
+      "Working on the department's alumni-network initiatives:",
+      "Making an interest- and career-based alumni dashboard, and a newsletter for alumni; linking companies and senior alumni to open up career opportunities for IPD students.",
     ],
   },
   {
@@ -233,7 +250,8 @@ export const extracurricular: Role[] = [
     location: "Philadelphia, USA",
     period: "Sep. 2026 – Present",
     bullets: [
-      "Building low-cost assistive devices with clinicians and users. Working on Guided Hands, a mechanical writing aid that turns large arm movements into pen control for people with limited fine-motor ability, redesigned for quiet, tight, low-cost sliding.",
+      "Building low-cost assistive devices with clinicians and users.",
+      "Working on Guided Hands, a mechanical writing aid that turns large arm movements into pen control for people with limited fine-motor ability, redesigned for quiet, tight, low-cost sliding.",
     ],
   },
   {
@@ -269,5 +287,6 @@ export const awards: { title: string; org: string; period: string }[] = [
   { title: "GP Border Operation Merit Award", org: "Republic of Korea Army", period: "Mar. 2023" },
   { title: "3rd Prize, 2021 Mirae Asset Financial Big Data Festival", org: "Mirae Asset Daewoo", period: "Nov. 2021" },
   { title: "2nd Prize, 14th Convergence Foundation Project", org: "Sungkyunkwan University", period: "Feb. 2021" },
-  { title: "Yoon Yong-taek SKKU Alumni Association Chairman's Scholarship (x2)", org: "Sungkyunkwan University", period: "Apr. 2020, Apr. 2021" },
+  { title: "Yoon Yong-taek SKKU Alumni Association Chairman's Scholarship", org: "Sungkyunkwan University", period: "Apr. 2021" },
+  { title: "Yoon Yong-taek SKKU Alumni Association Chairman's Scholarship", org: "Sungkyunkwan University", period: "Apr. 2020" },
 ];

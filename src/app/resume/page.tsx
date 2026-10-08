@@ -9,6 +9,7 @@ import {
   projectsGroup,
   projects,
   publications,
+  bookChapter,
   extracurricular,
   awards,
   type Role,
@@ -60,6 +61,15 @@ function RoleBlock({ r, lead = "title" }: { r: Role; lead?: "title" | "org" }) {
         <Link href={r.href} className="mt-3 inline-block text-sm text-accent underline underline-offset-4">
           View project →
         </Link>
+      )}
+      {r.links && (
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1">
+          {r.links.map((l) => (
+            <Link key={l.href} href={l.href} className="text-sm text-accent underline underline-offset-4">
+              {l.label} →
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -153,7 +163,7 @@ export default function ResumePage() {
       </Section>
 
       <Section title="Publications">
-        {publications.map((r, i) => (
+        {[...publications, bookChapter].map((r, i) => (
           <RoleBlock key={i} r={r} />
         ))}
       </Section>

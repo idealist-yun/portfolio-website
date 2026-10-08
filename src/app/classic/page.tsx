@@ -223,14 +223,6 @@ export default function Home() {
               strategic design consulting firm that drives breakthrough
               innovation, much like IDEO.
             </p>
-            <p className="mt-5">
-              If you&apos;d like to explore my long-term plans in more detail,
-              please visit the{" "}
-              <Link href="/vision" className="text-accent underline">
-                Vision
-              </Link>{" "}
-              page.
-            </p>
           </div>
         </div>
       </section>

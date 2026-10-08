@@ -155,7 +155,6 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
             {[
               ["Work", "/project"],
               ["Research", "/research"],
-              ["Vision", "/vision"],
               ["Resume", "/resume"],
             ].map(([l, h]) => (
               <Link key={l} href={h} className="underline-offset-4 transition-colors hover:text-black hover:underline">
@@ -369,9 +368,6 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
           <div className="mt-10 flex gap-4 font-mono text-[11px] uppercase tracking-wider" style={{ color: MUTED }}>
             <Link href="/resume" className="underline underline-offset-4 hover:text-black">
               Resume
-            </Link>
-            <Link href="/vision" className="underline underline-offset-4 hover:text-black">
-              Vision
             </Link>
             <Link href="/classic" className="underline underline-offset-4 hover:text-black">
               Classic layout

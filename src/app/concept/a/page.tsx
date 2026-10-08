@@ -43,7 +43,6 @@ export default function ConceptA() {
             {[
               ["Work", "/project"],
               ["Research", "/research"],
-              ["Vision", "/vision"],
               ["Resume", "/resume"],
             ].map(([l, h]) => (
               <Link

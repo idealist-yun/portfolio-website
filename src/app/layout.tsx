@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Inter, DM_Serif_Display, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -10,11 +10,16 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const fraunces = Fraunces({
+const dmSerif = DM_Serif_Display({
   subsets: ["latin"],
-  variable: "--font-fraunces",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-dm",
+  weight: "400",
   style: ["normal", "italic"],
+});
+
+const jetMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-c",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="en" className={`${inter.variable} ${dmSerif.variable} ${jetMono.variable}`}>
       <body className="min-h-screen font-sans antialiased flex flex-col">
         <Nav />
         <main className="flex-1">{children}</main>

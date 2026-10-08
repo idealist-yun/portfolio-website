@@ -7,6 +7,7 @@ import { DeskItem, InkDiagram, StageScale } from "@/components/concept/Desk";
 import ObservationRoom from "@/components/concept/ObservationRoom";
 import Switcher from "@/components/concept/Switcher";
 import ProjectBento from "@/components/concept/ProjectBento";
+import Logo from "@/components/Logo";
 import VipRobotSim from "@/components/VipRobotSim";
 import { ClockPair, Piano } from "@/components/concept/widgets";
 import { journey, whyQuote } from "@/data/concept";
@@ -227,17 +228,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       <header className="sticky top-0 z-40 border-b border-black/10 backdrop-blur-md" style={{ background: "rgba(243,238,226,0.82)" }}>
         <div className="mx-auto flex max-w-[1240px] items-center justify-between px-6 py-3.5">
           <Link href="/" className="group flex items-center pt-2" title="Everything starts from a dot">
-            <span className="font-[family-name:var(--font-dm)] text-[1.8rem] leading-none">
-              <span className="relative inline-block italic">
-                ı
-                <span
-                  aria-hidden
-                  className="absolute h-[0.15em] w-[0.15em] rounded-full transition-transform duration-300 group-hover:scale-150"
-                  style={{ background: RED, left: "0.15em", top: "0.15em" }}
-                />
-              </span>
-              an
-            </span>
+            <Logo className="text-[1.8rem]" />
           </Link>
           <nav className="hidden gap-7 font-mono text-[11px] uppercase tracking-wider sm:flex" style={{ color: MUTED }}>
             {[

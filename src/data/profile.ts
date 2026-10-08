@@ -17,7 +17,7 @@ export const profile = {
 
 export const nav = [
   { href: "/", label: "Home" },
+  { href: "/project", label: "Work" },
   { href: "/research", label: "Research" },
-  { href: "/project", label: "Project" },
-  { href: "/resume", label: "Resume & Contact" },
+  { href: "/resume", label: "Resume" },
 ];

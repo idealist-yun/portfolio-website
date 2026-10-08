@@ -46,8 +46,10 @@ type Hall = {
   doing: string; // what a visitor is doing here
   caption: string; // docent line
   top: boolean;
+  plaque: string;
+  pics: [string, number][]; // [src, aspect] hung on the walls: back-left, back-right, left wall
 };
-export const ZONES: Hall[] = [
+const ZONES_RAW: Omit<Hall, "plaque" | "pics">[] = [
   { id: "army", name: "Army", sub: "ROKA · 2022–24", color: "#4caf6a", x0: 1, y0: 1, x1: 7, y1: 7, project: 3, doing: "studying the terrain model", caption: "Led 60+ people, and built a 3D terrain trainer.", top: true },
   { id: "care", name: "Care", sub: "disability · thesis", color: "#4c7df0", x0: 9, y0: 1, x1: 15, y1: 7, project: 0, doing: "reading the story", caption: "It started with my brother. 2,400 profiles, 5 personas.", top: true },
   { id: "samsung", name: "Samsung", sub: "2025–26", color: "#6d5bd0", x0: 17, y0: 1, x1: 23, y1: 7, project: 5, doing: "reading the numbers", caption: "Demand forecasts to 2030, a dashboard, a Bixby cook.", top: true },
@@ -55,6 +57,17 @@ export const ZONES: Hall[] = [
   { id: "lab", name: "Lab", sub: "grad school · SDI", color: "#14b8a6", x0: 9, y0: 13, x1: 15, y1: 19, project: 1, doing: "trying the simulator", caption: "AI agents living a day in a virtual world.", top: false },
   { id: "mall", name: "Mall", sub: "retail · Starfield", color: "#f5b301", x0: 17, y0: 13, x1: 23, y1: 19, project: 4, doing: "browsing the shelves", caption: "Network-analysis personas for a mega mall.", top: false },
 ];
+const FULL = "/images/full/";
+const HALL_PICS: Record<ZoneId, [string, number][]> = {
+  army: [[FULL + "military-3d-battlefield-mapping-01.jpg", 1400 / 1131], [FULL + "military-3d-battlefield-mapping-03.jpg", 1400 / 950], [FULL + "military-3d-battlefield-mapping-02.jpg", 824 / 1400]],
+  care: [["/images/cards/disability-persona-augmentation.jpg", 1], [FULL + "disability-persona-augmentation-07.jpg", 1400 / 1314], [FULL + "disability-persona-augmentation-05.jpg", 1132 / 1400]],
+  samsung: [["/images/cards/samsung-raemian-metaverse.jpg", 1000 / 607], [FULL + "samsung-raemian-metaverse-04.jpg", 1095 / 1400], [FULL + "samsung-raemian-metaverse-06.jpg", 1400 / 515]],
+  robots: [["/images/cards/vip-concierge-robot.jpg", 1000 / 776], [FULL + "vip-concierge-robot-02.jpg", 1400 / 662], [FULL + "vip-concierge-robot-07.jpg", 1049 / 1400]],
+  lab: [["/images/cards/idd-agent-simulation.jpg", 1000 / 562], [FULL + "disability-persona-augmentation-03.jpg", 1400 / 1054], [FULL + "disability-persona-augmentation-09.jpg", 1400 / 1167]],
+  mall: [["/images/cards/starfield-existing-branch.jpg", 1000 / 722], [FULL + "starfield-existing-branch-01.jpg", 1400 / 1054], [FULL + "starfield-existing-branch-09.jpg", 1400 / 823]],
+};
+const PLAQUE: Record<ZoneId, string> = { army: "TERRAIN MODEL", care: "FIVE PERSONAS", samsung: "RAEMIAN TOWER", robots: "ROBES FOR ROBOTS", lab: "IDD VILLAGE", mall: "STARFIELD MODEL" };
+export const ZONES: Hall[] = ZONES_RAW.map((z) => ({ ...z, plaque: PLAQUE[z.id], pics: HALL_PICS[z.id] }));
 const hallOf = (id: ZoneId) => ZONES.find((z) => z.id === id)!;
 export const zoneColor = (z: ZoneId | "plaza") => (z === "plaza" ? "#c3cddd" : hallOf(z).color);
 const zoneOf = (p: Pt): ZoneId | "plaza" => {
@@ -72,7 +85,8 @@ ZONES.forEach((z) => {
   NODES[`${z.id}_door`] = door;
   NODES[`${z.id}_a`] = [xc - 1.3, z.top ? 5.8 : 14.2];
   NODES[`${z.id}_b`] = [xc + 1.7, z.top ? 4.2 : 15.8];
-  EDGES.push([cNode, `${z.id}_door`], [`${z.id}_door`, `${z.id}_a`], [`${z.id}_a`, `${z.id}_b`]);
+  NODES[`${z.id}_d`] = [xc + 1.0, z.top ? 6.2 : 13.8];
+  EDGES.push([cNode, `${z.id}_door`], [`${z.id}_door`, `${z.id}_a`], [`${z.id}_a`, `${z.id}_b`], [`${z.id}_door`, `${z.id}_d`]);
 });
 
 const dist2 = (a: Pt, b: Pt) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -209,99 +223,162 @@ function Box({
 
 type Item = { depth: number; el: ReactNode };
 
+// a flat image mapped onto a wall plane (side "y": plane gy=y0 running along gx; "x": plane gx=x0 running along gy)
+function WallPic({ src, side, wall, c, wu, z0, H, hot, color }: { src: string; side: "x" | "y"; wall: number; c: number; wu: number; z0: number; H: number; hot: boolean; color: string }) {
+  const o = side === "y" ? P(c - wu / 2, wall, z0 + H) : P(wall, c + wu / 2, z0 + H);
+  const m = side === "y" ? `matrix(${20 * wu} ${10 * wu} 0 ${H} ${o[0]} ${o[1]})` : `matrix(${20 * wu} ${-10 * wu} 0 ${H} ${o[0]} ${o[1]})`;
+  return (
+    <g transform={m}>
+      <rect x="-0.06" y={-0.09 * (20 / H)} width="1.12" height={1 + 0.18 * (20 / H)} fill="#fffdf7" stroke={hot ? color : "rgba(31,42,68,0.35)"} strokeWidth={hot ? 3 : 1} vectorEffect="non-scaling-stroke" />
+      <image href={src} x="0" y="0" width="1" height="1" preserveAspectRatio="none" />
+    </g>
+  );
+}
+
+function Pedestal({ gx, gy, w, d, h, plaque, color }: { gx: number; gy: number; w: number; d: number; h: number; plaque: string; color: string }) {
+  const t = P(gx + 0.12, gy + d, h * 0.45);
+  return (
+    <>
+      <Box gx={gx} gy={gy} w={w} d={d} h={h} base="#f7f5ef" />
+      <text transform={`matrix(0.894 0.447 0 1 ${t[0]} ${t[1]})`} fontSize="5.4" fontWeight={700} fill={color} style={{ fontFamily: SANS }}>
+        {plaque}
+      </text>
+    </>
+  );
+}
+
+function MiniRobot({ x, y, z, robe }: { x: number; y: number; z: number; robe: string }) {
+  const c = P(x, y, z);
+  return (
+    <g transform={`translate(${c[0]} ${c[1]})`}>
+      <path d="M-5,0 L-3.5,-13 L3.5,-13 L5,0 Z" fill={robe} stroke={EDGE} strokeWidth="0.7" />
+      <rect x="-3.2" y="-23" width="6.4" height="9" rx="2" fill="#26324f" />
+      <circle cx="-1.3" cy="-19" r="0.9" fill="#6fe3ff" />
+      <circle cx="1.3" cy="-19" r="0.9" fill="#6fe3ff" />
+    </g>
+  );
+}
+
+function MiniPerson({ x, y, z, color }: { x: number; y: number; z: number; color: string }) {
+  const c = P(x, y, z);
+  return (
+    <g transform={`translate(${c[0]} ${c[1]})`}>
+      <rect x="-3" y="-11" width="6" height="11" rx="3" fill={color} stroke={EDGE} strokeWidth="0.6" />
+      <circle cx="0" cy="-15" r="3.2" fill="#ffe0c4" stroke={EDGE} strokeWidth="0.6" />
+    </g>
+  );
+}
+
+// the exhibit at the centre of each hall, evoking its project
 function buildProps(): Item[] {
   const out: Item[] = [];
   let n = 0;
   const add = (gx: number, gy: number, w: number, d: number, el: ReactNode, bias = 0) =>
     out.push({ depth: gx + w / 2 + gy + d / 2 + bias, el: <g key={`p${n++}`}>{el}</g> });
+  const ctr = (id: ZoneId): [number, number] => {
+    const z = hallOf(id);
+    return [(z.x0 + z.x1) / 2, (z.y0 + z.y1) / 2];
+  };
 
-  // ARMY: stepped terrain model, sandbags, flag
-  add(2.6, 2.2, 3.0, 2.6, (
-    <>
-      <Box gx={2.6} gy={2.2} w={3.0} d={2.6} h={4} base="#cfe6cf" />
-      <Box gx={3.0} gy={2.6} w={2.2} d={1.8} z={4} h={4} base="#b4d8b4" />
-      <Box gx={3.5} gy={3.0} w={1.2} d={1.0} z={8} h={4} base="#97c797" />
-      <circle cx={P(4.1, 3.5, 17)[0]} cy={P(4.1, 3.5, 17)[1]} r="2.4" fill="#e2493a" stroke="none" />
-    </>
-  ));
-  [[2.0, 6.0], [3.1, 6.0], [4.2, 6.0]].forEach(([x, y]) => add(x, y, 1.0, 0.5, <Box gx={x} gy={y} w={1.0} d={0.5} h={4} base="#d9cfa8" />));
-  add(6.2, 1.6, 0.2, 0.2, (
-    <>
-      <Box gx={6.2} gy={1.6} w={0.2} d={0.2} h={46} base="#dfe6ee" />
-      <polygon points={pts([P(6.4, 1.7, 44), P(6.4, 1.7, 36), P(6.4, 2.9, 40)])} fill="#ff6b4a" stroke={EDGE} strokeWidth="1" />
-    </>
-  ));
-
-  // CARE: a home corner, the way the thesis starts
-  add(10.2, 1.4, 2.8, 1.7, (
-    <>
-      <Box gx={10.2} gy={1.4} w={2.8} d={1.7} h={5} base="#dbe6ff" />
-      <Box gx={10.3} gy={1.5} w={2.6} d={1.5} z={5} h={4} base="#ffffff" />
-      <Box gx={11.7} gy={1.5} w={1.2} d={1.5} z={9} h={2} base="#ffb3bd" />
-    </>
-  ));
-  add(13.7, 1.4, 1.0, 3.0, (
-    <>
-      <Box gx={13.7} gy={1.4} w={1.0} d={3.0} h={9} base="#f6f8fc" />
-      <Box gx={13.7} gy={1.4} w={1.0} d={3.0} z={9} h={1.4} base="#cdd8ea" />
-    </>
-  ));
-  add(10.8, 4.4, 1.6, 1.0, <Box gx={10.8} gy={4.4} w={1.6} d={1.0} h={6} base="#f4e3c6" />);
-
-  // SAMSUNG: appliances + dashboard wall
-  add(18.0, 1.4, 1.2, 1.2, (
-    <Box gx={18.0} gy={1.4} w={1.2} d={1.2} h={44} base="#e6ecf8">
-      <path d={`M${P(18.0, 2.6, 24).join(",")} L${P(19.2, 2.6, 24).join(",")}`} stroke={EDGE} fill="none" />
-    </Box>
-  ));
-  add(19.6, 1.4, 1.2, 1.2, (
-    <Box gx={19.6} gy={1.4} w={1.2} d={1.2} h={22} base="#f3f5fb">
-      <circle cx={P(20.2, 2.6, 11)[0]} cy={P(20.2, 2.6, 11)[1]} r="5" fill="#bcd0f5" stroke={EDGE} />
-    </Box>
-  ));
-  add(21.3, 1.4, 1.6, 0.4, (
-    <Box gx={21.3} gy={1.4} w={1.6} d={0.4} z={8} h={26} base="#3a4466">
-      <polyline points={pts([P(21.5, 1.8, 14), P(21.9, 1.8, 20), P(22.3, 1.8, 17), P(22.7, 1.8, 26)])} fill="none" stroke="#6fe3ff" strokeWidth="1.6" />
-    </Box>
-  ));
-
-  // ROBOTS: kiosk desk + two small robots
-  add(2.6, 17.6, 3.0, 0.9, (
-    <>
-      <Box gx={2.6} gy={17.6} w={3.0} d={0.9} h={9} base="#ffffff" />
-      <Box gx={2.6} gy={17.6} w={3.0} d={0.9} z={9} h={1.5} base="#ffb199" />
-    </>
-  ));
-  add(5.4, 14.4, 0.7, 0.7, <Box gx={5.4} gy={14.4} w={0.7} d={0.7} h={14} base="#eef2fa" />);
-  add(2.0, 14.6, 0.7, 0.7, <Box gx={2.0} gy={14.6} w={0.7} d={0.7} h={14} base="#eef2fa" />);
-
-  // LAB: desks with screens + a small "mini world" table
-  [[10.0, 17.4], [11.8, 17.4], [13.6, 17.4]].forEach(([x, y]) =>
-    add(x, y, 1.2, 0.9, (
+  // ARMY: clay terrain table (rivers + ridges), sandbags, flag
+  {
+    const [xc, yc] = ctr("army");
+    const gx = xc - 1.3, gy = yc - 1.0;
+    add(gx, gy, 2.6, 2.0, (
       <>
-        <Box gx={x} gy={y} w={1.2} d={0.9} h={7} base="#e1f6f2" />
-        <Box gx={x + 0.3} gy={y + 0.1} w={0.7} d={0.12} z={7} h={8} base="#3a4466" />
+        <Pedestal gx={gx} gy={gy} w={2.6} d={2.0} h={6} plaque={PLAQUE.army} color="#2f7d4a" />
+        <polygon points={pts([P(gx + 0.1, gy + 0.1, 6), P(gx + 2.5, gy + 0.1, 6), P(gx + 2.5, gy + 1.9, 6), P(gx + 0.1, gy + 1.9, 6)])} fill="#e9d9b8" />
+        <polyline points={pts([P(gx + 0.3, gy + 0.5, 6.2), P(gx + 1.1, gy + 0.8, 6.2), P(gx + 1.5, gy + 1.4, 6.2), P(gx + 2.3, gy + 1.5, 6.2)])} fill="none" stroke="#2fb5b0" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+        <Box gx={gx + 0.4} gy={gy + 1.1} w={0.8} d={0.7} z={6} h={4} base="#c9deb8" />
+        <Box gx={gx + 1.6} gy={gy + 0.3} w={0.7} d={0.6} z={6} h={6} base="#b4d4a0" />
+        <circle cx={P(gx + 1.9, gy + 1.5, 14)[0]} cy={P(gx + 1.9, gy + 1.5, 14)[1]} r="2" fill="#e2493a" stroke="none" />
       </>
-    ))
-  );
-  add(11.4, 14.6, 2.2, 1.6, (
-    <>
-      <Box gx={11.4} gy={14.6} w={2.2} d={1.6} h={6} base="#bfeee6" />
-      {[[11.9, 15.0], [12.6, 15.5], [13.1, 14.9]].map(([x, y], i) => (
-        <circle key={i} cx={P(x, y, 8)[0]} cy={P(x, y, 8)[1]} r="2.2" fill={["#ff7a6b", "#6a9bff", "#ffc93c"][i]} stroke="none" />
-      ))}
-    </>
-  ));
+    ));
+    [[xc + 2.0, 1.3], [xc + 2.0, 1.9], [xc + 1.5, 1.3]].forEach(([x, y]) => add(x, y, 1.0, 0.5, <Box gx={x} gy={y} w={1.0} d={0.5} h={4} base="#d9cfa8" />));
+  }
 
-  // MALL: shelves + checkout
-  [[18.0, 14.0], [19.9, 14.0]].forEach(([x, y]) => add(x, y, 0.8, 3.0, <Box gx={x} gy={y} w={0.8} d={3.0} h={20} base="#ffe9a8" />));
-  add(21.6, 14.0, 0.8, 2.0, <Box gx={21.6} gy={14.0} w={0.8} d={2.0} h={16} base="#fff0c0" />);
-  add(20.6, 17.6, 2.2, 0.9, (
-    <>
-      <Box gx={20.6} gy={17.6} w={2.2} d={0.9} h={9} base="#ffffff" />
-      <Box gx={20.6} gy={17.6} w={2.2} d={0.9} z={9} h={1.5} base="#ffd566" />
-    </>
-  ));
+  // CARE: the five personas, standing on a low round-ish plinth, with the ABC star behind
+  {
+    const [xc, yc] = ctr("care");
+    const gx = xc - 1.2, gy = yc - 0.9;
+    add(gx, gy, 2.4, 1.8, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.4} d={1.8} h={5} plaque={PLAQUE.care} color="#3a62c9" />
+        {["#ff7a6b", "#6a9bff", "#ffc93c", "#4caf6a", "#b07af0"].map((c, i) => (
+          <MiniPerson key={c} x={gx + 0.35 + i * 0.4} y={gy + 0.6 + (i % 2) * 0.6} z={5} color={c} />
+        ))}
+      </>
+    ), 0.3);
+    add(xc - 3.0, yc + 1.2, 1.2, 1.0, <Box gx={xc - 3.0} gy={yc + 1.2} w={1.2} d={1.0} h={6} base="#dbe6ff" />);
+  }
+
+  // SAMSUNG: Raemian apartment tower model + smart-home panel
+  {
+    const [xc, yc] = ctr("samsung");
+    const gx = xc - 1.2, gy = yc - 0.9;
+    add(gx, gy, 2.4, 1.8, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.4} d={1.8} h={5} plaque={PLAQUE.samsung} color="#5a47b8" />
+        <Box gx={gx + 0.3} gy={gy + 0.35} w={0.8} d={1.1} z={5} h={30} base="#dfe7f7" />
+        <Box gx={gx + 1.3} gy={gy + 0.5} w={0.8} d={0.9} z={5} h={20} base="#e9eefb" />
+        {[9, 14, 19, 24, 29].map((z) => (
+          <line key={z} x1={P(gx + 0.3, gy + 1.45, 5 + z)[0]} y1={P(gx + 0.3, gy + 1.45, 5 + z)[1]} x2={P(gx + 1.1, gy + 1.45, 5 + z)[0]} y2={P(gx + 1.1, gy + 1.45, 5 + z)[1]} stroke="#7e92c4" strokeWidth="1.4" />
+        ))}
+        <circle cx={P(gx + 0.7, gy + 0.9, 38)[0]} cy={P(gx + 0.7, gy + 0.9, 38)[1]} r="2.2" fill="#6d5bd0" stroke="none" />
+      </>
+    ));
+    add(xc + 2.2, 1.6, 0.6, 0.6, <Box gx={xc + 2.2} gy={1.6} w={0.6} d={0.6} h={12} base="#e6ecf8" />);
+  }
+
+  // ROBOTS: three serving robots in court dress on a long plinth
+  {
+    const [xc, yc] = ctr("robots");
+    const gx = xc - 1.5, gy = yc - 0.5;
+    add(gx, gy, 3.0, 1.0, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={3.0} d={1.0} h={4} plaque={PLAQUE.robots} color="#d9502f" />
+        <MiniRobot x={gx + 0.6} y={gy + 0.5} z={4} robe="#3b6fd8" />
+        <MiniRobot x={gx + 1.5} y={gy + 0.5} z={4} robe="#2f9e7a" />
+        <MiniRobot x={gx + 2.4} y={gy + 0.5} z={4} robe="#2b2b33" />
+      </>
+    ), 0.3);
+    add(xc + 2.4, yc + 2.2, 0.7, 0.7, <Box gx={xc + 2.4} gy={yc + 2.2} w={0.7} d={0.7} h={6} base="#ffe1d8" />);
+  }
+
+  // LAB: workstation whose screen shows the actual IDD village map
+  {
+    const [xc, yc] = ctr("lab");
+    const gx = xc - 1.4, gy = yc - 0.7;
+    const o = P(gx + 0.2, gy + 0.24, 19);
+    add(gx, gy, 2.8, 1.4, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.8} d={1.4} h={6} plaque={PLAQUE.lab} color="#0f8f80" />
+        <Box gx={gx + 0.1} gy={gy + 0.1} w={2.6} d={0.14} z={6} h={14} base="#2f3b5c" />
+        <g transform={`matrix(${20 * 2.4} ${10 * 2.4} 0 11 ${o[0]} ${o[1]})`}>
+          <image href="/images/cards/idd-agent-simulation.jpg" x="0" y="0" width="1" height="1" preserveAspectRatio="none" />
+        </g>
+        <MiniPerson x={gx + 0.7} y={gy + 0.9} z={6} color="#2fb5d9" />
+        <MiniPerson x={gx + 1.5} y={gy + 1.0} z={6} color="#ff7a6b" />
+        <MiniPerson x={gx + 2.2} y={gy + 0.9} z={6} color="#ffc93c" />
+      </>
+    ), 0.3);
+  }
+
+  // MALL: five-storey Starfield model (B1–4F) with an added-brand pin
+  {
+    const [xc, yc] = ctr("mall");
+    const gx = xc - 1.2, gy = yc - 0.9;
+    add(gx, gy, 2.4, 1.8, (
+      <>
+        <Pedestal gx={gx} gy={gy} w={2.4} d={1.8} h={4} plaque={PLAQUE.mall} color="#b27d00" />
+        {[0, 1, 2, 3].map((i) => (
+          <Box key={i} gx={gx + 0.2} gy={gy + 0.25} w={2.0} d={1.3} z={4 + i * 7} h={4} base={["#fff0c0", "#ffe9a8", "#ffe090", "#ffd566"][i]} />
+        ))}
+        <circle cx={P(gx + 1.6, gy + 0.9, 36)[0]} cy={P(gx + 1.6, gy + 0.9, 36)[1]} r="3" fill="#ff6b4a" stroke="#fff" strokeWidth="1" />
+      </>
+    ));
+    add(xc + 2.4, yc + 2.2, 0.8, 0.8, <Box gx={xc + 2.4} gy={yc + 2.2} w={0.8} d={0.8} h={14} base="#fff0c0" />);
+  }
 
   // ENTRANCE arch
   add(0.4, 9.0, 0.3, 2.0, (
@@ -357,8 +434,11 @@ type Snap = {
   cam: { x: number; y: number; w: number; h: number };
   heat: Record<string, number>;
   busy: Record<string, number>;
-  docentNear: boolean;
+  doc: { pos: Pt; face: 1 | -1; mode: "walk" | "do"; hall: ZoneId | null; line: string };
 };
+const WELCOME = "Welcome. Six halls, one person. Follow me!";
+const TOUR: ZoneId[] = ["army", "care", "samsung", "mall", "lab", "robots"];
+type Docent = { pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1; hall: ZoneId | null };
 type Lane = { z: ZoneId | "plaza"; t0: number; t1: number };
 
 export default function ObservationRoom({
@@ -392,6 +472,7 @@ export default function ObservationRoom({
   const heat = useRef<Record<string, number>>({});
   const cam = useRef({ x: 0, y: 0, w: VW, h: VH });
   const selRef = useRef<string | null>(null);
+  const docent = useRef<Docent>({ pos: [NODES.gate[0] + 0.8, NODES.gate[1] + 1] as Pt, path: [], seg: 0, mode: "do", left: 4, i: -1, node: "gate", face: 1, hall: null });
 
   const [snap, setSnap] = useState<Snap>({
     t: 0,
@@ -400,7 +481,7 @@ export default function ObservationRoom({
     cam: { x: 0, y: 0, w: VW, h: VH },
     heat: {},
     busy: {},
-    docentNear: false,
+    doc: { pos: [NODES.gate[0] + 0.8, NODES.gate[1] + 1] as Pt, face: 1, mode: "do", hall: null, line: WELCOME },
   });
   const [notes, setNotes] = useState<Note[]>([]);
   const [friction, setFriction] = useState(0);
@@ -505,6 +586,41 @@ export default function ObservationRoom({
         }
       });
 
+      const d = docent.current;
+      if (d.mode === "do") {
+        d.left -= dt;
+        if (d.left <= 0) {
+          d.i = (d.i + 1) % TOUR.length;
+          d.path = route(d.node, `${TOUR[d.i]}_d`);
+          d.seg = 0;
+          d.mode = "walk";
+          d.hall = null;
+        }
+      } else {
+        let move = 3.2 * dt;
+        while (move > 0 && d.seg < d.path.length - 1) {
+          const to = d.path[d.seg + 1];
+          const dd = dist2(d.pos, to);
+          if (dd <= move) {
+            d.pos = [...to] as Pt;
+            move -= dd;
+            d.seg += 1;
+          } else {
+            const k = move / dd;
+            const sx = P(to[0], to[1])[0] - P(d.pos[0], d.pos[1])[0];
+            if (Math.abs(sx) > 0.5) d.face = sx > 0 ? 1 : -1;
+            d.pos = [d.pos[0] + (to[0] - d.pos[0]) * k, d.pos[1] + (to[1] - d.pos[1]) * k];
+            move = 0;
+          }
+        }
+        if (d.seg >= d.path.length - 1) {
+          d.node = `${TOUR[d.i]}_d`;
+          d.mode = "do";
+          d.left = 9;
+          d.hall = TOUR[d.i];
+        }
+      }
+
       trailT.current += dt;
       if (trailT.current > 0.12) {
         trailT.current = 0;
@@ -533,7 +649,7 @@ export default function ObservationRoom({
       }
 
       const target = { x: 0, y: 0, w: VW, h: VH };
-      const f = agents.current.find((a) => a.v.id === selRef.current);
+      const f = selRef.current === "D" ? { pos: docent.current.pos } : agents.current.find((a) => a.v.id === selRef.current);
       if (f) {
         const s = P(f.pos[0], f.pos[1]);
         target.w = VW * 0.46;
@@ -559,7 +675,7 @@ export default function ObservationRoom({
       const z = zoneOf(a.pos);
       if (z !== "plaza" && a.mode === "do") busy[z] = (busy[z] ?? 0) + 1;
     });
-    const dpos = NODES.c1;
+    const dc = docent.current;
     return {
       t: clock.current,
       a: agents.current.map((a) => ({
@@ -575,7 +691,7 @@ export default function ObservationRoom({
       cam: { ...cam.current },
       heat: { ...heat.current },
       busy,
-      docentNear: agents.current.some((a) => dist2(a.pos, dpos) < 3.6),
+      doc: { pos: [...dc.pos] as Pt, face: dc.face, mode: dc.mode, hall: dc.hall, line: dc.hall ? hallOf(dc.hall).caption : WELCOME },
     };
   }, []);
 
@@ -599,14 +715,53 @@ export default function ObservationRoom({
   }, [playing, run, speed, tick, makeSnap]);
 
   const focus = hov ?? sel ?? hoverId;
-  const focusAgent = snap.a.find((a) => a.id === focus);
   const focusVisitor = VISITORS.find((v) => v.id === focus);
+  const focusPos = focus === "D" ? snap.doc.pos : snap.a.find((a) => a.id === focus)?.pos;
+  const focusText =
+    focus === "D"
+      ? `Docent robot · ${snap.doc.mode === "walk" ? "leading the tour" : snap.doc.hall ? `presenting ${hallOf(snap.doc.hall).name}` : "welcoming"}`
+      : focusVisitor
+        ? (() => {
+            const a = snap.a.find((x) => x.id === focus)!;
+            return `${focusVisitor.role} · ${a.mode === "walk" ? "walking" : hallOf(a.hall).doing}`;
+          })()
+        : "";
+  const lines = (t: string, max = 30) => {
+    const out: string[] = [];
+    let cur = "";
+    t.split(" ").forEach((w) => {
+      if ((cur + " " + w).trim().length > max) {
+        out.push(cur);
+        cur = w;
+      } else cur = (cur + " " + w).trim();
+    });
+    if (cur) out.push(cur);
+    return out;
+  };
   const label = clockAt(snap.t);
   const heatMax = Math.max(12, ...Object.values(snap.heat));
   const busiest = ZONES.map((z) => [z, snap.heat[z.id] ?? 0] as const).sort((a, b) => b[1] - a[1])[0];
 
   const peopleItems: Item[] = [
-    { depth: NODES.c1[0] + 1.2 + (NODES.c1[1] + 1.2) + 0.2, el: <g key="docent" transform={`translate(${P(NODES.c1[0] - 1.4, NODES.c1[1] + 1.4)[0]} ${P(NODES.c1[0] - 1.4, NODES.c1[1] + 1.4)[1]})`}><Docent t={snap.t} /></g> },
+    {
+      depth: snap.doc.pos[0] + snap.doc.pos[1] + 0.35,
+      el: (
+        <g
+          key="docent"
+          transform={`translate(${P(snap.doc.pos[0], snap.doc.pos[1])[0]} ${P(snap.doc.pos[0], snap.doc.pos[1])[1]}) scale(${1.1 * snap.doc.face} 1.1)`}
+          className="cursor-pointer"
+          onPointerEnter={() => setHov("D")}
+          onPointerLeave={() => setHov(null)}
+          onClick={(e) => {
+            e.stopPropagation();
+            setSel(sel === "D" ? null : "D");
+          }}
+        >
+          <rect x="-14" y="-40" width="28" height="46" fill="transparent" />
+          <Docent t={snap.doc.mode === "walk" ? snap.t * 3 : snap.t} />
+        </g>
+      ),
+    },
     ...snap.a.map((a): Item => {
       const sc = P(a.pos[0], a.pos[1]);
       const walking = a.mode === "walk";
@@ -699,6 +854,32 @@ export default function ObservationRoom({
               <polygon points={pts([P(z.x0, z.y0, 0), P(z.x0, z.y1, 0), P(z.x0, z.y1, 46), P(z.x0, z.y0, 46)])} fill="url(#gl)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" />
               <polygon points={pts([P(z.x0, z.y0, 0), P(z.x1, z.y0, 0), P(z.x1, z.y0, 46), P(z.x0, z.y0, 46)])} fill="url(#gr)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" />
               <path d={`M${P(z.x0, z.y0, 46).join(",")} L${P(z.x0, z.y1, 46).join(",")} M${P(z.x0, z.y0, 46).join(",")} L${P(z.x1, z.y0, 46).join(",")}`} stroke={z.color} strokeWidth="2" opacity="0.7" fill="none" />
+              {snap.doc.hall === z.id && snap.doc.mode === "do" && (
+                <polygon points={pts([P(z.x0, z.y0), P(z.x1, z.y0), P(z.x1, z.y1), P(z.x0, z.y1)])} fill="none" stroke={z.color} strokeWidth="3" strokeDasharray="6 4" />
+              )}
+              {z.pics.map(([src, ar], i) => {
+                const side = i === 2 ? "x" : "y";
+                const maxw = side === "x" ? 2.2 : 1.7;
+                const H = Math.min(22, (maxw * 20) / ar);
+                const wu = (ar * H) / 20;
+                const xc = (z.x0 + z.x1) / 2;
+                const c = side === "x" ? (z.y0 + z.y1) / 2 - 0.3 : xc + (i === 0 ? -2 : 2);
+                const f = featured[z.project];
+                return (
+                  <g
+                    key={src}
+                    className="cursor-pointer"
+                    onPointerEnter={() => setBbHot(z.id)}
+                    onPointerLeave={() => setBbHot(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(hrefFor(f));
+                    }}
+                  >
+                    <WallPic src={src} side={side} wall={side === "x" ? z.x0 : z.y0} c={c} wu={wu} z0={16} H={H} hot={bbHot === z.id} color={z.color} />
+                  </g>
+                );
+              })}
             </g>
           );
         })}
@@ -720,60 +901,42 @@ export default function ObservationRoom({
           <g key={i}>{s.el}</g>
         ))}
 
-        {/* docent line at the entrance */}
-        {snap.docentNear && (
-          <g transform={`translate(${P(NODES.c1[0] - 1.4, NODES.c1[1] + 1.4, 44)[0]} ${P(NODES.c1[0] - 1.4, NODES.c1[1] + 1.4, 44)[1]})`} pointerEvents="none">
-            <rect x="-62" y="-11" width="124" height="15" rx="7.5" fill="#fff" stroke={INK} strokeWidth="1.2" />
-            <text x="0" y="0" textAnchor="middle" fontSize="8.5" fill={INK} style={{ fontFamily: SANS }}>
-              Welcome, start anywhere.
-            </text>
-          </g>
-        )}
+        {/* docent speech */}
+        {snap.doc.mode === "do" && (() => {
+          const ls = lines(snap.doc.line, 32);
+          const sc = P(snap.doc.pos[0], snap.doc.pos[1]);
+          const w = Math.max(...ls.map((l) => l.length)) * 4.3 + 16;
+          const h = ls.length * 10 + 8;
+          const col = snap.doc.hall ? hallOf(snap.doc.hall).color : INK;
+          return (
+            <g transform={`translate(${sc[0]} ${sc[1] - 46})`} pointerEvents="none">
+              <rect x={-w / 2} y={-h} width={w} height={h} rx="8" fill="#fff" stroke={col} strokeWidth="1.5" />
+              <path d="M-4,0 L0,6 L4,0 Z" fill="#fff" stroke={col} strokeWidth="1.5" />
+              <rect x="-5" y="-1.5" width="10" height="3" fill="#fff" />
+              {ls.map((l, i) => (
+                <text key={i} x="0" y={-h + 10 + i * 10 - 1} textAnchor="middle" fontSize="7.6" fill={INK} style={{ fontFamily: SANS }}>
+                  {l}
+                </text>
+              ))}
+            </g>
+          );
+        })()}
 
         {/* hall labels, docent captions, project billboards */}
         {ZONES.map((z) => {
           const f = featured[z.project];
-          const top = P(z.x0, z.y0, 46);
-          const bx = top[0] - 4;
-          const by = top[1] - 30;
           const hot = bbHot === z.id;
-          const occupied = (snap.busy[z.id] ?? 0) > 0;
           const lab = P(z.x1 - 0.3, z.y1 - 0.3, 0);
           return (
             <g key={z.id}>
               <text x={lab[0]} y={lab[1] + 17} textAnchor="middle" fontSize="10.5" fontWeight={700} fill={z.color} style={{ fontFamily: "var(--font-bric), " + SANS }}>
                 {z.name.toUpperCase()} <tspan fill="rgba(31,42,68,0.45)" fontWeight={500}>· {z.sub}</tspan>
               </text>
-              {occupied && (
-                <g transform={`translate(${lab[0]} ${lab[1] + 31})`} pointerEvents="none">
-                  <rect x={-Math.min(150, z.caption.length * 2.6 + 8)} y="-9" width={Math.min(300, z.caption.length * 5.2 + 16)} height="14" rx="7" fill="rgba(255,255,255,0.9)" stroke={z.color} strokeWidth="1" />
-                  <text x="0" y="1" textAnchor="middle" fontSize="7.8" fill={INK} style={{ fontFamily: SANS }}>
-                    {z.caption}
-                  </text>
-                </g>
-              )}
-              {f && (
-                <g
-                  className="cursor-pointer"
-                  transform={`translate(${bx} ${by})`}
-                  onPointerEnter={() => setBbHot(z.id)}
-                  onPointerLeave={() => setBbHot(null)}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(hrefFor(f));
-                  }}
-                >
-                  <line x1="0" y1="24" x2="0" y2="32" stroke={z.color} strokeWidth="1.6" />
-                  <rect x="-66" y="-12" width="132" height="36" rx="9" fill="rgba(255,255,255,0.86)" stroke={hot ? z.color : "rgba(255,255,255,0.95)"} strokeWidth={hot ? 2.4 : 1.4} />
-                  <clipPath id={`cp-${z.id}`}>
-                    <rect x="-62" y="-8" width="28" height="28" rx="6" />
-                  </clipPath>
-                  <image href={f.image} x="-62" y="-8" width="28" height="28" preserveAspectRatio="xMidYMid slice" clipPath={`url(#cp-${z.id})`} />
-                  <text x="-28" y="3" fontSize="8.2" fontWeight={700} fill={INK} style={{ fontFamily: "var(--font-bric), " + SANS }}>
-                    {f.title.length > 19 ? f.title.slice(0, 18) + "…" : f.title}
-                  </text>
-                  <text x="-28" y="14" fontSize="7.2" fill={z.color} style={{ fontFamily: SANS }}>
-                    open exhibit →
+              {f && hot && (
+                <g transform={`translate(${lab[0]} ${lab[1] + 32})`} pointerEvents="none">
+                  <rect x="-92" y="-10" width="184" height="15" rx="7.5" fill={INK} />
+                  <text x="0" y="0.5" textAnchor="middle" fontSize="8" fill="#fff" style={{ fontFamily: SANS }}>
+                    Open exhibit: {f.title.length > 28 ? f.title.slice(0, 27) + "…" : f.title} →
                   </text>
                 </g>
               )}
@@ -785,8 +948,8 @@ export default function ObservationRoom({
           ENTRANCE
         </text>
 
-        {focusAgent && focusVisitor && (
-          <g transform={`translate(${P(focusAgent.pos[0], focusAgent.pos[1])[0]} ${P(focusAgent.pos[0], focusAgent.pos[1])[1] - 16})`} pointerEvents="none">
+        {focusPos && focusText && (
+          <g transform={`translate(${P(focusPos[0], focusPos[1])[0]} ${P(focusPos[0], focusPos[1])[1] - 16})`} pointerEvents="none">
             {[
               [-17, -26, 1, 1],
               [17, -26, -1, 1],
@@ -796,9 +959,9 @@ export default function ObservationRoom({
               <path key={i} d={`M${x},${y + sy * 6} V${y} H${x + sx * 6}`} fill="none" stroke={INK} strokeWidth="1.8" />
             ))}
             <g transform="translate(0 -48)">
-              <rect x="-62" y="-9" width="124" height="16" rx="8" fill={INK} />
+              <rect x="-78" y="-9" width="156" height="16" rx="8" fill={INK} />
               <text x="0" y="2.4" textAnchor="middle" fontSize="8.5" fill="#fff" style={{ fontFamily: SANS }}>
-                {focusVisitor.role} · {focusAgent.mode === "walk" ? "walking" : hallOf(focusAgent.hall).doing}
+                {focusText}
               </text>
             </g>
           </g>

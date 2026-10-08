@@ -210,8 +210,8 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
                 ı
                 <span
                   aria-hidden
-                  className="absolute h-[0.17em] w-[0.17em] rounded-full transition-transform duration-300 group-hover:scale-150"
-                  style={{ background: RED, left: "0.255em", top: "0.14em" }}
+                  className="absolute h-[0.15em] w-[0.15em] rounded-full transition-transform duration-300 group-hover:scale-150"
+                  style={{ background: RED, left: "0.08em", top: "0.1em" }}
                 />
               </span>
               an Lee

@@ -1258,7 +1258,13 @@ export default function ObservationRoom({
     pl.path = [...route(a, b), target];
   };
 
+  // on a phone the inline frame is only a preview: any tap opens the full-screen view
+  const small = () => typeof window !== "undefined" && window.innerWidth < 640;
   const onBackground = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (!expanded && small()) {
+      expand();
+      return;
+    }
     if (play) {
       if (dlg) return;
       const g = toGrid(e);
@@ -1321,6 +1327,7 @@ export default function ObservationRoom({
             onPointerLeave={() => setHov(null)}
             onClick={(e) => {
               e.stopPropagation();
+              if (!expanded && small()) return expand();
               if (play) {
                 if (snap.near === a.id) openDialog(a.id);
                 else {
@@ -1356,6 +1363,7 @@ export default function ObservationRoom({
           onPointerLeave={() => setHov(null)}
           onClick={(e) => {
             e.stopPropagation();
+            if (!expanded && small()) return expand();
             if (play) {
               if (snap.near === "D") openDialog("D");
               else {
@@ -1409,7 +1417,7 @@ export default function ObservationRoom({
     onPointerEnter: () => setPicHot(zid),
     onPointerLeave: () => setPicHot(null),
     onClick: (e: React.MouseEvent) => {
-      if (!expanded && !play) return;
+      if (!expanded && small()) return;
       e.stopPropagation();
       const lk = hallOf(zid).link;
       if (lk) router.push(lk.href);
@@ -1457,6 +1465,7 @@ export default function ObservationRoom({
           className="cursor-pointer"
           onClick={(e) => {
             e.stopPropagation();
+            if (!expanded && small()) return expand();
             if (snap.near === `x:${z.id}`) openDialog(`x:${z.id}`);
             else {
               st.current.talkWho = `x:${z.id}`;
@@ -1704,7 +1713,7 @@ export default function ObservationRoom({
           <span className="whitespace-nowrap">MUSEUM OF IAN</span>
         </span>
         <span className="pointer-events-auto flex items-center gap-2">
-          <span className="rounded-full bg-white/85 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
+          <span className={`rounded-full bg-white/85 px-3 py-1 backdrop-blur ${expanded ? "" : "max-sm:hidden"}`} style={{ fontFamily: "var(--font-pixel)" }}>
             {snap.follow ? "FOLLOWING" : "OVERVIEW"}
           </span>
           {snap.follow && (
@@ -1714,7 +1723,7 @@ export default function ObservationRoom({
                 st.current.follow = false;
                 st.current.talkWho = null;
               }}
-              className="inline-flex h-7 items-center rounded-full bg-white/90 px-3 backdrop-blur hover:bg-[#fff3b8]"
+              className={`inline-flex h-7 items-center rounded-full bg-white/90 px-3 backdrop-blur hover:bg-[#fff3b8] ${expanded ? "" : "max-sm:hidden"}`}
               style={{ fontFamily: "var(--font-pixel)" }}
             >
               ⤡
@@ -1737,7 +1746,7 @@ export default function ObservationRoom({
           <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/80 px-3 py-1 text-[11px] backdrop-blur md:block" style={{ fontFamily: "var(--font-pixel)", color: INK }}>
             WASD / arrows to move · click the floor to walk · click a Ian to talk · Space to talk
           </p>
-          <div className="absolute bottom-3 left-3 h-[84px] w-[84px] md:hidden">
+          <div className={`absolute bottom-3 left-3 h-[84px] w-[84px] md:hidden ${expanded ? "" : "max-sm:hidden"}`}>
             {dpad("ArrowUp", "↖", "left-0 top-0")}
             {dpad("ArrowRight", "↗", "right-0 top-0")}
             {dpad("ArrowLeft", "↙", "bottom-0 left-0")}
@@ -1747,7 +1756,7 @@ export default function ObservationRoom({
             <button
               type="button"
               onClick={() => openDialog(snap.near as string)}
-              className="absolute bottom-5 right-6 rounded-full px-4 py-1.5 text-[12px] text-white md:hidden"
+              className={`absolute bottom-5 right-6 rounded-full px-4 py-1.5 text-[12px] text-white md:hidden ${expanded ? "" : "max-sm:hidden"}`}
               style={{ background: INK, fontFamily: "var(--font-pixel)" }}
             >
               talk

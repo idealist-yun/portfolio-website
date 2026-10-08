@@ -89,8 +89,8 @@ export default function ConceptB() {
             Designing for <em style={{ color: RED }}>vulnerability,</em> with data &amp; AI.
           </h1>
           <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-8" style={{ color: MUTED }}>
-            Hi, I&rsquo;m Yun, a strategic designer. Welcome to the museum of my work: the army,
-            care, Samsung, robots, the lab and a mall. I&rsquo;m the one watching how visitors walk it.
+            Hi, I&rsquo;m Yun, a strategic designer. This is a small museum about me: the army,
+            care, Samsung, robots, the lab and a mall. Each avatar inside is me at that chapter. Go talk to them.
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">
@@ -100,11 +100,11 @@ export default function ConceptB() {
                 style={{ background: "linear-gradient(135deg,#9a6a38,#6e4520)", boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.18), 0 22px 40px -18px rgba(29,27,24,0.7)" }}
               >
                 <div className="rounded-[2px] bg-[#f8f2e4] p-3">
-                  <ObservationRoom chrome={false} showNotes={false} showLanes={false} />
+                  <ObservationRoom />
                 </div>
               </div>
               <p className="mt-2 text-center text-[1.35rem] leading-none" style={{ fontFamily: "var(--font-hand)", color: MUTED }}>
-                the museum of Yun: a docent robot leads the tour, five visitors wander. Click anyone to follow, any picture to open the project.
+                the museum of Yun: every avatar is me at one chapter. Click the frame to enlarge it, then step inside and play.
               </p>
             </DeskItem>
 

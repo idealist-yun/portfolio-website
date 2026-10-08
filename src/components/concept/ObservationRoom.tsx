@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { featured, hrefFor } from "@/data/concept";
+import { createPortal } from "react-dom";
+import { featured, hrefFor, journey, whyQuote } from "@/data/concept";
 
 type Pt = [number, number];
 
@@ -70,6 +72,7 @@ const PLAQUE: Record<ZoneId, string> = { army: "TERRAIN MODEL", care: "FIVE PERS
 export const ZONES: Hall[] = ZONES_RAW.map((z) => ({ ...z, plaque: PLAQUE[z.id], pics: HALL_PICS[z.id] }));
 const hallOf = (id: ZoneId) => ZONES.find((z) => z.id === id)!;
 export const zoneColor = (z: ZoneId | "plaza") => (z === "plaza" ? "#c3cddd" : hallOf(z).color);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const zoneOf = (p: Pt): ZoneId | "plaza" => {
   for (const z of ZONES) if (p[0] >= z.x0 - 0.5 && p[0] <= z.x1 + 0.5 && p[1] >= z.y0 - 0.5 && p[1] <= z.y1 + 0.5) return z.id;
   return "plaza";
@@ -124,84 +127,133 @@ function route(from: string, to: string): Pt[] {
   return out.map((k) => NODES[k]);
 }
 
-// ------------------------------------------------------------ visitors = my three audiences, plus two
-type Visitor = { id: string; role: string; color: string; hair: string; route: [ZoneId, "a" | "b", number][] };
-const VISITORS: Visitor[] = [
-  { id: "V1", role: "Lab contact", color: "#4c7df0", hair: "#1f2a44", route: [["lab", "a", 4], ["care", "a", 4], ["robots", "b", 2], ["samsung", "a", 1.5], ["army", "b", 2.5]] },
-  { id: "V2", role: "Investor", color: "#f5b301", hair: "#7a4a1f", route: [["robots", "a", 4], ["samsung", "b", 3.5], ["mall", "a", 2], ["lab", "b", 2.5], ["care", "b", 3]] },
-  { id: "V3", role: "Recruiter", color: "#4caf6a", hair: "#2b2b2b", route: [["samsung", "a", 3.5], ["army", "a", 3], ["care", "a", 2.5], ["robots", "b", 2.5], ["mall", "b", 1.5]] },
-  { id: "V4", role: "Student", color: "#f58ac0", hair: "#5a2a4a", route: [["army", "b", 3], ["care", "b", 3.5], ["lab", "a", 3.5], ["mall", "a", 2], ["robots", "a", 3]] },
-  { id: "V5", role: "Collaborator", color: "#ff7a6b", hair: "#3b2a20", route: [["care", "a", 3.5], ["robots", "b", 3], ["lab", "b", 3], ["army", "a", 2], ["samsung", "b", 2]] },
-];
+// ------------------------------------------------------------ walkable floor + obstacles (for the playable avatar)
+const PED: Record<ZoneId, [number, number, number, number]> = {
+  army: [-1.3, -1.0, 2.6, 2.0],
+  care: [-1.2, -0.9, 2.4, 1.8],
+  samsung: [-1.2, -0.9, 2.4, 1.8],
+  robots: [-1.5, -0.5, 3.0, 1.0],
+  lab: [-1.4, -0.7, 2.8, 1.4],
+  mall: [-1.2, -0.9, 2.4, 1.8],
+};
+type Rect = [number, number, number, number];
+const FLOOR: Rect[] = [[0.5, 8.3, NX - 0.5, 11.7]];
+const OBST: Rect[] = [];
+ZONES.forEach((z) => {
+  const xc = (z.x0 + z.x1) / 2;
+  const yc = (z.y0 + z.y1) / 2;
+  FLOOR.push([z.x0 + 0.45, z.y0 + 0.45, z.x1 - 0.45, z.y1 - 0.45]);
+  FLOOR.push(z.top ? [xc - 0.7, z.y1 - 0.5, xc + 0.7, 8.4] : [xc - 0.7, 11.6, xc + 0.7, z.y0 + 0.5]);
+  const [dx, dy, w, d] = PED[z.id];
+  OBST.push([xc + dx - 0.25, yc + dy - 0.25, xc + dx + w + 0.25, yc + dy + d + 0.25]);
+});
+const inRect = (x: number, y: number, r: Rect) => x >= r[0] && x <= r[2] && y >= r[1] && y <= r[3];
+const walkable = (x: number, y: number) => FLOOR.some((r) => inRect(x, y, r)) && !OBST.some((r) => inRect(x, y, r));
+const clearLine = (a: Pt, b: Pt) => {
+  const n = Math.max(2, Math.ceil(dist2(a, b) / 0.25));
+  for (let i = 0; i <= n; i++) if (!walkable(a[0] + ((b[0] - a[0]) * i) / n, a[1] + ((b[1] - a[1]) * i) / n)) return false;
+  return true;
+};
+const nearestVisible = (p: Pt): string | null => {
+  let best: string | null = null;
+  let bd = Infinity;
+  Object.entries(NODES).forEach(([k, v]) => {
+    const dd = dist2(p, v);
+    if (dd < bd && clearLine(p, v)) {
+      bd = dd;
+      best = k;
+    }
+  });
+  return best;
+};
 
-// illustrative reactions (service-design view of the museum itself)
-const REACT: Record<string, Partial<Record<ZoneId, [string, boolean]>>> = {
-  V1: {
-    lab: ["Asks where the clinical data comes from.", true],
-    care: ["Stays long: the thesis is the hook.", false],
-    robots: ["Skims, wants the research question.", true],
-    samsung: ["Skips: link to research unclear.", true],
-    army: ["Curious: simulation for training?", false],
+// ------------------------------------------------------------ the six Yuns
+type YunInfo = { tag: string; doing: string; hi: string; who: string; made: string };
+const YUN: Record<ZoneId, YunInfo> = {
+  army: {
+    tag: "Army Yun",
+    doing: "building the terrain trainer",
+    hi: "Hi. I'm the Yun from the Army years.",
+    who: journey[2].note,
+    made: featured[3].line,
   },
-  V2: {
-    robots: ["Photographs a robot. 'Is this a product?'", false],
-    samsung: ["Nods at the numbers, wants market size.", true],
-    mall: ["Reads fast: where's the business model?", true],
-    lab: ["Asks how this scales.", true],
-    care: ["Moved by the story, then asks about the company.", false],
+  care: {
+    tag: "Thesis Yun",
+    doing: "interviewing caregivers",
+    hi: "Hi. I'm the Yun who started with a question.",
+    who: `"${whyQuote}" Carried since childhood, shaped by my younger brother's developmental disability.`,
+    made: featured[0].line,
   },
-  V3: {
-    samsung: ["Recognises the brand and stays.", false],
-    army: ["Leading 60+ people: noted.", false],
-    care: ["Wants one line of impact.", true],
-    robots: ["Asks how big the team was.", true],
-    mall: ["Passes: too many projects.", true],
+  samsung: {
+    tag: "Samsung Yun",
+    doing: "forecasting demand",
+    hi: "Hi. I'm the Yun at Samsung.",
+    who: journey[5].note,
+    made: featured[5].line,
   },
-  V4: {
-    army: ["A 3D model of terrain? Wow.", false],
-    care: ["Reads the whole story.", false],
-    lab: ["Wants to try it right now.", false],
-    mall: ["Unclear what exactly she did.", true],
-    robots: ["Excited by the royal-court idea.", false],
+  robots: {
+    tag: "Robot-lab Yun",
+    doing: "choreographing robots",
+    hi: "Hi. I'm the Yun from the SDI robot projects.",
+    who: journey[4].note,
+    made: featured[2].line,
   },
-  V5: {
-    care: ["Wants to co-design a pilot.", false],
-    robots: ["Asks about the simulation scenarios.", false],
-    lab: ["Can't find how to get in touch.", true],
-    army: ["Passes through quickly.", true],
-    samsung: ["Needs a clearer 'what's next'.", true],
+  lab: {
+    tag: "Simulator Yun",
+    doing: "running the simulator",
+    hi: "Hi. I'm the Yun who builds the simulator.",
+    who: "Personas of people with developmental disabilities, augmented by data and run through AI simulation.",
+    made: featured[1].line,
+  },
+  mall: {
+    tag: "Retail Yun",
+    doing: "mapping shoppers",
+    hi: "Hi. I'm the Yun who turned customer data into strategy.",
+    who: "Customer data turned into service strategy for malls, appliances and apartment life.",
+    made: featured[4].line,
   },
 };
 
-type Agent = {
-  v: Visitor;
-  i: number;
-  mode: "walk" | "do";
-  path: Pt[];
-  seg: number;
-  pos: Pt;
-  left: number;
-  face: 1 | -1;
-  node: string;
-  comfort: number;
+type Spot = [ZoneId, "a" | "b", number];
+const ROUTES: Record<ZoneId, Spot[]> = {
+  army: [["army", "a", 6], ["army", "b", 4], ["care", "a", 3], ["army", "a", 5], ["army", "b", 4], ["samsung", "b", 3]],
+  care: [["care", "a", 6], ["care", "b", 4], ["lab", "a", 3], ["care", "b", 5], ["care", "a", 4], ["robots", "a", 3]],
+  samsung: [["samsung", "a", 6], ["samsung", "b", 4], ["mall", "b", 3], ["samsung", "b", 5], ["samsung", "a", 4], ["army", "a", 3]],
+  robots: [["robots", "a", 6], ["robots", "b", 4], ["lab", "b", 3], ["robots", "a", 5], ["robots", "b", 4], ["mall", "a", 3]],
+  lab: [["lab", "a", 6], ["lab", "b", 4], ["care", "a", 3], ["lab", "b", 5], ["lab", "a", 4], ["robots", "b", 3]],
+  mall: [["mall", "a", 6], ["mall", "b", 4], ["samsung", "a", 3], ["mall", "b", 5], ["mall", "a", 4], ["lab", "a", 3]],
 };
 
-function makeAgent(v: Visitor, offset: number): Agent {
-  const [hall, which] = v.route[0];
-  const node = `${hall}_${which}`;
-  return { v, i: 0, mode: "walk", path: route("gate", node), seg: 0, pos: [NODES.gate[0] - offset * 0.4, NODES.gate[1] + (offset % 2 ? 0.5 : -0.5)] as Pt, left: 0, face: 1, node: "gate", comfort: 0.6 };
+type Yun = { hall: ZoneId; pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1 };
+const makeYun = (hall: ZoneId, k: number): Yun => ({ hall, pos: [...NODES[`${hall}_a`]] as Pt, path: [], seg: 0, mode: "do", left: 2 + k * 1.3, i: 0, node: `${hall}_a`, face: 1 });
+
+const WELCOME = "Welcome. This museum is about one person, in six chapters. Follow me!";
+const TOUR: ZoneId[] = ["army", "care", "samsung", "mall", "lab", "robots"];
+type Docent = { pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1; hall: ZoneId | null };
+
+type Choice = { label: string; go?: string; href?: string };
+type DNode = { text: string; choices: Choice[] };
+function dialogNode(who: string, key: string): DNode {
+  if (who === "D") {
+    if (key === "start")
+      return {
+        text: "Start with the Care hall: the question behind everything is there. Then walk the others in any order, and talk to each Yun.",
+        choices: [{ label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
+      };
+    return {
+      text: "I'm the docent. Every Yun you see here is Yun at one chapter of their life. Talk to all six to fill your passport.",
+      choices: [{ label: "Where do I start?", go: "start" }, { label: "Show me the journey map", href: "/concept/journey" }, { label: "Thanks" }],
+    };
+  }
+  const h = who as ZoneId;
+  const y = YUN[h];
+  const href = hrefFor(featured[hallOf(h).project]);
+  const open: Choice = { label: "Show me the exhibit", href };
+  if (key === "who") return { text: y.who, choices: [{ label: "What did you make?", go: "made" }, open, { label: "See you" }] };
+  if (key === "made") return { text: y.made, choices: [{ label: "Who were you then?", go: "who" }, open, { label: "See you" }] };
+  return { text: y.hi, choices: [{ label: "Who were you then?", go: "who" }, { label: "What did you make?", go: "made" }, open, { label: "See you" }] };
 }
 
-export type Note = { id: number; who: string; time: string; hour: number; text: string; need: boolean; color: string; zone: ZoneId };
-
-const DAY = 150;
-const hourAt = (t: number) => 9 + ((t % DAY) / DAY) * 8;
-const clockAt = (t: number) => {
-  const m = 9 * 60 + ((t % DAY) / DAY) * 8 * 60;
-  const hh = Math.floor(m / 60);
-  const mm = Math.floor(m % 60);
-  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
-};
 
 // ------------------------------------------------------------ iso building blocks
 function Box({
@@ -392,22 +444,61 @@ function buildProps(): Item[] {
 }
 
 // ------------------------------------------------------------ people
-function Person({ color, hair, face, bob }: { color: string; hair: string; face: 1 | -1; bob: number }) {
+type Kind = ZoneId | "you";
+const SHIRT: Record<Kind, string> = { army: "#5b7a46", care: "#6a9bff", samsung: "#eef0ff", robots: "#ff8a66", lab: "#f6f8fb", mall: "#ffd24a", you: "#ff4d6d" };
+
+function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) {
+  const shirt = SHIRT[kind];
   return (
     <g transform={`scale(${face} 1)`}>
       <ellipse cx="0" cy="1.5" rx="8" ry="3" fill="rgba(60,80,120,0.22)" />
       <g transform={`translate(0 ${bob})`}>
         <rect x="-4" y="-6" width="3" height="6" rx="1.2" fill="#56618a" />
         <rect x="1" y="-6" width="3" height="6" rx="1.2" fill="#56618a" />
-        <rect x="-5.5" y="-17" width="11" height="12" rx="4.5" fill={color} />
+        <rect x="-5.5" y="-17" width="11" height="12" rx="4.5" fill={shirt} stroke={kind === "samsung" || kind === "lab" ? "rgba(70,100,150,0.4)" : "none"} strokeWidth="0.8" />
+        {kind === "lab" && <rect x="-1" y="-17" width="2" height="12" fill="#2fb8a8" />}
+        {kind === "samsung" && (
+          <>
+            <line x1="-1.5" y1="-17" x2="0" y2="-11" stroke="#1f2a44" strokeWidth="0.9" />
+            <line x1="1.5" y1="-17" x2="0" y2="-11" stroke="#1f2a44" strokeWidth="0.9" />
+            <rect x="-1.6" y="-11" width="3.2" height="3.8" rx="0.6" fill="#4a5bd8" />
+          </>
+        )}
         <circle cx="0" cy="-23" r="6.2" fill="#ffe0c4" />
-        <path d="M-6.2,-24 Q-6,-30 0,-30 Q6,-30 6.2,-24 Q2,-27 -1,-26 Q-5,-26 -6.2,-24 Z" fill={hair} />
+        <path d="M-6.2,-24 Q-6,-30 0,-30 Q6,-30 6.2,-24 Q2,-27 -1,-26 Q-5,-26 -6.2,-24 Z" fill="#1f2a44" />
         <circle cx="-2.2" cy="-22.5" r="0.9" fill={INK} />
         <circle cx="2.2" cy="-22.5" r="0.9" fill={INK} />
+        {kind === "army" && (
+          <>
+            <path d="M-6.6,-25 Q-6,-32 0,-32 Q6,-32 6.6,-25 Z" fill="#4a6a38" />
+            <rect x="-1" y="-26.4" width="9" height="2" rx="1" fill="#3a5430" />
+          </>
+        )}
+        {kind === "lab" && (
+          <>
+            <circle cx="-2.6" cy="-22.6" r="2.1" fill="none" stroke={INK} strokeWidth="0.8" />
+            <circle cx="2.6" cy="-22.6" r="2.1" fill="none" stroke={INK} strokeWidth="0.8" />
+            <line x1="-0.5" y1="-22.6" x2="0.5" y2="-22.6" stroke={INK} strokeWidth="0.8" />
+          </>
+        )}
+        {kind === "robots" && (
+          <>
+            <path d="M-6.4,-24 Q0,-34 6.4,-24" fill="none" stroke="#26324f" strokeWidth="1.4" />
+            <rect x="-7.6" y="-24" width="2.6" height="5" rx="1.2" fill="#26324f" />
+          </>
+        )}
+        {kind === "care" && <path d="M0,-9.5 C-3,-12.5 -3.6,-14.2 -1.8,-14.8 C-0.8,-15 0,-14.2 0,-14.2 C0,-14.2 0.8,-15 1.8,-14.8 C3.6,-14.2 3,-12.5 0,-9.5 Z" fill="#ff6b8a" />}
+        {kind === "mall" && (
+          <>
+            <rect x="5" y="-12" width="6.5" height="8" rx="1" fill="#ff6b4a" stroke={EDGE} strokeWidth="0.6" />
+            <path d="M6.6,-12 Q8.2,-16 9.9,-12" fill="none" stroke="#c94b2e" strokeWidth="0.9" />
+          </>
+        )}
       </g>
     </g>
   );
 }
+
 
 function Docent({ t }: { t: number }) {
   const bob = Math.sin(t * 3) * 0.8;
@@ -426,70 +517,56 @@ function Docent({ t }: { t: number }) {
   );
 }
 
+
 // ------------------------------------------------------------ snapshot
+type SnapAgent = { id: ZoneId; pos: Pt; face: 1 | -1; mode: "walk" | "do"; frozen: boolean };
 type Snap = {
   t: number;
-  a: { id: string; color: string; hair: string; pos: Pt; face: 1 | -1; mode: "walk" | "do"; hall: ZoneId }[];
-  trail: Record<string, Pt[]>;
-  cam: { x: number; y: number; w: number; h: number };
-  heat: Record<string, number>;
-  busy: Record<string, number>;
+  a: SnapAgent[];
+  p: { pos: Pt; face: 1 | -1; moving: boolean };
   doc: { pos: Pt; face: 1 | -1; mode: "walk" | "do"; hall: ZoneId | null; line: string };
+  near: string | null;
+  cam: { x: number; y: number; w: number; h: number };
 };
-const WELCOME = "Welcome. Six halls, one person. Follow me!";
-const TOUR: ZoneId[] = ["army", "care", "samsung", "mall", "lab", "robots"];
-type Docent = { pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: number; i: number; node: string; face: 1 | -1; hall: ZoneId | null };
-type Lane = { z: ZoneId | "plaza"; t0: number; t1: number };
+
+const KEYDIR: Record<string, Pt> = { ArrowUp: [-1, -1], w: [-1, -1], ArrowDown: [1, 1], s: [1, 1], ArrowLeft: [-1, 1], a: [-1, 1], ArrowRight: [1, -1], d: [1, -1] };
+const START: Pt = [NODES.gate[0] + 1.6, NODES.gate[1] + 0.6];
 
 export default function ObservationRoom({
-  chrome = true,
-  showNotes = true,
-  showLanes = true,
-  onNote,
-  hoverId = null,
+  active,
   selected,
   onSelectedChange,
-  active,
 }: {
   chrome?: boolean;
-  showNotes?: boolean;
-  showLanes?: boolean;
-  onNote?: (n: Note) => void;
-  hoverId?: string | null;
+  active?: boolean;
   selected?: string | null;
   onSelectedChange?: (id: string | null) => void;
-  active?: boolean;
 }) {
   const router = useRouter();
-  const [init] = useState(() => VISITORS.map((v, i) => makeAgent(v, i)));
-  const agents = useRef<Agent[]>(init);
+  const [init] = useState(() => ZONES.map((z, k) => makeYun(z.id, k)));
+  const agents = useRef<Yun[]>(init);
   const clock = useRef(0);
-  const noteId = useRef(0);
-  const sample = useRef(0);
-  const trailT = useRef(0);
-  const trails = useRef<Record<string, Pt[]>>({});
-  const lanesRef = useRef<Record<string, Lane[]>>({});
-  const heat = useRef<Record<string, number>>({});
+  const docent = useRef<Docent>({ pos: [NODES.gate[0] + 0.8, NODES.gate[1] - 1] as Pt, path: [], seg: 0, mode: "do", left: 4, i: -1, node: "gate", face: 1, hall: null });
+  const player = useRef<{ pos: Pt; face: 1 | -1; path: Pt[]; moving: boolean }>({ pos: START, face: 1, path: [], moving: false });
+  const keys = useRef<Set<string>>(new Set());
   const cam = useRef({ x: 0, y: 0, w: VW, h: VH });
-  const selRef = useRef<string | null>(null);
-  const docent = useRef<Docent>({ pos: [NODES.gate[0] + 0.8, NODES.gate[1] + 1] as Pt, path: [], seg: 0, mode: "do", left: 4, i: -1, node: "gate", face: 1, hall: null });
+  const st = useRef({ play: false, sel: null as string | null, dlg: null as { who: string; key: string } | null, near: null as string | null });
+  const svgRef = useRef<SVGSVGElement>(null);
+  const last = useRef<number | null>(null);
 
   const [snap, setSnap] = useState<Snap>({
     t: 0,
-    a: init.map((x) => ({ id: x.v.id, color: x.v.color, hair: x.v.hair, pos: x.pos, face: x.face, mode: x.mode, hall: "army" })),
-    trail: {},
+    a: init.map((a) => ({ id: a.hall, pos: a.pos, face: a.face, mode: a.mode, frozen: false })),
+    p: { pos: START, face: 1, moving: false },
+    doc: { pos: [NODES.gate[0] + 0.8, NODES.gate[1] - 1] as Pt, face: 1, mode: "do", hall: null, line: WELCOME },
+    near: null,
     cam: { x: 0, y: 0, w: VW, h: VH },
-    heat: {},
-    busy: {},
-    doc: { pos: [NODES.gate[0] + 0.8, NODES.gate[1] + 1] as Pt, face: 1, mode: "do", hall: null, line: WELCOME },
   });
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [friction, setFriction] = useState(0);
-  const [delight, setDelight] = useState(0);
-  const [lanes, setLanes] = useState<Record<string, Lane[]>>({});
-  const [curve, setCurve] = useState<number[]>(() => Array(48).fill(0.6));
   const [playing, setPlaying] = useState(true);
-  const [speed, setSpeed] = useState(1);
+  const [play, setPlay] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [dlg, setDlg] = useState<{ who: string; key: string } | null>(null);
+  const [met, setMet] = useState<ZoneId[]>([]);
   const [selInt, setSelInt] = useState<string | null>(null);
   const sel = selected !== undefined ? selected : selInt;
   const setSel = useCallback(
@@ -500,15 +577,18 @@ export default function ObservationRoom({
     [onSelectedChange]
   );
   const [hov, setHov] = useState<string | null>(null);
-  const [bbHot, setBbHot] = useState<ZoneId | null>(null);
+  const [picHot, setPicHot] = useState<ZoneId | null>(null);
   const [visible, setVisible] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
-  const last = useRef<number | null>(null);
+  const [frameH, setFrameH] = useState(0);
   const props = useMemo(() => buildProps(), []);
 
   useEffect(() => {
-    selRef.current = sel;
-  }, [sel]);
+    st.current.play = play;
+    st.current.sel = sel;
+    st.current.dlg = dlg;
+    st.current.near = snap.near;
+  });
 
   useEffect(() => {
     const el = wrap.current;
@@ -518,184 +598,276 @@ export default function ObservationRoom({
     return () => io.disconnect();
   }, []);
 
-  const arrive = useCallback(
-    (a: Agent) => {
-      const [hall, , dur] = a.v.route[a.i];
-      a.mode = "do";
-      a.left = dur;
-      const react = REACT[a.v.id]?.[hall];
-      const need = react ? react[1] : false;
-      a.comfort = need ? 0.22 : 0.82;
-      const n: Note = {
-        id: ++noteId.current,
-        who: a.v.id,
-        time: clockAt(clock.current),
-        hour: hourAt(clock.current),
-        text: react ? react[0] : "Pauses for a moment.",
-        need,
-        color: a.v.color,
-        zone: hall,
-      };
-      setNotes((arr) => [n, ...arr].slice(0, 4));
-      if (need) setFriction((x) => x + 1);
-      else setDelight((x) => x + 1);
-      onNote?.(n);
+  useEffect(() => {
+    if (!expanded) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [expanded]);
+
+  const expand = useCallback(() => {
+    setFrameH(wrap.current?.offsetHeight ?? 0);
+    setExpanded(true);
+  }, []);
+  const collapse = useCallback(() => {
+    setExpanded(false);
+    setPlay(false);
+    setDlg(null);
+    player.current.path = [];
+    keys.current.clear();
+  }, [setPlay]);
+
+  const openDialog = useCallback((who: string) => {
+    setDlg({ who, key: "root" });
+    if (who !== "D") setMet((m) => (m.includes(who as ZoneId) ? m : [...m, who as ZoneId]));
+  }, []);
+
+  const choose = useCallback(
+    (c: Choice) => {
+      if (c.href) {
+        router.push(c.href);
+        return;
+      }
+      if (c.go) setDlg((d) => (d ? { ...d, key: c.go as string } : d));
+      else setDlg(null);
     },
-    [onNote]
+    [router]
   );
 
-  const tick = useCallback(
-    (dt: number) => {
-      clock.current += dt;
-      agents.current.forEach((a) => {
-        if (a.mode === "do") {
-          a.left -= dt;
-          const h = a.v.route[a.i][0];
-          heat.current[h] = (heat.current[h] ?? 0) + dt;
-          a.comfort += (0.6 - a.comfort) * dt * 0.15;
-          if (a.left <= 0) {
-            a.i = (a.i + 1) % a.v.route.length;
-            const [nh, nw] = a.v.route[a.i];
-            a.path = route(a.node, `${nh}_${nw}`);
-            a.seg = 0;
-            a.mode = "walk";
-            a.comfort = 0.55;
-          }
-        } else {
-          let move = 2.9 * dt;
-          while (move > 0 && a.seg < a.path.length - 1) {
-            const to = a.path[a.seg + 1];
-            const dd = dist2(a.pos, to);
-            if (dd <= move) {
-              a.pos = [...to] as Pt;
-              move -= dd;
-              a.seg += 1;
-            } else {
-              const k = move / dd;
-              const sx = P(to[0], to[1])[0] - P(a.pos[0], a.pos[1])[0];
-              if (Math.abs(sx) > 0.5) a.face = sx > 0 ? 1 : -1;
-              a.pos = [a.pos[0] + (to[0] - a.pos[0]) * k, a.pos[1] + (to[1] - a.pos[1]) * k];
-              move = 0;
-            }
-          }
-          if (a.seg >= a.path.length - 1) {
-            const [h, w] = a.v.route[a.i];
-            a.node = `${h}_${w}`;
-            arrive(a);
-          }
+  // keyboard
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      const s = st.current;
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      if (k === "Escape") {
+        if (s.dlg) setDlg(null);
+        else if (s.play) {
+          setPlay(false);
+          keys.current.clear();
+        } else if (expanded) collapse();
+        return;
+      }
+      if (!s.play) return;
+      if (s.dlg) {
+        const n = dialogNode(s.dlg.who, s.dlg.key);
+        const idx = parseInt(k, 10);
+        if (idx >= 1 && idx <= n.choices.length) choose(n.choices[idx - 1]);
+        else if (k === "e" || k === "Enter") choose(n.choices[0]);
+        e.preventDefault();
+        return;
+      }
+      if (k === "e" || k === "Enter") {
+        if (s.near) openDialog(s.near);
+        e.preventDefault();
+        return;
+      }
+      if (KEYDIR[k]) {
+        keys.current.add(k);
+        player.current.path = [];
+        e.preventDefault();
+      }
+    };
+    const up = (e: KeyboardEvent) => {
+      const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+      keys.current.delete(k);
+    };
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+    };
+  }, [expanded, collapse, choose, openDialog]);
+
+  const tick = useCallback((dt: number) => {
+    clock.current += dt;
+    const s = st.current;
+    const pl = player.current;
+
+    // player
+    if (s.play && !s.dlg) {
+      let vx = 0;
+      let vy = 0;
+      keys.current.forEach((k) => {
+        const d = KEYDIR[k];
+        if (d) {
+          vx += d[0];
+          vy += d[1];
         }
       });
+      let moved = false;
+      const step = (tx: number, ty: number) => {
+        const [x, y] = pl.pos;
+        let nx = x;
+        let ny = y;
+        if (walkable(x + tx, y + ty)) {
+          nx = x + tx;
+          ny = y + ty;
+        } else if (walkable(x + tx, y)) nx = x + tx;
+        else if (walkable(x, y + ty)) ny = y + ty;
+        if (nx !== x || ny !== y) {
+          pl.pos = [nx, ny];
+          moved = true;
+          const sx = nx - ny - (x - y);
+          if (Math.abs(sx) > 0.001) pl.face = sx > 0 ? 1 : -1;
+        }
+      };
+      if (vx || vy) {
+        const m = Math.hypot(vx, vy);
+        step((vx / m) * 4.6 * dt, (vy / m) * 4.6 * dt);
+      } else if (pl.path.length) {
+        const to = pl.path[0];
+        const dd = dist2(pl.pos, to);
+        const mv = 4.6 * dt;
+        if (dd <= mv) {
+          pl.pos = [...to] as Pt;
+          pl.path.shift();
+          moved = true;
+        } else {
+          const nx = pl.pos[0] + ((to[0] - pl.pos[0]) / dd) * mv;
+          const ny = pl.pos[1] + ((to[1] - pl.pos[1]) / dd) * mv;
+          const sx = nx - ny - (pl.pos[0] - pl.pos[1]);
+          if (Math.abs(sx) > 0.001) pl.face = sx > 0 ? 1 : -1;
+          pl.pos = [nx, ny];
+          moved = true;
+        }
+      }
+      pl.moving = moved;
+    } else pl.moving = false;
 
-      const d = docent.current;
-      if (d.mode === "do") {
-        d.left -= dt;
-        if (d.left <= 0) {
-          d.i = (d.i + 1) % TOUR.length;
-          d.path = route(d.node, `${TOUR[d.i]}_d`);
-          d.seg = 0;
-          d.mode = "walk";
-          d.hall = null;
+    // nearest talkable
+    let near: string | null = null;
+    if (s.play) {
+      let bd = 2.7;
+      agents.current.forEach((a) => {
+        const d = dist2(pl.pos, a.pos);
+        if (d < bd) {
+          bd = d;
+          near = a.hall;
+        }
+      });
+      if (dist2(pl.pos, docent.current.pos) < bd) near = "D";
+    }
+    s.near = near;
+
+    // the Yuns
+    agents.current.forEach((a) => {
+      if (near === a.hall || (s.dlg && s.dlg.who === a.hall)) {
+        const sx = P(pl.pos[0], pl.pos[1])[0] - P(a.pos[0], a.pos[1])[0];
+        if (Math.abs(sx) > 1) a.face = sx > 0 ? 1 : -1;
+        return;
+      }
+      if (a.mode === "do") {
+        a.left -= dt;
+        if (a.left <= 0) {
+          a.i = (a.i + 1) % ROUTES[a.hall].length;
+          const [nh, nw] = ROUTES[a.hall][a.i];
+          a.path = route(a.node, `${nh}_${nw}`);
+          a.seg = 0;
+          a.mode = "walk";
         }
       } else {
-        let move = 3.2 * dt;
-        while (move > 0 && d.seg < d.path.length - 1) {
-          const to = d.path[d.seg + 1];
-          const dd = dist2(d.pos, to);
+        let move = 2.6 * dt;
+        while (move > 0 && a.seg < a.path.length - 1) {
+          const to = a.path[a.seg + 1];
+          const dd = dist2(a.pos, to);
           if (dd <= move) {
-            d.pos = [...to] as Pt;
+            a.pos = [...to] as Pt;
             move -= dd;
-            d.seg += 1;
+            a.seg += 1;
           } else {
             const k = move / dd;
-            const sx = P(to[0], to[1])[0] - P(d.pos[0], d.pos[1])[0];
-            if (Math.abs(sx) > 0.5) d.face = sx > 0 ? 1 : -1;
-            d.pos = [d.pos[0] + (to[0] - d.pos[0]) * k, d.pos[1] + (to[1] - d.pos[1]) * k];
+            const sx = P(to[0], to[1])[0] - P(a.pos[0], a.pos[1])[0];
+            if (Math.abs(sx) > 0.5) a.face = sx > 0 ? 1 : -1;
+            a.pos = [a.pos[0] + (to[0] - a.pos[0]) * k, a.pos[1] + (to[1] - a.pos[1]) * k];
             move = 0;
           }
         }
-        if (d.seg >= d.path.length - 1) {
-          d.node = `${TOUR[d.i]}_d`;
-          d.mode = "do";
-          d.left = 9;
-          d.hall = TOUR[d.i];
+        if (a.seg >= a.path.length - 1) {
+          const [h, w, dur] = ROUTES[a.hall][a.i];
+          a.node = `${h}_${w}`;
+          a.mode = "do";
+          a.left = dur;
         }
       }
+    });
 
-      trailT.current += dt;
-      if (trailT.current > 0.12) {
-        trailT.current = 0;
-        agents.current.forEach((a) => {
-          const arr = (trails.current[a.v.id] ??= []);
-          const s = P(a.pos[0], a.pos[1]);
-          const l = arr[arr.length - 1];
-          if (!l || Math.hypot(l[0] - s[0], l[1] - s[1]) > 1.5) arr.push(s);
-          if (arr.length > 46) arr.shift();
-        });
+    // the docent tour
+    const d = docent.current;
+    if (s.dlg && s.dlg.who === "D") {
+      // paused while talking
+    } else if (d.mode === "do") {
+      d.left -= dt;
+      if (d.left <= 0) {
+        d.i = (d.i + 1) % TOUR.length;
+        d.path = route(d.node, `${TOUR[d.i]}_d`);
+        d.seg = 0;
+        d.mode = "walk";
+        d.hall = null;
       }
+    } else {
+      let move = 3.0 * dt;
+      while (move > 0 && d.seg < d.path.length - 1) {
+        const to = d.path[d.seg + 1];
+        const dd = dist2(d.pos, to);
+        if (dd <= move) {
+          d.pos = [...to] as Pt;
+          move -= dd;
+          d.seg += 1;
+        } else {
+          const k = move / dd;
+          const sx = P(to[0], to[1])[0] - P(d.pos[0], d.pos[1])[0];
+          if (Math.abs(sx) > 0.5) d.face = sx > 0 ? 1 : -1;
+          d.pos = [d.pos[0] + (to[0] - d.pos[0]) * k, d.pos[1] + (to[1] - d.pos[1]) * k];
+          move = 0;
+        }
+      }
+      if (d.seg >= d.path.length - 1) {
+        d.node = `${TOUR[d.i]}_d`;
+        d.mode = "do";
+        d.left = 9;
+        d.hall = TOUR[d.i];
+      }
+    }
 
-      sample.current += dt;
-      if (sample.current > 0.5) {
-        sample.current = 0;
-        agents.current.forEach((a) => {
-          const z = zoneOf(a.pos);
-          const arr = (lanesRef.current[a.v.id] ??= []);
-          const lastSeg = arr[arr.length - 1];
-          if (lastSeg && lastSeg.z === z) lastSeg.t1 = clock.current;
-          else arr.push({ z, t0: clock.current, t1: clock.current });
-          while (arr.length > 1 && arr[0].t1 < clock.current - 70) arr.shift();
-        });
-        setLanes(Object.fromEntries(Object.entries(lanesRef.current).map(([k, v]) => [k, v.map((s) => ({ ...s }))])));
-        setCurve((c) => [...c.slice(1), agents.current.reduce((s, a) => s + a.comfort, 0) / agents.current.length]);
-      }
-
-      const target = { x: 0, y: 0, w: VW, h: VH };
-      const f = selRef.current === "D" ? { pos: docent.current.pos } : agents.current.find((a) => a.v.id === selRef.current);
-      if (f) {
-        const s = P(f.pos[0], f.pos[1]);
-        target.w = VW * 0.46;
-        target.h = VH * 0.46;
-        target.x = Math.max(0, Math.min(VW - target.w, s[0] - target.w / 2));
-        target.y = Math.max(0, Math.min(VH - target.h, s[1] - 24 - target.h / 2));
-      }
-      const k = 1 - Math.exp(-dt * 4.5);
-      const c = cam.current;
-      c.x += (target.x - c.x) * k;
-      c.y += (target.y - c.y) * k;
-      c.w += (target.w - c.w) * k;
-      c.h += (target.h - c.h) * k;
-    },
-    [arrive]
-  );
+    // camera
+    const target = { x: 0, y: 0, w: VW, h: VH };
+    let f: Pt | undefined;
+    if (s.play) f = pl.pos;
+    else if (s.sel === "D") f = d.pos;
+    else if (s.sel) f = agents.current.find((a) => a.hall === s.sel)?.pos;
+    if (f) {
+      const z = s.play ? 0.5 : 0.46;
+      const sc = P(f[0], f[1]);
+      target.w = VW * z;
+      target.h = VH * z;
+      target.x = Math.max(0, Math.min(VW - target.w, sc[0] - target.w / 2));
+      target.y = Math.max(0, Math.min(VH - target.h, sc[1] - 24 - target.h / 2));
+    }
+    const k = 1 - Math.exp(-dt * 4.5);
+    const c = cam.current;
+    c.x += (target.x - c.x) * k;
+    c.y += (target.y - c.y) * k;
+    c.w += (target.w - c.w) * k;
+    c.h += (target.h - c.h) * k;
+  }, []);
 
   const makeSnap = useCallback((): Snap => {
-    const trail: Record<string, Pt[]> = {};
-    Object.entries(trails.current).forEach(([k, v]) => (trail[k] = v.slice()));
-    const busy: Record<string, number> = {};
-    agents.current.forEach((a) => {
-      const z = zoneOf(a.pos);
-      if (z !== "plaza" && a.mode === "do") busy[z] = (busy[z] ?? 0) + 1;
-    });
     const dc = docent.current;
+    const s = st.current;
     return {
       t: clock.current,
-      a: agents.current.map((a) => ({
-        id: a.v.id,
-        color: a.v.color,
-        hair: a.v.hair,
-        pos: [...a.pos] as Pt,
-        face: a.face,
-        mode: a.mode,
-        hall: a.v.route[a.i][0],
-      })),
-      trail,
-      cam: { ...cam.current },
-      heat: { ...heat.current },
-      busy,
+      a: agents.current.map((a) => ({ id: a.hall, pos: [...a.pos] as Pt, face: a.face, mode: a.mode, frozen: s.near === a.hall })),
+      p: { pos: [...player.current.pos] as Pt, face: player.current.face, moving: player.current.moving },
       doc: { pos: [...dc.pos] as Pt, face: dc.face, mode: dc.mode, hall: dc.hall, line: dc.hall ? hallOf(dc.hall).caption : WELCOME },
+      near: s.near,
+      cam: { ...cam.current },
     };
   }, []);
 
-  const run = active ?? visible;
+  const run = active ?? (visible || expanded);
   useEffect(() => {
     if (!playing || !run) {
       last.current = null;
@@ -704,7 +876,7 @@ export default function ObservationRoom({
     let raf = 0;
     const loop = (now: number) => {
       if (last.current != null) {
-        tick(Math.min(0.05, (now - last.current) / 1000) * speed);
+        tick(Math.min(0.05, (now - last.current) / 1000));
         setSnap(makeSnap());
       }
       last.current = now;
@@ -712,18 +884,58 @@ export default function ObservationRoom({
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [playing, run, speed, tick, makeSnap]);
+  }, [playing, run, tick, makeSnap]);
 
-  const focus = hov ?? sel ?? hoverId;
-  const focusVisitor = VISITORS.find((v) => v.id === focus);
+  const toGrid = (e: React.MouseEvent<SVGSVGElement>): Pt | null => {
+    const svg = svgRef.current;
+    const m = svg?.getScreenCTM();
+    if (!svg || !m) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const q = pt.matrixTransform(m.inverse());
+    const u = (q.x - OX) / (TW / 2);
+    const v = (q.y - OY) / (TH / 2);
+    return [(u + v) / 2, (v - u) / 2];
+  };
+
+  const walkTo = (target: Pt) => {
+    const pl = player.current;
+    if (!walkable(target[0], target[1])) return;
+    if (clearLine(pl.pos, target)) {
+      pl.path = [target];
+      return;
+    }
+    const a = nearestVisible(pl.pos);
+    const b = nearestVisible(target);
+    if (!a || !b) return;
+    pl.path = [...route(a, b), target];
+  };
+
+  const onBackground = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (!expanded) {
+      if (sel) setSel(null);
+      else expand();
+      return;
+    }
+    if (play && !dlg) {
+      const g = toGrid(e);
+      if (g) walkTo(g);
+      return;
+    }
+    if (sel) setSel(null);
+  };
+
+  const focus = hov ?? sel;
   const focusPos = focus === "D" ? snap.doc.pos : snap.a.find((a) => a.id === focus)?.pos;
   const focusText =
     focus === "D"
       ? `Docent robot · ${snap.doc.mode === "walk" ? "leading the tour" : snap.doc.hall ? `presenting ${hallOf(snap.doc.hall).name}` : "welcoming"}`
-      : focusVisitor
+      : focus
         ? (() => {
-            const a = snap.a.find((x) => x.id === focus)!;
-            return `${focusVisitor.role} · ${a.mode === "walk" ? "walking" : hallOf(a.hall).doing}`;
+            const a = snap.a.find((x) => x.id === focus);
+            if (!a) return "";
+            return `${YUN[a.id].tag} · ${a.mode === "walk" ? "walking" : YUN[a.id].doing}`;
           })()
         : "";
   const lines = (t: string, max = 30) => {
@@ -738,35 +950,23 @@ export default function ObservationRoom({
     if (cur) out.push(cur);
     return out;
   };
-  const label = clockAt(snap.t);
-  const heatMax = Math.max(12, ...Object.values(snap.heat));
-  const busiest = ZONES.map((z) => [z, snap.heat[z.id] ?? 0] as const).sort((a, b) => b[1] - a[1])[0];
+
+  const tag = (text: string, color: string, y: number, on = false, w = 54) => (
+    <g transform={`translate(0 ${y - (on ? 3 : 0)})`}>
+      <rect x={-w / 2} y="-8" width={w} height="11" rx="5.5" fill="#fff" stroke={color} strokeWidth="1.6" />
+      <text x="0" y="0.2" textAnchor="middle" fontSize="6.4" fontWeight={700} fill={INK} style={{ fontFamily: SANS }}>
+        {text}
+      </text>
+    </g>
+  );
 
   const peopleItems: Item[] = [
-    {
-      depth: snap.doc.pos[0] + snap.doc.pos[1] + 0.35,
-      el: (
-        <g
-          key="docent"
-          transform={`translate(${P(snap.doc.pos[0], snap.doc.pos[1])[0]} ${P(snap.doc.pos[0], snap.doc.pos[1])[1]}) scale(${1.1 * snap.doc.face} 1.1)`}
-          className="cursor-pointer"
-          onPointerEnter={() => setHov("D")}
-          onPointerLeave={() => setHov(null)}
-          onClick={(e) => {
-            e.stopPropagation();
-            setSel(sel === "D" ? null : "D");
-          }}
-        >
-          <rect x="-14" y="-40" width="28" height="46" fill="transparent" />
-          <Docent t={snap.doc.mode === "walk" ? snap.t * 3 : snap.t} />
-        </g>
-      ),
-    },
     ...snap.a.map((a): Item => {
       const sc = P(a.pos[0], a.pos[1]);
       const walking = a.mode === "walk";
-      const bob = walking ? Math.sin(snap.t * 15 + a.id.charCodeAt(1)) * 1.4 : 0;
+      const bob = walking ? Math.sin(snap.t * 14 + a.id.length * 3) * 1.4 : 0;
       const on = focus === a.id;
+      const h = hallOf(a.id);
       return {
         depth: a.pos[0] + a.pos[1] + 0.35,
         el: (
@@ -778,45 +978,107 @@ export default function ObservationRoom({
             onPointerLeave={() => setHov(null)}
             onClick={(e) => {
               e.stopPropagation();
-              setSel(sel === a.id ? null : a.id);
+              if (play && expanded) {
+                if (snap.near === a.id) openDialog(a.id);
+                else walkTo([a.pos[0], a.pos[1] + 1.2]);
+              } else setSel(sel === a.id ? null : a.id);
             }}
           >
-            <rect x="-14" y="-40" width="28" height="46" fill="transparent" />
-            <Person color={a.color} hair={a.hair} face={a.face} bob={bob} />
-            <g transform={`translate(0 ${-36 - (on ? 3 : 0)})`}>
-              <rect x="-9" y="-8" width="18" height="11" rx="5.5" fill="#fff" stroke={a.color} strokeWidth="1.6" />
-              <text x="0" y="0.4" textAnchor="middle" fontSize="7" fontWeight={700} fill={INK} style={{ fontFamily: SANS }}>
-                {a.id}
-              </text>
-            </g>
+            <rect x="-14" y="-42" width="28" height="48" fill="transparent" />
+            <Person kind={a.id} face={a.face} bob={bob} />
+            {tag(YUN[a.id].tag.toUpperCase(), h.color, -37, on, YUN[a.id].tag.length * 4.1 + 12)}
+            {a.frozen && play && (
+              <g transform="translate(0 -52)">
+                <rect x="-17" y="-8" width="34" height="11" rx="5.5" fill={INK} />
+                <text x="0" y="0" textAnchor="middle" fontSize="6.6" fill="#fff" style={{ fontFamily: SANS }}>
+                  E · talk
+                </text>
+              </g>
+            )}
           </g>
         ),
       };
     }),
+    {
+      depth: snap.doc.pos[0] + snap.doc.pos[1] + 0.35,
+      el: (
+        <g
+          key="docent"
+          transform={`translate(${P(snap.doc.pos[0], snap.doc.pos[1])[0]} ${P(snap.doc.pos[0], snap.doc.pos[1])[1]}) scale(1.1)`}
+          className="cursor-pointer"
+          onPointerEnter={() => setHov("D")}
+          onPointerLeave={() => setHov(null)}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (play && expanded) {
+              if (snap.near === "D") openDialog("D");
+              else walkTo([snap.doc.pos[0], snap.doc.pos[1] + 1.2]);
+            } else setSel(sel === "D" ? null : "D");
+          }}
+        >
+          <rect x="-14" y="-42" width="28" height="48" fill="transparent" />
+          <g transform={`scale(${snap.doc.face} 1)`}>
+            <Docent t={snap.doc.mode === "walk" ? snap.t * 3 : snap.t} />
+          </g>
+          {tag("DOCENT", INK, -39, focus === "D", 40)}
+          {snap.near === "D" && play && (
+            <g transform="translate(0 -54)">
+              <rect x="-17" y="-8" width="34" height="11" rx="5.5" fill={INK} />
+              <text x="0" y="0" textAnchor="middle" fontSize="6.6" fill="#fff" style={{ fontFamily: SANS }}>
+                E · talk
+              </text>
+            </g>
+          )}
+        </g>
+      ),
+    },
+    {
+      depth: snap.p.pos[0] + snap.p.pos[1] + 0.35,
+      el: (
+        <g key="you" transform={`translate(${P(snap.p.pos[0], snap.p.pos[1])[0]} ${P(snap.p.pos[0], snap.p.pos[1])[1]}) scale(1.1)`} pointerEvents="none">
+          <ellipse cx="0" cy="1.5" rx="11" ry="4" fill="none" stroke="#ff4d6d" strokeWidth="1.4" opacity={0.5 + 0.4 * Math.sin(snap.t * 4)} />
+          <Person kind="you" face={snap.p.face} bob={snap.p.moving ? Math.sin(snap.t * 16) * 1.4 : 0} />
+          {tag("YOU", "#ff4d6d", -37, play, 26)}
+          <path d={`M-3,${-50 + Math.sin(snap.t * 5) * 1.5} L3,${-50 + Math.sin(snap.t * 5) * 1.5} L0,${-45 + Math.sin(snap.t * 5) * 1.5} Z`} fill="#ff4d6d" />
+        </g>
+      ),
+    },
   ];
   const scene = [...props, ...peopleItems].sort((a, b) => a.depth - b.depth);
 
-  const chartPoints = curve.map((v, i) => `${(i / (curve.length - 1)) * 160},${30 - v * 30}`).join(" ");
-  const winT = 70;
-  const laneRows = VISITORS.map((p) => (
-    <g key={p.id}>
-      {(lanes[p.id] ?? []).map((s, i) => {
-        const x0 = Math.max(0, 1 - (snap.t - s.t0) / winT);
-        const x1 = Math.max(0, 1 - (snap.t - s.t1) / winT);
-        if (x1 <= 0) return null;
-        return <rect key={i} x={x0 * 300} y={0} width={Math.max(2, (x1 - x0) * 300)} height="10" rx="3" fill={zoneColor(s.z)} opacity={s.z === "plaza" ? 0.45 : 0.95} />;
-      })}
-    </g>
-  ));
+  const dnode = dlg ? dialogNode(dlg.who, dlg.key) : null;
+  const dcolor = dlg ? (dlg.who === "D" ? INK : hallOf(dlg.who as ZoneId).color) : INK;
+  const dname = dlg ? (dlg.who === "D" ? "Docent robot" : YUN[dlg.who as ZoneId].tag) : "";
+
+  const dpad = (dir: string, label: string, cls: string) => (
+    <button
+      type="button"
+      aria-label={label}
+      className={`absolute h-9 w-9 rounded-full border bg-white/90 text-sm shadow ${cls}`}
+      style={{ borderColor: "rgba(31,42,68,0.3)", color: INK }}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        keys.current.add(dir);
+        player.current.path = [];
+      }}
+      onPointerUp={() => keys.current.delete(dir)}
+      onPointerLeave={() => keys.current.delete(dir)}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {label}
+    </button>
+  );
 
   const scenePanel = (
     <div className="relative overflow-hidden rounded-[18px]" style={{ background: "linear-gradient(180deg,#f6f9fd,#e9f0f9)" }}>
       <svg
+        ref={svgRef}
         viewBox={`${snap.cam.x.toFixed(1)} ${snap.cam.y.toFixed(1)} ${snap.cam.w.toFixed(1)} ${snap.cam.h.toFixed(1)}`}
-        className="block h-auto w-full"
+        className={`block w-full ${expanded ? "" : "h-auto"}`}
+        style={expanded ? { height: "calc(100vh - 150px)" } : undefined}
         role="img"
-        aria-label="A glass museum of six halls about Yun's work, with visitors walking through while a designer observes"
-        onClick={() => setSel(null)}
+        aria-label="A glass museum about Yun: six halls for six chapters, each with a Yun avatar, a docent robot, and a visitor you can control"
+        onClick={onBackground}
       >
         <defs>
           <linearGradient id="gl" x1="0" y1="0" x2="0" y2="1">
@@ -839,18 +1101,16 @@ export default function ObservationRoom({
           return <line key={`y${g}`} x1={P(0, g)[0]} y1={P(0, g)[1]} x2={P(NX, g)[0]} y2={P(NX, g)[1]} stroke="rgba(70,100,150,0.08)" strokeWidth="1" />;
         })}
 
-        {/* corridor */}
         <polygon points={pts([P(0, 8), P(NX, 8), P(NX, 12), P(0, 12)])} fill="#eef3fa" opacity="0.95" stroke={EDGE} strokeWidth="1" />
         <line x1={P(1, 10)[0]} y1={P(1, 10)[1]} x2={P(NX - 1, 10)[0]} y2={P(NX - 1, 10)[1]} stroke="#9db3d4" strokeDasharray="3 6" strokeWidth="1.4" />
 
-        {/* halls: slab, heat, glass walls */}
         {ZONES.map((z) => {
-          const h = Math.min(1, (snap.heat[z.id] ?? 0) / heatMax);
+          const stamped = met.includes(z.id);
           return (
             <g key={z.id}>
               <polygon points={pts([P(z.x0, z.y1, 0), P(z.x1, z.y1, 0), P(z.x1, z.y1, -6), P(z.x0, z.y1, -6)])} fill={mixc(z.color, "#ffffff", 0.7)} stroke={EDGE} strokeWidth="1" />
               <polygon points={pts([P(z.x1, z.y0, 0), P(z.x1, z.y1, 0), P(z.x1, z.y1, -6), P(z.x1, z.y0, -6)])} fill={mixc(z.color, "#7080a0", 0.4)} opacity="0.55" stroke={EDGE} strokeWidth="1" />
-              <polygon points={pts([P(z.x0, z.y0), P(z.x1, z.y0), P(z.x1, z.y1), P(z.x0, z.y1)])} fill={mixc(z.color, "#ffffff", 0.9 - h * 0.42)} stroke={EDGE} strokeWidth="1" />
+              <polygon points={pts([P(z.x0, z.y0), P(z.x1, z.y0), P(z.x1, z.y1), P(z.x0, z.y1)])} fill={mixc(z.color, "#ffffff", stamped ? 0.72 : 0.88)} stroke={EDGE} strokeWidth="1" />
               <polygon points={pts([P(z.x0, z.y0, 0), P(z.x0, z.y1, 0), P(z.x0, z.y1, 46), P(z.x0, z.y0, 46)])} fill="url(#gl)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" />
               <polygon points={pts([P(z.x0, z.y0, 0), P(z.x1, z.y0, 0), P(z.x1, z.y0, 46), P(z.x0, z.y0, 46)])} fill="url(#gr)" stroke="rgba(255,255,255,0.9)" strokeWidth="1.2" />
               <path d={`M${P(z.x0, z.y0, 46).join(",")} L${P(z.x0, z.y1, 46).join(",")} M${P(z.x0, z.y0, 46).join(",")} L${P(z.x1, z.y0, 46).join(",")}`} stroke={z.color} strokeWidth="2" opacity="0.7" fill="none" />
@@ -869,30 +1129,18 @@ export default function ObservationRoom({
                   <g
                     key={src}
                     className="cursor-pointer"
-                    onPointerEnter={() => setBbHot(z.id)}
-                    onPointerLeave={() => setBbHot(null)}
+                    onPointerEnter={() => setPicHot(z.id)}
+                    onPointerLeave={() => setPicHot(null)}
                     onClick={(e) => {
+                      if (!expanded) return;
                       e.stopPropagation();
                       router.push(hrefFor(f));
                     }}
                   >
-                    <WallPic src={src} side={side} wall={side === "x" ? z.x0 : z.y0} c={c} wu={wu} z0={14} H={H} hot={bbHot === z.id} color={z.color} />
+                    <WallPic src={src} side={side} wall={side === "x" ? z.x0 : z.y0} c={c} wu={wu} z0={14} H={H} hot={picHot === z.id} color={z.color} />
                   </g>
                 );
               })}
-            </g>
-          );
-        })}
-
-        {/* journey trails */}
-        {VISITORS.map((p) => {
-          const tr = snap.trail[p.id] ?? [];
-          if (tr.length < 2) return null;
-          return (
-            <g key={p.id} strokeLinecap="round">
-              {tr.slice(1).map((pt, i) => (
-                <line key={i} x1={tr[i][0]} y1={tr[i][1]} x2={pt[0]} y2={pt[1]} stroke={p.color} strokeWidth={focus === p.id ? 3 : 2} opacity={((i + 1) / tr.length) * (focus && focus !== p.id ? 0.2 : 0.75)} />
-              ))}
             </g>
           );
         })}
@@ -901,15 +1149,14 @@ export default function ObservationRoom({
           <g key={i}>{s.el}</g>
         ))}
 
-        {/* docent speech */}
-        {snap.doc.mode === "do" && (() => {
+        {snap.doc.mode === "do" && !dlg && (() => {
           const ls = lines(snap.doc.line, 32);
           const sc = P(snap.doc.pos[0], snap.doc.pos[1]);
           const w = Math.max(...ls.map((l) => l.length)) * 4.3 + 16;
           const h = ls.length * 10 + 8;
           const col = snap.doc.hall ? hallOf(snap.doc.hall).color : INK;
           return (
-            <g transform={`translate(${sc[0]} ${sc[1] - 46})`} pointerEvents="none">
+            <g transform={`translate(${sc[0]} ${sc[1] - 62})`} pointerEvents="none">
               <rect x={-w / 2} y={-h} width={w} height={h} rx="8" fill="#fff" stroke={col} strokeWidth="1.5" />
               <path d="M-4,0 L0,6 L4,0 Z" fill="#fff" stroke={col} strokeWidth="1.5" />
               <rect x="-5" y="-1.5" width="10" height="3" fill="#fff" />
@@ -922,21 +1169,19 @@ export default function ObservationRoom({
           );
         })()}
 
-        {/* hall labels, docent captions, project billboards */}
         {ZONES.map((z) => {
           const f = featured[z.project];
-          const hot = bbHot === z.id;
           const lab = P(z.x1 - 0.3, z.y1 - 0.3, 0);
           return (
             <g key={z.id}>
               <text x={lab[0]} y={lab[1] + 17} textAnchor="middle" fontSize="10.5" fontWeight={700} fill={z.color} style={{ fontFamily: "var(--font-bric), " + SANS }}>
                 {z.name.toUpperCase()} <tspan fill="rgba(31,42,68,0.45)" fontWeight={500}>· {z.sub}</tspan>
               </text>
-              {f && hot && (
+              {picHot === z.id && (
                 <g transform={`translate(${lab[0]} ${lab[1] + 32})`} pointerEvents="none">
-                  <rect x="-92" y="-10" width="184" height="15" rx="7.5" fill={INK} />
+                  <rect x="-96" y="-10" width="192" height="15" rx="7.5" fill={INK} />
                   <text x="0" y="0.5" textAnchor="middle" fontSize="8" fill="#fff" style={{ fontFamily: SANS }}>
-                    Open exhibit: {f.title.length > 28 ? f.title.slice(0, 27) + "…" : f.title} →
+                    {expanded ? "Open exhibit" : "Click to enlarge"}: {f.title.length > 24 ? f.title.slice(0, 23) + "…" : f.title} →
                   </text>
                 </g>
               )}
@@ -948,7 +1193,7 @@ export default function ObservationRoom({
           ENTRANCE
         </text>
 
-        {focusPos && focusText && (
+        {focusPos && focusText && !play && (
           <g transform={`translate(${P(focusPos[0], focusPos[1])[0]} ${P(focusPos[0], focusPos[1])[1] - 16})`} pointerEvents="none">
             {[
               [-17, -26, 1, 1],
@@ -958,8 +1203,8 @@ export default function ObservationRoom({
             ].map(([x, y, sx, sy], i) => (
               <path key={i} d={`M${x},${y + sy * 6} V${y} H${x + sx * 6}`} fill="none" stroke={INK} strokeWidth="1.8" />
             ))}
-            <g transform="translate(0 -48)">
-              <rect x="-78" y="-9" width="156" height="16" rx="8" fill={INK} />
+            <g transform="translate(0 -62)">
+              <rect x="-82" y="-9" width="164" height="16" rx="8" fill={INK} />
               <text x="0" y="2.4" textAnchor="middle" fontSize="8.5" fill="#fff" style={{ fontFamily: SANS }}>
                 {focusText}
               </text>
@@ -974,42 +1219,108 @@ export default function ObservationRoom({
         <span className="absolute bottom-0 left-0 h-4 w-4 border-b-2 border-l-2" style={{ borderColor: INK }} />
         <span className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2" style={{ borderColor: INK }} />
       </div>
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between px-6 py-5 text-[11px]" style={{ color: INK }}>
-        <span className="flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
+      <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-2 px-6 py-5 text-[11px]" style={{ color: INK }}>
+        <span className="flex items-center gap-2 rounded-full bg-white/85 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
           <span className="h-2 w-2 animate-pulse rounded-full bg-[#ff4d4d]" />
-          <span className="sm:hidden">OBSERVING</span>
-          <span className="hidden sm:inline">OBSERVING THE MUSEUM · 6 halls · 5 visitors</span>
+          <span className="sm:hidden">MUSEUM OF YUN</span>
+          <span className="hidden sm:inline">THE MUSEUM OF YUN · 6 chapters · 6 Yuns</span>
         </span>
-        <span className="rounded-full bg-white/80 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
-          {sel ? `FOLLOW ${sel}` : "OVERVIEW"} · {label}
+        <span className="pointer-events-auto flex items-center gap-2">
+          <span className="rounded-full bg-white/85 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
+            {play ? "YOU'RE INSIDE" : sel ? `FOLLOW · ${sel === "D" ? "DOCENT" : YUN[sel as ZoneId]?.tag.toUpperCase()}` : "OVERVIEW"}
+          </span>
+          <button
+            type="button"
+            onClick={() => (expanded ? collapse() : expand())}
+            aria-label={expanded ? "Close" : "Enlarge"}
+            className="inline-flex h-7 items-center gap-1.5 rounded-full bg-white/90 px-3 backdrop-blur hover:bg-[#fff3b8]"
+            style={{ fontFamily: "var(--font-pixel)" }}
+          >
+            {expanded ? "× close" : "⤢ enlarge"}
+          </button>
         </span>
       </div>
-      {sel && (
-        <button
-          type="button"
-          onClick={() => setSel(null)}
-          className="absolute bottom-5 right-6 rounded-full bg-white/90 px-3 py-1 text-[11px] backdrop-blur hover:bg-white"
-          style={{ fontFamily: "var(--font-pixel)", color: INK }}
-        >
-          × back to overview
-        </button>
+
+      {sel && !play && (
+        <div className="absolute bottom-5 right-6 flex gap-2" style={{ fontFamily: "var(--font-pixel)" }}>
+          {sel === "D" || YUN[sel as ZoneId] ? (
+            <button type="button" onClick={() => openDialog(sel)} className="rounded-full px-3 py-1 text-[11px] text-white" style={{ background: INK }}>
+              talk
+            </button>
+          ) : null}
+          <button type="button" onClick={() => setSel(null)} className="rounded-full bg-white/90 px-3 py-1 text-[11px] backdrop-blur hover:bg-white" style={{ color: INK }}>
+            × overview
+          </button>
+        </div>
       )}
-      {!sel && (
-        <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/70 px-3 py-1 text-[11px] backdrop-blur sm:block" style={{ fontFamily: "var(--font-pixel)", color: "rgba(31,42,68,0.7)" }}>
-          click a visitor to follow · click an exhibit to open it
+      {!sel && !play && (
+        <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/75 px-3 py-1 text-[11px] backdrop-blur sm:block" style={{ fontFamily: "var(--font-pixel)", color: "rgba(31,42,68,0.75)" }}>
+          {expanded ? "click a Yun to follow · press “Step inside” to play" : "each avatar is me at a chapter · click the frame to enlarge"}
         </p>
+      )}
+      {play && !dlg && (
+        <>
+          <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/80 px-3 py-1 text-[11px] backdrop-blur md:block" style={{ fontFamily: "var(--font-pixel)", color: INK }}>
+            WASD / arrows move · click floor to walk · E talk · Esc exit
+          </p>
+          <div className="absolute bottom-3 left-3 h-[84px] w-[84px] md:hidden">
+            {dpad("ArrowUp", "↖", "left-0 top-0")}
+            {dpad("ArrowRight", "↗", "right-0 top-0")}
+            {dpad("ArrowLeft", "↙", "bottom-0 left-0")}
+            {dpad("ArrowDown", "↘", "bottom-0 right-0")}
+          </div>
+          {snap.near && (
+            <button
+              type="button"
+              onClick={() => openDialog(snap.near as string)}
+              className="absolute bottom-5 right-6 rounded-full px-4 py-1.5 text-[12px] text-white md:hidden"
+              style={{ background: INK, fontFamily: "var(--font-pixel)" }}
+            >
+              talk
+            </button>
+          )}
+        </>
+      )}
+
+      {dnode && dlg && (
+        <div className="absolute inset-x-3 bottom-3 mx-auto max-w-[560px] rounded-2xl border-2 bg-white/95 p-4 shadow-[0_18px_40px_-14px_rgba(31,42,68,0.6)] backdrop-blur" style={{ borderColor: dcolor }} onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center justify-between">
+            <span className="rounded-full px-2.5 py-0.5 text-[11px] text-white" style={{ background: dcolor, fontFamily: "var(--font-pixel)" }}>
+              {dname}
+            </span>
+            <button type="button" onClick={() => setDlg(null)} aria-label="Close dialogue" className="text-[13px] opacity-60 hover:opacity-100" style={{ color: INK }}>
+              ×
+            </button>
+          </div>
+          <p className="mt-2 text-[14px] leading-snug" style={{ color: INK }}>
+            {dnode.text}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {dnode.choices.map((c, i) => (
+              <button
+                key={c.label}
+                type="button"
+                onClick={() => choose(c)}
+                className="rounded-full border px-3 py-1 text-[12px] transition-colors hover:bg-[#fff3b8]"
+                style={{ borderColor: "rgba(31,42,68,0.35)", color: INK, background: "#fff" }}
+              >
+                <span className="opacity-50">{i + 1}</span> {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
 
-  const analysis = (
-    <div className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-3" style={{ color: INK }}>
-      <div className="flex items-center gap-1.5 text-[12px]" style={{ fontFamily: "var(--font-pixel)" }}>
+  const controls = (
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-x-5 gap-y-3 px-1" style={{ color: INK }}>
+      <div className="flex items-center gap-2 text-[12px]" style={{ fontFamily: "var(--font-pixel)" }}>
         <button
           type="button"
           onClick={() => setPlaying((p) => !p)}
           aria-label={playing ? "Pause" : "Play"}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-full border bg-white hover:bg-[#fff3b8]"
+          className="inline-flex h-8 w-8 items-center justify-center rounded-full border bg-white hover:bg-[#fff3b8]"
           style={{ borderColor: "rgba(31,42,68,0.3)" }}
         >
           {playing ? (
@@ -1018,116 +1329,64 @@ export default function ObservationRoom({
             <svg viewBox="0 0 16 16" className="h-3 w-3" fill="currentColor"><path d="M4 2v12l10-6z" /></svg>
           )}
         </button>
-        {[1, 2, 4].map((s) => (
+        {expanded ? (
           <button
-            key={s}
             type="button"
-            onClick={() => setSpeed(s)}
-            className="h-7 rounded-full border px-2.5"
-            style={{ borderColor: "rgba(31,42,68,0.3)", background: speed === s ? INK : "#fff", color: speed === s ? "#fff" : INK }}
+            onClick={() => {
+              setPlay((p) => !p);
+              setSel(null);
+              keys.current.clear();
+              player.current.path = [];
+            }}
+            className="inline-flex h-8 items-center rounded-full px-4 text-white"
+            style={{ background: play ? "#8a94ad" : "#ff4d6d" }}
           >
-            {s}×
+            {play ? "Exit game" : "Step inside"}
           </button>
-        ))}
+        ) : (
+          <button type="button" onClick={expand} className="inline-flex h-8 items-center rounded-full border bg-white px-4 hover:bg-[#fff3b8]" style={{ borderColor: "rgba(31,42,68,0.3)" }}>
+            Enlarge &amp; play
+          </button>
+        )}
+        <Link href="/concept/journey" className="inline-flex h-8 items-center rounded-full border bg-white px-4 hover:bg-[#fff3b8]" style={{ borderColor: "rgba(31,42,68,0.3)" }}>
+          Journey map →
+        </Link>
       </div>
-
-      <div className="flex items-center gap-4 text-[12px]" style={{ fontFamily: "var(--font-pixel)" }}>
-        <div>
-          <p className="text-[10px] uppercase opacity-55">engagement</p>
-          <svg viewBox="0 0 160 30" className="h-6 w-[96px]">
-            <line x1="0" y1="15" x2="160" y2="15" stroke="rgba(31,42,68,0.2)" strokeDasharray="3 4" />
-            <polyline points={chartPoints} fill="none" stroke="#2fb89a" strokeWidth="2.2" strokeLinejoin="round" strokeLinecap="round" />
-          </svg>
-        </div>
-        <div className="text-center">
-          <p className="text-[10px] uppercase opacity-55">friction</p>
-          <span className="rounded-md px-2 py-0.5 text-white" style={{ background: "#ff6b4a" }}>{friction}</span>
-        </div>
-        <div className="text-center">
-          <p className="text-[10px] uppercase opacity-55">delight</p>
-          <span className="rounded-md px-2 py-0.5 text-white" style={{ background: "#2fb89a" }}>{delight}</span>
-        </div>
-        <div className="text-center">
-          <p className="text-[10px] uppercase opacity-55">busiest hall</p>
-          <span className="rounded-md px-2 py-0.5 text-white" style={{ background: busiest[1] > 0 ? busiest[0].color : "#9db3d4" }}>
-            {busiest[1] > 0 ? busiest[0].name : "—"}
-          </span>
-        </div>
+      <div className="flex items-center gap-2 text-[11px]" style={{ fontFamily: "var(--font-pixel)" }}>
+        <span className="uppercase opacity-55">passport {met.length}/6</span>
+        <span className="flex gap-1">
+          {ZONES.map((z) => (
+            <span key={z.id} title={YUN[z.id].tag} className="h-3.5 w-3.5 rounded-full border" style={{ borderColor: z.color, background: met.includes(z.id) ? z.color : "transparent" }} />
+          ))}
+        </span>
       </div>
+    </div>
+  );
 
-      {showLanes && (
-        <div className="min-w-0 basis-full">
-          <div className="mb-1 flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase tracking-wider" style={{ fontFamily: "var(--font-pixel)", color: "rgba(31,42,68,0.55)" }}>
-            <span>visitor journey · last {winT}s</span>
-            <span className="flex flex-wrap gap-x-3 gap-y-1">
-              {ZONES.map((z) => (
-                <span key={z.id} className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full" style={{ background: z.color }} />
-                  {z.name}
-                </span>
-              ))}
-            </span>
-          </div>
-          <svg viewBox="0 0 330 100" className="h-auto w-full">
-            {VISITORS.map((p, i) => (
-              <g key={p.id} transform={`translate(24 ${i * 19 + 2})`}>
-                <text x="-4" y="9" textAnchor="end" fontSize="8" fill={INK} style={{ fontFamily: "var(--font-pixel)" }}>
-                  {p.id}
-                </text>
-                <rect x="0" y="0" width="300" height="10" rx="3" fill="rgba(31,42,68,0.06)" />
-                {laneRows[i]}
-              </g>
-            ))}
-            <line x1="324" y1="0" x2="324" y2="100" stroke={INK} strokeWidth="1.2" />
-          </svg>
-        </div>
-      )}
+  const body = (
+    <div
+      className={
+        expanded
+          ? "fixed inset-0 z-[300] overflow-y-auto bg-[#eaf1fa] p-3 sm:p-5"
+          : "w-full"
+      }
+    >
+      {chromeWrap(scenePanel, controls, expanded)}
     </div>
   );
 
   return (
-    <div ref={wrap} className="w-full">
-      {chrome ? (
-        <div
-          className="rounded-[28px] border bg-white/70 p-3 backdrop-blur"
-          style={{ borderColor: "rgba(31,42,68,0.18)", boxShadow: "0 30px 60px -30px rgba(31,42,68,0.35), inset 0 0 0 1px rgba(255,255,255,0.9)" }}
-        >
-          {scenePanel}
-          <div className="px-2 pb-1">{analysis}</div>
-        </div>
-      ) : (
-        <div>
-          {scenePanel}
-          {analysis}
-        </div>
-      )}
+    <div ref={wrap} className="w-full" style={expanded && frameH ? { height: frameH } : undefined}>
+      {expanded && typeof document !== "undefined" ? createPortal(body, document.body) : body}
+    </div>
+  );
+}
 
-      {showNotes && (
-        <>
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {notes.length === 0 && <p className="text-sm text-[#1f2a44]/60">Waiting for the first visitor…</p>}
-            {notes.map((n, i) => (
-              <div
-                key={n.id}
-                className="relative rounded-xl border bg-white/85 px-4 pb-3 pt-3 shadow-[0_10px_24px_-16px_rgba(31,42,68,0.5)] backdrop-blur"
-                style={{ borderColor: `${zoneColor(n.zone)}88`, borderLeftWidth: 5, borderLeftColor: zoneColor(n.zone), transform: `rotate(${[-0.6, 0.5, -0.3, 0.6][i % 4]}deg)` }}
-              >
-                <p className="flex items-center gap-2 text-[11px] text-[#1f2a44]/65" style={{ fontFamily: "var(--font-pixel)" }}>
-                  <span className="h-2.5 w-2.5 rounded-full" style={{ background: n.color }} />
-                  {VISITORS.find((v) => v.id === n.who)?.role} · {n.time} · {hallOf(n.zone).name}
-                  <span className="ml-auto rounded px-1.5 text-white" style={{ background: n.need ? "#ff6b4a" : "#2fb89a" }}>
-                    {n.need ? "friction" : "delight"}
-                  </span>
-                </p>
-                <p className="mt-1.5 text-[1.28rem] leading-[1.05] text-[#1f2a44]" style={{ fontFamily: "var(--font-hand)" }}>
-                  {n.text}
-                </p>
-              </div>
-            ))}
-          </div>
-          <p className="mt-3 text-[11px] text-[#1f2a44]/55">Simulated visitors and illustrative observations.</p>
-        </>
-      )}
+function chromeWrap(scene: ReactNode, controls: ReactNode, expanded: boolean) {
+  return (
+    <div className={expanded ? "mx-auto max-w-[1500px]" : ""}>
+      {scene}
+      {controls}
     </div>
   );
 }

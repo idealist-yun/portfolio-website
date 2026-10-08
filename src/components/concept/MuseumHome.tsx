@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { DeskItem, InkDiagram } from "@/components/concept/Desk";
+import { DeskItem, InkDiagram, StageScale } from "@/components/concept/Desk";
 import ObservationRoom from "@/components/concept/ObservationRoom";
 import Switcher from "@/components/concept/Switcher";
 import ProjectBento from "@/components/concept/ProjectBento";
@@ -33,6 +33,39 @@ function PostIt({ color, children, pin = "#e2493a", className = "" }: { color: s
       />
       {children}
     </div>
+  );
+}
+
+const DESIGN_W = 1192;
+// the desk is laid out at one width and scaled to fit, so nothing ever overlaps at any desktop width
+function Stage({ children }: { children: React.ReactNode }) {
+  const outer = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  const [s, setS] = useState(1);
+  const [h, setH] = useState<number | null>(null);
+  useEffect(() => {
+    const o = outer.current;
+    const i = inner.current;
+    if (!o || !i) return;
+    const upd = () => {
+      const wide = window.innerWidth >= 768;
+      const sc = wide ? Math.min(1, o.clientWidth / DESIGN_W) : 1;
+      setS(sc);
+      setH(wide ? i.offsetHeight * sc : null);
+    };
+    const ro = new ResizeObserver(upd);
+    ro.observe(o);
+    ro.observe(i);
+    return () => ro.disconnect();
+  }, []);
+  return (
+    <StageScale.Provider value={s}>
+      <div ref={outer} style={h ? { height: h } : undefined}>
+        <div ref={inner} className="md:w-[1192px] md:origin-top-left" style={s < 1 ? { transform: `scale(${s})` } : undefined}>
+          {children}
+        </div>
+      </div>
+    </StageScale.Provider>
   );
 }
 
@@ -138,17 +171,18 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
 
       {/* hero */}
       <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">
-        <div className="relative xl:min-h-[820px]">
-          <h1 className="relative z-[5] max-w-[17ch] font-[family-name:var(--font-instrument)] text-[clamp(3rem,8.6vw,8.4rem)] leading-[0.92] tracking-[-0.02em] xl:max-w-[10.9ch] xl:text-[calc(min(100vw-3rem,1240px)*0.075)]">
+        <Stage>
+        <div className="relative md:min-h-[820px]">
+          <h1 className="relative z-[5] max-w-[17ch] font-[family-name:var(--font-instrument)] text-[clamp(3rem,8.6vw,8.4rem)] leading-[0.92] tracking-[-0.02em] md:max-w-[10.9ch] md:text-[93px]">
             Designing for <em style={{ color: RED }}>vulnerability,</em> with data &amp; AI.
           </h1>
-          <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed xl:mt-8" style={{ color: MUTED }}>
+          <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-8" style={{ color: MUTED }}>
             Hi, I&rsquo;m Yun, a strategic designer. This is a small museum about me, in five wings:
             defense, care and assistive tech, robotics and simulation, my lab since 2021, and Samsung. Each avatar inside is me at one chapter. Go talk to them.
           </p>
 
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:mt-0 xl:block">
-            <DeskItem left="47%" top="0%" rot={0} z={3} front={front} onFront={bump} className="sm:col-span-2 xl:w-[600px]">
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">
+            <DeskItem left="47%" top="0%" rot={0} z={3} front={front} onFront={bump} className="sm:col-span-2 md:w-[600px]">
               <div
                 className="rounded-[4px] p-[10px] shadow-[0_22px_40px_-18px_rgba(29,27,24,0.7)]"
                 style={{ background: "linear-gradient(135deg,#9a6a38,#6e4520)", boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.18), 0 22px 40px -18px rgba(29,27,24,0.7)" }}
@@ -162,7 +196,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </p>
             </DeskItem>
 
-            <DeskItem left="76%" top="55%" rot={4} z={4} front={front} onFront={bump} className="xl:w-[250px]">
+            <DeskItem left="76%" top="55%" rot={4} z={4} front={front} onFront={bump} className="md:w-[250px]">
               <div className="rounded-sm bg-white p-2 pb-8 shadow-[0_14px_30px_-14px_rgba(29,27,24,0.6)]">
                 <Image
                   src="/images/about-collage.png"
@@ -177,7 +211,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </div>
             </DeskItem>
 
-            <DeskItem left="22%" top="56%" rot={-3} z={5} front={front} onFront={bump} className="xl:w-[250px]">
+            <DeskItem left="22%" top="56%" rot={-3} z={5} front={front} onFront={bump} className="md:w-[250px]">
               <PostIt color="#ffe9a0">
                 <p className="text-[1.5rem] leading-[1.1]" style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
                   &ldquo;{whyQuote}&rdquo;
@@ -188,7 +222,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="0%" top="72%" rot={-2} z={4} front={front} onFront={bump} className="xl:w-[290px]">
+            <DeskItem left="0%" top="72%" rot={-2} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#bfe0ff">
                 <p className={noteLabel}>now</p>
                 <p className={`mt-1 text-[1.65rem] ${noteHand}`} style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
@@ -200,21 +234,21 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="25%" top="82%" rot={2} z={4} front={front} onFront={bump} className="xl:w-[270px]">
+            <DeskItem left="25%" top="82%" rot={2} z={4} front={front} onFront={bump} className="md:w-[270px]">
               <PostIt color="#c4f1d2">
                 <p className={`mb-2 ${noteLabel}`}>time check</p>
                 <ClockPair tone="paper" />
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="53%" top="80%" rot={-1.5} z={4} front={front} onFront={bump} className="xl:w-[290px]">
+            <DeskItem left="53%" top="80%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#ffd0dc">
                 <p className={`mb-2 ${noteLabel}`}>off hours · play me (a – k, w e t y u)</p>
                 <Piano tone="paper" />
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="46%" top="58%" rot={2} z={6} front={front} onFront={bump} className="xl:w-[330px]">
+            <DeskItem left="46%" top="58%" rot={2} z={6} front={front} onFront={bump} className="md:w-[330px]">
               <PostIt color="#fff6d6" pin="#c8431f">
                 <p className={noteLabel}>how it branches</p>
                 <div className="mt-1">
@@ -223,7 +257,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="80%" top="84%" rot={3} z={6} front={front} onFront={bump} className="xl:w-[190px]">
+            <DeskItem left="80%" top="84%" rot={3} z={6} front={front} onFront={bump} className="md:w-[190px]">
               <PostIt color="#fff3a8" pin="#2f6fdf">
                 <p className={noteLabel}>method</p>
                 <p className="mt-1 text-[1.5rem] leading-[1.05]" style={{ fontFamily: "var(--font-hand)", fontWeight: 700 }}>
@@ -233,7 +267,8 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
             </DeskItem>
           </div>
         </div>
-        <p className="mt-6 hidden font-mono text-[11px] uppercase tracking-[0.18em] xl:block" style={{ color: MUTED }}>
+        </Stage>
+        <p className="mt-6 hidden font-mono text-[11px] uppercase tracking-[0.18em] md:block" style={{ color: MUTED }}>
           ↑ everything on the desk is draggable
         </p>
       </section>

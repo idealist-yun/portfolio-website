@@ -1,6 +1,9 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useRef, useState, type ReactNode } from "react";
+
+// the hero desk is designed at one width and scaled down on narrower screens; drags must undo the scale
+export const StageScale = createContext(1);
 
 type Pos = { x: number; y: number };
 
@@ -23,6 +26,7 @@ export function DeskItem({
   onFront: () => void;
   front: number;
 }) {
+  const sc = useContext(StageScale);
   const [off, setOff] = useState<Pos>({ x: 0, y: 0 });
   const [drag, setDrag] = useState(false);
   const start = useRef<{ px: number; py: number; ox: number; oy: number } | null>(null);
@@ -31,7 +35,7 @@ export function DeskItem({
 
   return (
     <div
-      className={`relative xl:absolute xl:left-[var(--l)] xl:top-[var(--t)] ${className}`}
+      className={`relative md:absolute md:left-[var(--l)] md:top-[var(--t)] ${className}`}
       style={
         {
           "--l": left,
@@ -54,8 +58,8 @@ export function DeskItem({
       onPointerMove={(e) => {
         if (!start.current) return;
         setOff({
-          x: start.current.ox + e.clientX - start.current.px,
-          y: start.current.oy + e.clientY - start.current.py,
+          x: start.current.ox + (e.clientX - start.current.px) / sc,
+          y: start.current.oy + (e.clientY - start.current.py) / sc,
         });
       }}
       onPointerUp={() => {

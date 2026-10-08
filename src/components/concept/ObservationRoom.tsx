@@ -41,7 +41,7 @@ const WINGS: Wing[] = [
   { id: "defense", name: "DEFENSE", color: "#3f9a5a", tint: "#e6f1e3", x0: 0.7, y0: 0.7, x1: 6.0, y1: 8.0 },
   { id: "care", name: "CARE & ASSISTIVE", color: "#4c7df0", tint: "#e4ebfb", x0: 6.0, y0: 0.7, x1: 16.8, y1: 8.0 },
   { id: "robots", name: "ROBOTICS & SIMULATION", color: "#ff6b4a", tint: "#fde6de", x0: 16.8, y0: 0.7, x1: 25.3, y1: 8.0 },
-  { id: "sdi", name: "SDI LAB · WHERE IT STARTED", color: "#d98a0c", tint: "#fbefd6", x0: 0.7, y0: 11.6, x1: 18.4, y1: 19.3 },
+  { id: "sdi", name: "SDI LAB · SINCE 2021", color: "#d98a0c", tint: "#fbefd6", x0: 0.7, y0: 11.6, x1: 18.4, y1: 19.3 },
   { id: "samsung", name: "SAMSUNG ELECTRONICS", color: "#3a4cc7", tint: "#e3e7fb", x0: 18.4, y0: 11.6, x1: 25.3, y1: 19.3 },
 ];
 type Hall = {
@@ -82,7 +82,7 @@ const ZONES_RAW: Omit<Hall, "plaque" | "pics">[] = [
   { id: "tom", wing: "care", name: "Guided Hands", sub: "TOM · assistive", color: "#2fb5d9", cx: 15.1, cy: 3.8, rw: 1.7, link: null, caption: "At Penn, TOM: rebuilding a writing aid for people with limited hand control, at low cost." },
   { id: "robots", wing: "robots", name: "VIP Robots", sub: "HRI · SKKU", color: "#ff6b4a", cx: 19.9, cy: 3.9, rw: 1.9, link: { href: hrefFor(featured[2]), title: featured[2].title }, caption: "Three serving robots, choreographed like a royal ceremony." },
   { id: "lab", wing: "robots", name: "IDD Lab", sub: "simulation testbed", color: "#14b8a6", cx: 23.6, cy: 3.9, rw: 1.7, link: { href: hrefFor(featured[1]), title: featured[1].title }, caption: "AI agents living a day in a virtual world." },
-  { id: "mall", wing: "sdi", name: "Starfield", sub: "retail data", color: "#f5b301", cx: 3.1, cy: 15.3, rw: 1.9, link: { href: hrefFor(featured[4]), title: featured[4].title }, caption: "Network-analysis personas for a mega mall." },
+  { id: "mall", wing: "sdi", name: "Starfield", sub: "2021 · first project", color: "#f5b301", cx: 3.1, cy: 15.3, rw: 1.9, link: { href: hrefFor(featured[4]), title: featured[4].title }, caption: "My first lab project, 2021: network-analysis personas for a mega mall." },
   { id: "raemian", wing: "sdi", name: "Raemian", sub: "Samsung C&T", color: "#6d5bd0", cx: 7.2, cy: 15.3, rw: 1.9, link: { href: hrefFor(featured[5]), title: featured[5].title }, caption: "Housing data turned into metaverse services for a Samsung C&T complex." },
   { id: "fandom", wing: "sdi", name: "Fandom", sub: "Samsung vs rivals", color: "#e0457b", cx: 11.3, cy: 15.3, rw: 1.9, link: { href: "/project/samsung-brand-fandom", title: "Brand fandom analysis between Samsung and a competitor" }, caption: "Who loves Samsung, and who loves its rivals? A brand fandom analysis." },
   { id: "lifelog", wing: "sdi", name: "Life-log", sub: "mini fridge", color: "#3d8bff", cx: 15.4, cy: 15.3, rw: 1.9, link: { href: "/project/samsung-lifelog-minifridge", title: "Life-log analysis for new product service planning" }, caption: "Life-log analysis to plan a new service around a mini fridge." },
@@ -211,7 +211,7 @@ const YUN: Record<YunId, YunInfo> = {
     home: "army",
     doing: "building the terrain trainer",
     hi: "Hi. I'm the Yun from the Army years.",
-    who: journey[2].note,
+    who: journey[3].note,
     made: featured[3].line,
     href: hrefFor(featured[3]),
     hrefLabel: "Show me the exhibit",
@@ -231,7 +231,7 @@ const YUN: Record<YunId, YunInfo> = {
     home: "robots",
     doing: "choreographing robots and running the simulator",
     hi: "Hi. I'm the Yun from the robot and simulation projects.",
-    who: journey[4].note,
+    who: journey[5].note,
     made: featured[2].line + " And the simulator: " + featured[1].line,
     href: hrefFor(featured[2]),
     hrefLabel: "Show me the exhibit",
@@ -239,9 +239,9 @@ const YUN: Record<YunId, YunInfo> = {
   mall: {
     tag: "SDI-Lab Yun",
     home: "mall",
-    doing: "turning customer data into strategy",
+    doing: "learning data-driven service design",
     hi: "Hi. I'm the Yun who turned customer data into strategy.",
-    who: "The lab where it started: customer data turned into service strategy for malls, appliances and apartment life. Samsung came after.",
+    who: "In Feb 2021 I joined SDI Lab as an undergraduate researcher; my first project was Starfield. Data-driven service design started here, and I stayed until 2025: malls, appliances, apartments, then robots.",
     made: featured[4].line,
     href: hrefFor(featured[4]),
     hrefLabel: "Show me the exhibit",
@@ -251,7 +251,7 @@ const YUN: Record<YunId, YunInfo> = {
     home: "samsung",
     doing: "forecasting demand",
     hi: "Hi. I'm the Yun at Samsung.",
-    who: journey[5].note,
+    who: journey[6].note,
     made: "A demand dashboard with an AI chatbot, and a Bixby cooking assistant for screen-based appliances.",
     href: "/project/samsung-ax-dashboard",
     hrefLabel: "Show me the dashboard",
@@ -261,7 +261,7 @@ const YUN: Record<YunId, YunInfo> = {
     home: "tom",
     doing: "building Guided Hands",
     hi: "Hi. I'm the Yun at Penn, right now.",
-    who: journey[6].note,
+    who: journey[7].note,
     made: "A low-cost Guided Hands with TOM: a sliding frame that lets big arm motions become writing.",
     href: "/resume",
     hrefLabel: "Open my resume",
@@ -1554,7 +1554,7 @@ export default function ObservationRoom({
         })}
         <polygon points={pts([P(4.5, 9.1), P(23.5, 9.1), P(23.5, 10.3), P(4.5, 10.3)])} fill="#f7e7c6" stroke="#c99a2e" strokeWidth="1" strokeDasharray="4 3" />
         {journey.map((j, i) => {
-          const gx = 5.6 + i * 2.7;
+          const gx = 5.4 + i * 2.5;
           const u = universeOf(j.universe);
           const t = P(gx - 0.3, 10.1, 0);
           return (

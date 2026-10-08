@@ -132,9 +132,10 @@ export const archiveCount = projects.length;
 export const journey = [
   { year: "2017", title: "Business × Data Science", place: "Sungkyunkwan University", note: "Two degrees at once: how organisations work, and how data speaks.", universe: "consumer" },
   { year: "2020", title: "Founded GRU", place: "Service-design club", note: "Where design thinking started: consulting projects for startups, run by students.", universe: "public" },
+  { year: "2021", title: "SDI Lab, undergraduate researcher", place: "Data-driven service design", note: "Joined in Feb 2021. First project: Shinsegae Starfield. Where data-driven service design started.", universe: "consumer" },
   { year: "2022", title: "Army officer", place: "ROKA, Injae", note: "Led 60+ people as the youngest Headquarters Company Commander; built a 3D terrain trainer.", universe: "military" },
   { year: "2022", title: "Master of Service Design", place: "Sungkyunkwan University", note: "Thesis: personas of people with developmental disabilities, augmented by data and run through AI simulation.", universe: "disability" },
-  { year: "2024", title: "SDI Lab researcher", place: "Data-driven service design", note: "Robots, metaverse and mall branches: quantified personas for real clients.", universe: "robotics" },
+  { year: "2024", title: "SDI Lab, contract researcher", place: "Back from the army", note: "Robots, metaverse and mall branches: quantified personas for real clients.", universe: "robotics" },
   { year: "2025", title: "Samsung Electronics", place: "Market Intelligence", note: "Demand forecasting, an enterprise dashboard, and a Bixby cooking assistant.", universe: "simulation" },
   { year: "2026", title: "UPenn M:IPD", place: "Philadelphia", note: "Engineering, design and Wharton: AI-driven strategic design, and then a company.", universe: "simulation" },
 ];

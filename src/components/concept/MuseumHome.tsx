@@ -172,11 +172,11 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">
         <Stage>
         <div className="relative md:min-h-[820px]">
-          <h1 className="relative z-[5] max-w-[17ch] font-[family-name:var(--font-instrument)] text-[clamp(3rem,8.6vw,8.4rem)] leading-[0.92] tracking-[-0.02em] md:max-w-[10.9ch] md:text-[93px]">
-            Walk through <em style={{ color: RED }}>how I got here.</em>
+          <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-instrument)] text-[clamp(2.5rem,10vw,4rem)] leading-[0.98] tracking-[-0.02em] md:max-w-[560px] md:text-[68px]">
+            Strategic designer, <em style={{ color: RED }}>PM,</em> business developer, service &amp; experience designer.
           </h1>
           <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-8" style={{ color: MUTED }}>
-            I&rsquo;m Ian, a strategic designer. This is a small museum about me: every avatar inside is me at one chapter, from the army to Penn. Walk around, talk to them, or just look.
+            Hi, I&rsquo;m Ian. From the army and a design lab to Samsung and now Penn. This small museum is that path: every avatar inside is me at one chapter. Walk around and talk to them.
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">

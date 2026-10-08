@@ -46,7 +46,15 @@ export default function ProjectBento({ theme }: { theme: Theme }) {
           Selected{" "}
           {theme === "paper" ? <em style={{ color: "#c8431f" }}>work</em> : <span style={{ color: "#ff6b4a" }}>work</span>}
         </h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={`mr-1 flex items-center gap-2 text-[10px] uppercase tracking-wider ${t.label}`} style={{ color: t.muted }}>
+            <svg viewBox="0 0 44 16" className="h-4 w-11" fill="none" stroke={t.ink} strokeWidth="1.6" strokeLinejoin="round">
+              <path d="M2,8 L9,2 L16,8 L9,14 Z" />
+              <path d="M16,8 L23,2 L30,8 L23,14 Z" fill={theme === "paper" ? "#c8431f" : "#ff6b4a"} />
+              <path d="M30,8 H42 M33,8 L40,3 M33,8 L40,13" />
+            </svg>
+            design thinking branches into
+          </span>
           <button
             type="button"
             onClick={() => setFilter(null)}

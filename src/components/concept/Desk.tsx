@@ -45,7 +45,7 @@ export function DeskItem({
       }
       onPointerDown={(e) => {
         if (!isDesktop()) return;
-        if ((e.target as HTMLElement).closest("button,a")) return;
+        if ((e.target as HTMLElement).closest("button,a,svg,input")) return;
         (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
         start.current = { px: e.clientX, py: e.clientY, ox: off.x, oy: off.y };
         setDrag(true);

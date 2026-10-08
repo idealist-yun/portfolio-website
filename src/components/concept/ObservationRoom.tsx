@@ -93,6 +93,21 @@ export const ZONES: Hall[] = ZONES_RAW.map((z) => ({ ...z, plaque: PLAQUE[z.id],
 const hallOf = (id: ZoneId) => ZONES.find((z) => z.id === id)!;
 export const zoneColor = (z: ZoneId | "plaza") => (z === "plaza" ? "#c3cddd" : hallOf(z).color);
 
+const DETAIL: Record<ZoneId, string> = {
+  army: featured[3].line,
+  care: featured[0].line,
+  access: "Fieldwork with the National Rehabilitation Center turned the daily lives of people with developmental disabilities, stroke and spinal injuries into journey maps, then into a hackathon with SKKU students.",
+  tom: "A mechanical sliding frame that turns big arm movements into writing. The goal: quiet, tight, cheap, and good-looking enough to use in a classroom. Still being built.",
+  robots: featured[2].line,
+  lab: featured[1].line,
+  mall: featured[4].line,
+  raemian: featured[5].line,
+  fandom: "A brand fandom analysis between Samsung and a competitor, for the Household Appliance Division.",
+  lifelog: "Life-log analysis to plan new product services, for the Household Appliance Division.",
+  samsung: "The AX project: an enterprise demand dashboard with an AI chatbot, for the Digital Appliances Division.",
+  bixby: "A Bixby-powered cooking assistant for screen-based appliances, for the Digital Appliances Division.",
+};
+
 // pictures: hung on the back wall (wall) or standing on free panels
 type Panel = { z: ZoneId; src: string; plane: "x" | "y"; fixed: number; along: number; wall: boolean; wu: number; H: number };
 const PANEL_CFG: Partial<Record<ZoneId, ["x" | "y", number, number, boolean][]>> = {
@@ -279,6 +294,12 @@ type Docent = { pos: Pt; path: Pt[]; seg: number; mode: "walk" | "do"; left: num
 type Choice = { label: string; go?: string; href?: string };
 type DNode = { text: string; choices: Choice[] };
 function dialogNode(who: string, key: string): DNode {
+  if (who.startsWith("x:")) {
+    const h = hallOf(who.slice(2) as ZoneId);
+    const open: Choice[] = h.link ? [{ label: "Open the project", href: h.link.href }] : [];
+    if (key === "more") return { text: DETAIL[h.id], choices: [...open, { label: "Thanks" }] };
+    return { text: h.caption, choices: [{ label: "Tell me more", go: "more" }, ...open, { label: "Thanks" }] };
+  }
   if (who === "D") {
     if (key === "start")
       return {
@@ -922,7 +943,7 @@ export default function ObservationRoom({
 
   const openDialog = useCallback((who: string) => {
     setDlg({ who, key: "root" });
-    if (who !== "D") setMet((m) => (m.includes(who as YunId) ? m : [...m, who as YunId]));
+    if (who !== "D" && !who.startsWith("x:")) setMet((m) => (m.includes(who as YunId) ? m : [...m, who as YunId]));
   }, [setDlg]);
 
   const choose = useCallback(
@@ -1053,6 +1074,16 @@ export default function ObservationRoom({
         }
       });
       if (dist2(pl.pos, docent.current.pos) < bd) near = "D";
+      if (near === null) {
+        let be = 2.9;
+        ZONES.forEach((z) => {
+          const d = dist2(pl.pos, [z.cx, z.cy]);
+          if (d < be) {
+            be = d;
+            near = `x:${z.id}`;
+          }
+        });
+      }
     }
     s.near = near;
 
@@ -1413,14 +1444,45 @@ export default function ObservationRoom({
     });
     return best;
   })();
+  const exhItems: Item[] = ZONES.map((z) => {
+    const c = P(z.cx, z.cy, 8);
+    const isNear = snap.near === `x:${z.id}`;
+    return {
+      depth: z.cx + z.cy + 0.9,
+      el: (
+        <g
+          key={`hit-${z.id}`}
+          className="cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (snap.near === `x:${z.id}`) openDialog(`x:${z.id}`);
+            else {
+              st.current.talkWho = `x:${z.id}`;
+              walkTo(NODES[`${z.id}_a`]);
+            }
+          }}
+        >
+          <ellipse cx={c[0]} cy={c[1]} rx="38" ry="26" fill="transparent" />
+          {isNear && !dlg && (
+            <g transform={`translate(${c[0]} ${c[1] - 34})`} pointerEvents="none">
+              <rect x="-22" y="-8" width="44" height="11" rx="5.5" fill={INK} />
+              <text x="0" y="0" textAnchor="middle" fontSize="6.6" fill="#fff" style={{ fontFamily: SANS }}>
+                E · look
+              </text>
+            </g>
+          )}
+        </g>
+      ),
+    };
+  });
   const activeItems: Item[] = activeId
     ? [{ depth: hallOf(activeId).cx + hallOf(activeId).cy - 2.6, el: <g key="active-fx"><Spot cx={hallOf(activeId).cx} cy={hallOf(activeId).cy} color={hallOf(activeId).color} /><Orbs cx={hallOf(activeId).cx} cy={hallOf(activeId).cy} color={hallOf(activeId).color} /></g> }]
     : [];
-  const scene = [...PROPS, ...panelItems, ...activeItems, ...peopleItems].sort((a, b) => a.depth - b.depth);
+  const scene = [...PROPS, ...panelItems, ...activeItems, ...exhItems, ...peopleItems].sort((a, b) => a.depth - b.depth);
 
   const dnode = dlg ? dialogNode(dlg.who, dlg.key) : null;
-  const dcolor = dlg ? (dlg.who === "D" ? INK : yunColor(dlg.who as YunId)) : INK;
-  const dname = dlg ? (dlg.who === "D" ? "Docent robot" : YUN[dlg.who as YunId].tag) : "";
+  const dcolor = dlg ? (dlg.who === "D" ? INK : dlg.who.startsWith("x:") ? hallOf(dlg.who.slice(2) as ZoneId).color : yunColor(dlg.who as YunId)) : INK;
+  const dname = dlg ? (dlg.who === "D" ? "Docent robot" : dlg.who.startsWith("x:") ? hallOf(dlg.who.slice(2) as ZoneId).name : YUN[dlg.who as YunId].tag) : "";
 
   const dpad = (dir: string, label: string, cls: string) => (
     <button

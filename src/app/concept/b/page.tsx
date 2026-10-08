@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { DeskItem, InkDiagram } from "@/components/concept/Desk";
 import Switcher from "@/components/concept/Switcher";
-import { ClockPair, Piano, TiltCard } from "@/components/concept/widgets";
-import { archiveCount, featured, hrefFor, journey, universeOf, whyQuote } from "@/data/concept";
+import ProjectBento from "@/components/concept/ProjectBento";
+import { ClockPair, Piano } from "@/components/concept/widgets";
+import { journey, whyQuote } from "@/data/concept";
 import { profile } from "@/data/profile";
 
 const PAPER = "#f3eee2";
@@ -21,15 +22,6 @@ const grain =
 
 const paperCard =
   "rounded-lg border border-black/10 bg-[#fbf8ef] p-4 shadow-[0_10px_30px_-18px_rgba(29,27,24,0.55)]";
-
-const spans = [
-  "lg:col-span-7 aspect-[16/11]",
-  "lg:col-span-5 aspect-[1/1] lg:mt-14",
-  "lg:col-span-4 aspect-[4/5]",
-  "lg:col-span-4 aspect-[4/5] lg:mt-12",
-  "lg:col-span-4 aspect-[4/5]",
-  "lg:col-span-12 aspect-[21/8]",
-];
 
 const rites = ["출궁의", "작헌의", "왕복의", "수폐의", "입학의", "수하의"];
 const steps = ["Welcome", "Greet", "Move", "Be seated", "Meet", "See off"];
@@ -164,66 +156,7 @@ export default function ConceptB() {
 
       {/* work */}
       <section className="mx-auto max-w-[1240px] px-6 py-14">
-        <div className="flex items-end justify-between border-b border-black/15 pb-4">
-          <h2 className="font-[family-name:var(--font-instrument)] text-6xl">
-            Selected <em style={{ color: RED }}>work</em>
-          </h2>
-          <p className="hidden font-mono text-[11px] uppercase tracking-wider sm:block" style={{ color: MUTED }}>
-            6 of {archiveCount + 2}, the rest in the archive
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-x-6 gap-y-12 lg:grid-cols-12">
-          {featured.map((f, i) => {
-            const u = universeOf(f.universe);
-            return (
-              <div key={f.slug} className={`${spans[i].split(" ").filter((c) => !c.startsWith("aspect")).join(" ")}`}>
-                <Link href={hrefFor(f)} className="group block">
-                  <TiltCard max={5} className="rounded-sm">
-                    <div className={`relative overflow-hidden rounded-sm border border-black/15 ${spans[i].split(" ").filter((c) => c.startsWith("aspect")).join(" ")}`}>
-                      <Image
-                        src={f.image}
-                        alt=""
-                        fill
-                        sizes="(min-width:1024px) 60vw, 100vw"
-                        className="object-cover saturate-[0.55] sepia-[0.22] transition-all duration-500 group-hover:scale-[1.05] group-hover:saturate-100 group-hover:sepia-0"
-                      />
-                      <span
-                        className="absolute left-3 top-3 rounded-full px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-white"
-                        style={{ background: INK }}
-                      >
-                        {String(i + 1).padStart(2, "0")} · {u.name}
-                      </span>
-                      <span
-                        className="absolute bottom-3 right-3 translate-y-2 rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-                        style={{ background: RED }}
-                      >
-                        View case ↗
-                      </span>
-                    </div>
-                  </TiltCard>
-                  <div className="mt-3 flex items-baseline justify-between gap-6">
-                    <p className="font-[family-name:var(--font-instrument)] text-3xl leading-none transition-colors group-hover:text-[#c8431f]">
-                      {f.title}
-                    </p>
-                  </div>
-                  <p className="mt-2 max-w-md text-[13.5px] leading-snug" style={{ color: MUTED }}>
-                    {f.line}
-                  </p>
-                </Link>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-14 flex justify-center">
-          <Link
-            href="/project"
-            className="group rounded-full border border-black/25 px-6 py-3 font-mono text-[11px] uppercase tracking-wider transition-colors hover:border-black hover:bg-black hover:text-[#f3eee2]"
-          >
-            Open the full archive <span className="ml-1 inline-block transition-transform group-hover:translate-x-1">→</span>
-          </Link>
-        </div>
+        <ProjectBento theme="paper" />
       </section>
 
       {/* ceremony band */}

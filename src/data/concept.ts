@@ -13,7 +13,7 @@ export const universes: Universe[] = [
   {
     id: "disability",
     name: "Disability & Healthcare",
-    color: "#7aa2ff",
+    color: "#4c7df0",
     blurb:
       "Personas, service journeys and assistive design for people with developmental disabilities, the question behind everything else.",
     slugs: ["disability-persona-augmentation", "disability-as-market", "saihst-hospital-metaverse"],
@@ -21,7 +21,7 @@ export const universes: Universe[] = [
   {
     id: "simulation",
     name: "Simulation & AI",
-    color: "#c58bff",
+    color: "#14b8a6",
     blurb:
       "AI personas and virtual worlds that let a service be tested before it reaches the real one.",
     slugs: ["idd-agent-simulation", "wargame-simulation-project", "manufacturing-worker-training-ai"],
@@ -29,21 +29,21 @@ export const universes: Universe[] = [
   {
     id: "robotics",
     name: "Robotics & HRI",
-    color: "#ff8a5b",
+    color: "#ff6b4a",
     blurb: "Service design for robots that work among people, from a royal-court-inspired concierge to what comes next.",
     slugs: ["vip-concierge-robot"],
   },
   {
     id: "military",
     name: "Military",
-    color: "#6fd3a0",
+    color: "#4caf6a",
     blurb: "Design and data for the most conservative system I know, from terrain training to soldier life cycles.",
     slugs: ["military-3d-battlefield-mapping", "military-hr-big-data", "veterans-reintegration"],
   },
   {
     id: "consumer",
     name: "Retail & Consumer",
-    color: "#ffd166",
+    color: "#f5b301",
     blurb: "Customer data turned into service strategy for malls, appliances and apartment life.",
     slugs: [
       "starfield-existing-branch",
@@ -55,7 +55,7 @@ export const universes: Universe[] = [
   {
     id: "public",
     name: "Public Sector",
-    color: "#6fd0e6",
+    color: "#2fb5d9",
     blurb: "Communication and service strategy for government, grounded in how citizens actually behave.",
     slugs: ["mcst-public-communication"],
   },

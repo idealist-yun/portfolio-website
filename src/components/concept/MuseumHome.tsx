@@ -7,6 +7,7 @@ import { DeskItem, InkDiagram, StageScale } from "@/components/concept/Desk";
 import ObservationRoom from "@/components/concept/ObservationRoom";
 import Switcher from "@/components/concept/Switcher";
 import ProjectBento from "@/components/concept/ProjectBento";
+import VipRobotSim from "@/components/VipRobotSim";
 import { ClockPair, Piano } from "@/components/concept/widgets";
 import { journey, whyQuote } from "@/data/concept";
 import { profile } from "@/data/profile";
@@ -126,8 +127,6 @@ function HScroll({ children }: { children: React.ReactNode }) {
 const noteLabel = "text-[10px] font-semibold uppercase tracking-[0.14em] opacity-60";
 const noteHand = "leading-[1.05]";
 
-const rites = ["출궁의", "작헌의", "왕복의", "수폐의", "입학의", "수하의"];
-const steps = ["Welcome", "Greet", "Move", "Be seated", "Meet", "See off"];
 
 export default function MuseumHome({ preview = false }: { preview?: boolean }) {
   const [front, setFront] = useState(0);
@@ -279,40 +278,22 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
         <ProjectBento theme="paper" />
       </section>
 
-      {/* ceremony band */}
+      {/* how I work: the VIP reception as a live service simulation */}
       <section className="border-y border-black/15" style={{ background: "rgba(36,56,107,0.06)" }}>
         <div className="mx-auto max-w-[1240px] px-6 py-14">
           <div className="grid items-end gap-6 md:grid-cols-[1fr_1.2fr]">
             <h2 className="font-[family-name:var(--font-instrument)] text-5xl leading-[1.02]">
-              Every visit has <em style={{ color: INDIGO }}>six steps.</em>
+              This is how I <em style={{ color: INDIGO }}>work.</em>
             </h2>
             <p className="max-w-md text-[14px] leading-relaxed" style={{ color: MUTED }}>
-              For a robot-run reception at Sungkyunkwan University, I borrowed its structure from a
-              1817 album of the Crown Prince&rsquo;s entrance ceremony, and turned each scene into a
-              step of service.
+              A robot-run VIP reception for Sungkyunkwan University, designed as six steps borrowed from a 1817 album of the Crown Prince&rsquo;s entrance ceremony. This is the service blueprint, running: three robots, a guest, and the President. Press play, or hover a stop.
             </p>
           </div>
-          <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {rites.map((r, i) => (
-              <div key={r} className="group">
-                <div className="relative aspect-[4/3] overflow-hidden rounded-sm border border-black/20 shadow-[0_10px_24px_-16px_rgba(29,27,24,0.7)]">
-                  <Image
-                    src={`/images/ipakdo/rite-${i + 1}.jpg`}
-                    alt=""
-                    fill
-                    sizes="200px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                </div>
-                <p className="mt-2 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
-                  {i + 1} · {r}
-                </p>
-                <p className="font-[family-name:var(--font-instrument)] text-xl leading-tight">{steps[i]}</p>
-              </div>
-            ))}
+          <div className="mt-10">
+            <VipRobotSim />
           </div>
           <Link href="/project/vip-concierge-robot" className="mt-8 inline-block font-mono text-[11px] uppercase tracking-wider underline underline-offset-4" style={{ color: RED }}>
-            See the live simulation →
+            Read the full project →
           </Link>
         </div>
       </section>

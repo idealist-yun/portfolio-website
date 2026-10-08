@@ -22,10 +22,10 @@ type Version = "full" | "designer" | "pm" | "uxr" | "business";
 
 const versions: { id: Version; label: string; file: string; blurb: string }[] = [
   { id: "full", label: "Full", file: "/resume/Resume_SangyunLee_Full.pdf", blurb: "Everything, with awards and extra-curriculars." },
-  { id: "designer", label: "Designer", file: "/resume/Resume_SangyunLee_Designer.pdf", blurb: "Service and product design first." },
+  { id: "designer", label: "Service/Experience Designer", file: "/resume/Resume_SangyunLee_Designer.pdf", blurb: "Service and product design first." },
   { id: "pm", label: "PM", file: "/resume/Resume_SangyunLee_PM.pdf", blurb: "Product and strategy first." },
-  { id: "uxr", label: "UX Research", file: "/resume/Resume_SangyunLee_UXR.pdf", blurb: "Research methods first." },
-  { id: "business", label: "Business", file: "/resume/Resume_SangyunLee_Business.pdf", blurb: "Market and customer analytics first." },
+  { id: "uxr", label: "UX Researcher", file: "/resume/Resume_SangyunLee_UXR.pdf", blurb: "Research methods first." },
+  { id: "business", label: "Business Strategist", file: "/resume/Resume_SangyunLee_Business.pdf", blurb: "Market and customer analytics first." },
 ];
 
 type TrackBlock =

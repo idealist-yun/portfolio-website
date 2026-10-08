@@ -270,7 +270,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
             I&rsquo;m Ian, a strategic, service &amp; experience designer across business, design and engineering. I turn research into strategy, and test it on simulated users (generative agents) before it reaches real ones.
           </p>
           <p className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05]" style={{ color: INK }}>
-            Derive personas from data. Build agents from them. Simulate the service.
+            Define personas from data. Ideate and prototype the service. Test &amp; simulate it with persona agents.
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">

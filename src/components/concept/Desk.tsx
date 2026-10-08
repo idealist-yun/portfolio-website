@@ -31,7 +31,7 @@ export function DeskItem({
 
   return (
     <div
-      className={`relative md:absolute md:left-[var(--l)] md:top-[var(--t)] ${className}`}
+      className={`relative xl:absolute xl:left-[var(--l)] xl:top-[var(--t)] ${className}`}
       style={
         {
           "--l": left,

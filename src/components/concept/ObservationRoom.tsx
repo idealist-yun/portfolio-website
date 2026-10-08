@@ -682,11 +682,13 @@ type Snap = {
   p: { pos: Pt; face: 1 | -1; moving: boolean };
   doc: { pos: Pt; face: 1 | -1; mode: "walk" | "do"; hall: ZoneId | null; line: string };
   near: string | null;
+  follow: boolean;
+  moved: boolean;
   cam: { x: number; y: number; w: number; h: number };
 };
 
 const KEYDIR: Record<string, Pt> = { ArrowUp: [-1, -1], w: [-1, -1], ArrowDown: [1, 1], s: [1, 1], ArrowLeft: [-1, 1], a: [-1, 1], ArrowRight: [1, -1], d: [1, -1] };
-const START: Pt = fixSpot([NODES.gate[0] + 1.2, NODES.gate[1] - 0.3]);
+const START: Pt = fixSpot([10.4, 12.5]);
 
 export default function ObservationRoom({
   active,
@@ -706,7 +708,7 @@ export default function ObservationRoom({
   const player = useRef<{ pos: Pt; face: 1 | -1; path: Pt[]; moving: boolean }>({ pos: START, face: 1, path: [], moving: false });
   const keys = useRef<Set<string>>(new Set());
   const cam = useRef({ x: 0, y: 0, w: VW, h: VH });
-  const st = useRef({ play: false, sel: null as string | null, dlg: null as { who: string; key: string } | null, near: null as string | null });
+  const st = useRef({ play: true, follow: false, moved: false, talkWho: null as string | null, sel: null as string | null, dlg: null as { who: string; key: string } | null, near: null as string | null });
   const svgRef = useRef<SVGSVGElement>(null);
   const last = useRef<number | null>(null);
 
@@ -716,10 +718,13 @@ export default function ObservationRoom({
     p: { pos: START, face: 1, moving: false },
     doc: { pos: [NODES.gate[0] + 0.8, NODES.gate[1] - 1] as Pt, face: 1, mode: "do", hall: null, line: WELCOME },
     near: null,
+    follow: false,
+    moved: false,
     cam: { x: 0, y: 0, w: VW, h: VH },
   });
   const [playing, setPlaying] = useState(true);
-  const [play, setPlay] = useState(false);
+  const play = true;
+  const hoverFrame = useRef(false);
   const [expanded, setExpanded] = useState(false);
   const [dlg, setDlg] = useState<{ who: string; key: string } | null>(null);
   const [met, setMet] = useState<ZoneId[]>([]);
@@ -769,11 +774,10 @@ export default function ObservationRoom({
   }, []);
   const collapse = useCallback(() => {
     setExpanded(false);
-    setPlay(false);
     setDlg(null);
     player.current.path = [];
     keys.current.clear();
-  }, [setPlay, setDlg]);
+  }, [setDlg]);
 
   const openDialog = useCallback((who: string) => {
     setDlg({ who, key: "root" });
@@ -799,13 +803,13 @@ export default function ObservationRoom({
       const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
       if (k === "Escape") {
         if (s.dlg) setDlg(null);
-        else if (s.play) {
-          setPlay(false);
-          keys.current.clear();
+        else if (s.follow) {
+          s.follow = false;
+          s.talkWho = null;
         } else if (expanded) collapse();
         return;
       }
-      if (!s.play) return;
+      if (!expanded && !hoverFrame.current && !s.dlg) return;
       if (s.dlg) {
         const n = dialogNode(s.dlg.who, s.dlg.key);
         const idx = parseInt(k, 10);
@@ -822,6 +826,8 @@ export default function ObservationRoom({
       if (KEYDIR[k]) {
         keys.current.add(k);
         player.current.path = [];
+        s.follow = true;
+        s.talkWho = null;
         e.preventDefault();
       }
     };
@@ -891,6 +897,7 @@ export default function ObservationRoom({
         }
       }
       pl.moving = moved;
+      if (moved) s.moved = true;
     } else pl.moving = false;
 
     // nearest talkable
@@ -991,11 +998,11 @@ export default function ObservationRoom({
     // camera
     const target = { x: 0, y: 0, w: VW, h: VH };
     let f: Pt | undefined;
-    if (s.play) f = pl.pos;
-    else if (s.sel === "D") f = d.pos;
+    if (s.sel === "D") f = d.pos;
     else if (s.sel) f = agents.current.find((a) => a.hall === s.sel)?.pos;
+    else if (s.follow) f = pl.pos;
     if (f) {
-      const z = s.play ? 0.5 : 0.46;
+      const z = s.follow && !s.sel ? 0.5 : 0.46;
       const sc = P(f[0], f[1]);
       target.w = VW * z;
       target.h = VH * z;
@@ -1019,6 +1026,8 @@ export default function ObservationRoom({
       p: { pos: [...player.current.pos] as Pt, face: player.current.face, moving: player.current.moving },
       doc: { pos: [...dc.pos] as Pt, face: dc.face, mode: dc.mode, hall: dc.hall, line: dc.hall ? hallOf(dc.hall).caption : WELCOME },
       near: s.near,
+      follow: s.follow,
+      moved: s.moved,
       cam: { ...cam.current },
     };
   }, []);
@@ -1034,13 +1043,19 @@ export default function ObservationRoom({
       if (last.current != null) {
         tick(Math.min(0.05, (now - last.current) / 1000));
         setSnap(makeSnap());
+        const sx = st.current;
+        if (sx.talkWho && sx.near === sx.talkWho && !sx.dlg) {
+          const who = sx.talkWho;
+          sx.talkWho = null;
+          openDialog(who);
+        }
       }
       last.current = now;
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [playing, run, tick, makeSnap]);
+  }, [playing, run, tick, makeSnap, openDialog]);
 
   const toGrid = (e: React.MouseEvent<SVGSVGElement>): Pt | null => {
     const svg = svgRef.current;
@@ -1057,6 +1072,7 @@ export default function ObservationRoom({
 
   const walkTo = (target: Pt) => {
     const pl = player.current;
+    st.current.follow = true;
     if (!walkable(target[0], target[1])) return;
     if (clearLine(pl.pos, target)) {
       pl.path = [target];
@@ -1133,7 +1149,10 @@ export default function ObservationRoom({
               e.stopPropagation();
               if (play) {
                 if (snap.near === a.id) openDialog(a.id);
-                else walkTo([a.pos[0], a.pos[1] + 1.2]);
+                else {
+                  st.current.talkWho = a.id;
+                  walkTo([a.pos[0], a.pos[1] + 1.2]);
+                }
               } else setSel(sel === a.id ? null : a.id);
             }}
           >
@@ -1165,7 +1184,10 @@ export default function ObservationRoom({
             e.stopPropagation();
             if (play) {
               if (snap.near === "D") openDialog("D");
-              else walkTo([snap.doc.pos[0], snap.doc.pos[1] + 1.2]);
+              else {
+                st.current.talkWho = "D";
+                walkTo([snap.doc.pos[0], snap.doc.pos[1] + 1.2]);
+              }
             } else setSel(sel === "D" ? null : "D");
           }}
         >
@@ -1188,10 +1210,21 @@ export default function ObservationRoom({
     {
       depth: snap.p.pos[0] + snap.p.pos[1] + 0.35,
       el: (
-        <g key="you" transform={`translate(${P(snap.p.pos[0], snap.p.pos[1])[0]} ${P(snap.p.pos[0], snap.p.pos[1])[1]}) scale(1.1)`} pointerEvents="none">
+        <g key="you" transform={`translate(${P(snap.p.pos[0], snap.p.pos[1])[0]} ${P(snap.p.pos[0], snap.p.pos[1])[1]}) scale(1.5)`} pointerEvents="none">
           <ellipse cx="0" cy="1.5" rx="11" ry="4" fill="none" stroke="#ff4d6d" strokeWidth="1.4" opacity={0.5 + 0.4 * Math.sin(snap.t * 4)} />
           <Person kind="you" face={snap.p.face} bob={snap.p.moving ? Math.sin(snap.t * 16) * 1.4 : 0} />
-          {tag("YOU", "#ff4d6d", -37, play, 26)}
+          {tag("YOU", "#ff4d6d", -37, true, 28)}
+          {!snap.moved && (
+            <g transform="translate(0 -64)">
+              <rect x="-50" y="-11" width="100" height="22" rx="8" fill="#ff4d6d" />
+              <text x="0" y="-1" textAnchor="middle" fontSize="6.6" fontWeight={700} fill="#fff" style={{ fontFamily: SANS }}>
+                Move me!
+              </text>
+              <text x="0" y="7" textAnchor="middle" fontSize="5.6" fill="#fff" style={{ fontFamily: SANS }}>
+                WASD / arrows / click the floor
+              </text>
+            </g>
+          )}
           <path d={`M-3,${-50 + Math.sin(snap.t * 5) * 1.5} L3,${-50 + Math.sin(snap.t * 5) * 1.5} L0,${-45 + Math.sin(snap.t * 5) * 1.5} Z`} fill="#ff4d6d" />
         </g>
       ),
@@ -1240,6 +1273,7 @@ export default function ObservationRoom({
         e.stopPropagation();
         keys.current.add(dir);
         player.current.path = [];
+        st.current.follow = true;
       }}
       onPointerUp={() => keys.current.delete(dir)}
       onPointerLeave={() => keys.current.delete(dir)}
@@ -1407,13 +1441,25 @@ export default function ObservationRoom({
       <div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between gap-2 px-6 py-5 text-[11px]" style={{ color: INK }}>
         <span className="flex items-center gap-2 rounded-full bg-white/85 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
           <span className="h-2 w-2 animate-pulse rounded-full bg-[#ff4d4d]" />
-          <span className="sm:hidden">MUSEUM OF YUN</span>
-          <span className="hidden sm:inline">THE MUSEUM OF YUN · 6 chapters · 6 Yuns</span>
+          <span className="whitespace-nowrap">MUSEUM OF YUN</span>
         </span>
         <span className="pointer-events-auto flex items-center gap-2">
           <span className="rounded-full bg-white/85 px-3 py-1 backdrop-blur" style={{ fontFamily: "var(--font-pixel)" }}>
-            {play ? "YOU'RE INSIDE" : sel ? `FOLLOW · ${sel === "D" ? "DOCENT" : YUN[sel as ZoneId]?.tag.toUpperCase()}` : "OVERVIEW"}
+            {snap.follow ? "FOLLOWING" : "OVERVIEW"}
           </span>
+          {snap.follow && (
+            <button
+              type="button"
+              onClick={() => {
+                st.current.follow = false;
+                st.current.talkWho = null;
+              }}
+              className="inline-flex h-7 items-center rounded-full bg-white/90 px-3 backdrop-blur hover:bg-[#fff3b8]"
+              style={{ fontFamily: "var(--font-pixel)" }}
+            >
+              ⤡
+            </button>
+          )}
           <button
             type="button"
             onClick={() => (expanded ? collapse() : expand())}
@@ -1426,27 +1472,10 @@ export default function ObservationRoom({
         </span>
       </div>
 
-      {sel && !play && (
-        <div className="absolute bottom-5 right-6 flex gap-2" style={{ fontFamily: "var(--font-pixel)" }}>
-          {sel === "D" || YUN[sel as ZoneId] ? (
-            <button type="button" onClick={() => openDialog(sel)} className="rounded-full px-3 py-1 text-[11px] text-white" style={{ background: INK }}>
-              talk
-            </button>
-          ) : null}
-          <button type="button" onClick={() => setSel(null)} className="rounded-full bg-white/90 px-3 py-1 text-[11px] backdrop-blur hover:bg-white" style={{ color: INK }}>
-            × overview
-          </button>
-        </div>
-      )}
-      {!sel && !play && (
-        <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/75 px-3 py-1 text-[11px] backdrop-blur sm:block" style={{ fontFamily: "var(--font-pixel)", color: "rgba(31,42,68,0.75)" }}>
-          {expanded ? "click a Yun to follow · press “Step inside” to play" : "each avatar is me at a chapter · “Step inside” to play"}
-        </p>
-      )}
       {play && !dlg && (
         <>
           <p className="pointer-events-none absolute bottom-5 left-6 hidden rounded-full bg-white/80 px-3 py-1 text-[11px] backdrop-blur md:block" style={{ fontFamily: "var(--font-pixel)", color: INK }}>
-            WASD / arrows move · click floor to walk · E talk · Esc exit
+            WASD / arrows to move · click the floor to walk · click a Yun to talk · E talk
           </p>
           <div className="absolute bottom-3 left-3 h-[84px] w-[84px] md:hidden">
             {dpad("ArrowUp", "↖", "left-0 top-0")}
@@ -1514,20 +1543,6 @@ export default function ObservationRoom({
             <svg viewBox="0 0 16 16" className="h-3 w-3" fill="currentColor"><path d="M4 2v12l10-6z" /></svg>
           )}
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            setPlay((p) => !p);
-            setSel(null);
-            setDlg(null);
-            keys.current.clear();
-            player.current.path = [];
-          }}
-          className="inline-flex h-8 items-center rounded-full px-4 text-white"
-          style={{ background: play ? "#8a94ad" : "#ff4d6d" }}
-        >
-          {play ? "Exit game" : "Step inside"}
-        </button>
         {!expanded && (
           <button type="button" onClick={expand} className="inline-flex h-8 items-center rounded-full border bg-white px-4 hover:bg-[#fff3b8]" style={{ borderColor: "rgba(31,42,68,0.3)" }}>
             Enlarge
@@ -1561,7 +1576,7 @@ export default function ObservationRoom({
   );
 
   return (
-    <div ref={wrap} className="w-full" style={expanded && frameH ? { height: frameH } : undefined}>
+    <div ref={wrap} className="w-full" onPointerEnter={() => (hoverFrame.current = true)} onPointerLeave={() => (hoverFrame.current = false)} style={expanded && frameH ? { height: frameH } : undefined}>
       {expanded && typeof document !== "undefined" ? createPortal(body, document.body) : body}
     </div>
   );

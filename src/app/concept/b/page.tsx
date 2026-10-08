@@ -104,7 +104,7 @@ export default function ConceptB() {
                 </div>
               </div>
               <p className="mt-2 text-center text-[1.35rem] leading-none" style={{ fontFamily: "var(--font-hand)", color: MUTED }}>
-                the museum of Yun: every avatar is me at one chapter. Click the frame to enlarge it, then step inside and play.
+                the museum of Yun: every avatar is me at one chapter. The avatar in the middle is you: move it with WASD, arrows or a click, and talk to the Yuns.
               </p>
             </DeskItem>
 

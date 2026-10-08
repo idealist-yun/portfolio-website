@@ -155,7 +155,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
 
             <DeskItem left="53%" top="80%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#ffd0dc">
-                <p className={`mb-2 ${noteLabel}`}>off hours · play me (a – k)</p>
+                <p className={`mb-2 ${noteLabel}`}>off hours · play me (a – k, w e t y u)</p>
                 <Piano tone="paper" />
               </PostIt>
             </DeskItem>

@@ -39,21 +39,29 @@ export function ClockPair({ tone = "dark" }: { tone?: "dark" | "paper" }) {
 }
 
 const KEYS = [
-  { n: "C", f: 261.63, k: "a" },
-  { n: "D", f: 293.66, k: "s" },
-  { n: "E", f: 329.63, k: "d" },
-  { n: "F", f: 349.23, k: "f" },
-  { n: "G", f: 392.0, k: "g" },
-  { n: "A", f: 440.0, k: "h" },
-  { n: "B", f: 493.88, k: "j" },
-  { n: "C", f: 523.25, k: "k" },
+  { n: "C", f: 261.63, k: "a", c: "KeyA" },
+  { n: "D", f: 293.66, k: "s", c: "KeyS" },
+  { n: "E", f: 329.63, k: "d", c: "KeyD" },
+  { n: "F", f: 349.23, k: "f", c: "KeyF" },
+  { n: "G", f: 392.0, k: "g", c: "KeyG" },
+  { n: "A", f: 440.0, k: "h", c: "KeyH" },
+  { n: "B", f: 493.88, k: "j", c: "KeyJ" },
+  { n: "C", f: 523.25, k: "k", c: "KeyK" },
+];
+// black keys sit after white key `after` (0-based): C#, D#, F#, G#, A#
+const BLACK = [
+  { n: "C#", f: 277.18, k: "w", c: "KeyW", after: 0 },
+  { n: "D#", f: 311.13, k: "e", c: "KeyE", after: 1 },
+  { n: "F#", f: 369.99, k: "t", c: "KeyT", after: 3 },
+  { n: "G#", f: 415.3, k: "y", c: "KeyY", after: 4 },
+  { n: "A#", f: 466.16, k: "u", c: "KeyU", after: 5 },
 ];
 
 export function Piano({ tone = "dark" }: { tone?: "dark" | "paper" }) {
   const ctx = useRef<AudioContext | null>(null);
-  const [down, setDown] = useState<number | null>(null);
+  const [down, setDown] = useState<string | null>(null);
 
-  const play = (i: number) => {
+  const play = (id: string, f: number) => {
     try {
       if (!ctx.current) {
         const AC =
@@ -65,7 +73,7 @@ export function Piano({ tone = "dark" }: { tone?: "dark" | "paper" }) {
       const o = c.createOscillator();
       const g = c.createGain();
       o.type = "triangle";
-      o.frequency.value = KEYS[i].f;
+      o.frequency.value = f;
       g.gain.setValueAtTime(0.0001, c.currentTime);
       g.gain.exponentialRampToValueAtTime(0.22, c.currentTime + 0.02);
       g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 1.1);
@@ -75,15 +83,17 @@ export function Piano({ tone = "dark" }: { tone?: "dark" | "paper" }) {
     } catch {
       /* audio unavailable */
     }
-    setDown(i);
-    setTimeout(() => setDown((d) => (d === i ? null : d)), 160);
+    setDown(id);
+    setTimeout(() => setDown((d) => (d === id ? null : d)), 160);
   };
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.repeat || e.metaKey || e.ctrlKey) return;
-      const i = KEYS.findIndex((k) => k.k === e.key.toLowerCase());
-      if (i >= 0 && !(e.target instanceof HTMLInputElement)) play(i);
+      if (e.repeat || e.metaKey || e.ctrlKey || e.target instanceof HTMLInputElement) return;
+      const w = KEYS.find((k) => k.c === e.code);
+      if (w) return play(`w${w.n}${w.k}`, w.f);
+      const b = BLACK.find((k) => k.c === e.code);
+      if (b) play(`b${b.n}`, b.f);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -92,20 +102,42 @@ export function Piano({ tone = "dark" }: { tone?: "dark" | "paper" }) {
   const base = tone === "dark" ? "bg-white/90 text-black/60" : "bg-[#fffdf7] text-black/50";
   const on = tone === "dark" ? "bg-[#c58bff] text-white" : "bg-[#c8431f] text-white";
   return (
-    <div className="flex h-24 gap-[3px]">
-      {KEYS.map((k, i) => (
-        <button
-          key={i}
-          type="button"
-          aria-label={`Play note ${k.n}`}
-          onPointerDown={() => play(i)}
-          className={`flex flex-1 items-end justify-center rounded-b-md pb-1.5 font-mono text-[10px] transition-all duration-100 ${
-            down === i ? `${on} translate-y-0.5` : base
-          } ${tone === "paper" ? "border border-black/10" : ""}`}
-        >
-          {k.k}
-        </button>
-      ))}
+    <div className="relative h-24">
+      <div className="flex h-full gap-[3px]">
+        {KEYS.map((k) => {
+          const id = `w${k.n}${k.k}`;
+          return (
+            <button
+              key={id}
+              type="button"
+              aria-label={`Play note ${k.n}`}
+              onPointerDown={() => play(id, k.f)}
+              className={`flex flex-1 items-end justify-center rounded-b-md pb-1.5 font-mono text-[10px] transition-all duration-100 ${
+                down === id ? `${on} translate-y-0.5` : base
+              } ${tone === "paper" ? "border border-black/10" : ""}`}
+            >
+              {k.k}
+            </button>
+          );
+        })}
+      </div>
+      {BLACK.map((b) => {
+        const id = `b${b.n}`;
+        return (
+          <button
+            key={id}
+            type="button"
+            aria-label={`Play note ${b.n}`}
+            onPointerDown={() => play(id, b.f)}
+            className={`absolute top-0 z-10 flex h-[58%] w-[8%] -translate-x-1/2 items-end justify-center rounded-b-[3px] pb-1 font-mono text-[8px] text-white/70 shadow-[0_3px_5px_rgba(0,0,0,0.35)] transition-all duration-100 ${
+              down === id ? "translate-y-0.5 bg-[#c8431f]" : "bg-[#1d1b18]"
+            }`}
+            style={{ left: `${((b.after + 1) / KEYS.length) * 100}%` }}
+          >
+            {b.k}
+          </button>
+        );
+      })}
     </div>
   );
 }

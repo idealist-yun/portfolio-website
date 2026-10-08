@@ -950,7 +950,6 @@ export default function ObservationRoom({
         } else if (expanded) collapse();
         return;
       }
-      if (!expanded && !hoverFrame.current && !s.dlg) return;
       if (s.dlg) {
         const n = dialogNode(s.dlg.who, s.dlg.key);
         const idx = parseInt(k, 10);
@@ -959,11 +958,12 @@ export default function ObservationRoom({
         e.preventDefault();
         return;
       }
-      if (k === "e" || k === "Enter") {
-        if (s.near) openDialog(s.near);
+      if ((k === "e" || (k === "Enter" && hoverFrame.current)) && s.near) {
+        openDialog(s.near);
         e.preventDefault();
         return;
       }
+      if (!expanded && !hoverFrame.current) return;
       if (KEYDIR[k]) {
         keys.current.add(k);
         player.current.path = [];
@@ -1771,7 +1771,7 @@ export default function ObservationRoom({
   );
 
   return (
-    <div ref={wrap} className="w-full" onPointerEnter={() => (hoverFrame.current = true)} onPointerLeave={() => (hoverFrame.current = false)} style={expanded && frameH ? { height: frameH } : undefined}>
+    <div ref={wrap} className="w-full" onPointerEnter={() => (hoverFrame.current = true)} onPointerMove={() => (hoverFrame.current = true)} onPointerDown={() => (hoverFrame.current = true)} onPointerLeave={() => (hoverFrame.current = false)} style={expanded && frameH ? { height: frameH } : undefined}>
       {expanded && typeof document !== "undefined" ? createPortal(body, document.body) : body}
     </div>
   );

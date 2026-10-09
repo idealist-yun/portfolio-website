@@ -9,8 +9,7 @@ export const profile = {
   phone: "+1 (267) 679-0962",
   affiliation: "University of Pennsylvania, Master of Integrated Product Design (M:IPD)",
   affiliationPeriod: "Aug. 2026 – Present (Expected 2028)",
-  // TODO: fill in once LinkedIn is cleaned up (see vault Core Situation todo)
-  linkedin: "",
+  linkedin: "https://www.linkedin.com/in/sangyun-ian-lee-05b421230/",
   resumePdf: "/resume/Resume_SangyunLee.pdf",
   resumeOnePagePdf: "/resume/Resume_SangyunLee_1p.pdf",
 };

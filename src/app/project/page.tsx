@@ -1,13 +1,13 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui";
-import ProjectGrid from "@/components/ProjectGrid";
+import WorkGrid from "@/components/WorkGrid";
 
 export default function ProjectPage() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-16">
       <PageHeader
-        eyebrow="Project"
+        eyebrow="Work"
         title="Welcome to my past, present, and future!"
       />
 
@@ -18,7 +18,7 @@ export default function ProjectPage() {
       </p>
 
       <Suspense fallback={null}>
-        <ProjectGrid />
+        <WorkGrid />
       </Suspense>
     </div>
   );

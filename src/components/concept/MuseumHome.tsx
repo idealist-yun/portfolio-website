@@ -7,7 +7,7 @@ import { DeskItem, InkDiagram, StageScale } from "@/components/concept/Desk";
 import ObservationRoom from "@/components/concept/ObservationRoom";
 import Switcher from "@/components/concept/Switcher";
 import ProjectBento from "@/components/concept/ProjectBento";
-import Logo from "@/components/Logo";
+import SiteHeader from "@/components/SiteHeader";
 import VipRobotSim from "@/components/VipRobotSim";
 import { ClockPair, Piano } from "@/components/concept/widgets";
 import { journey, whyQuote } from "@/data/concept";
@@ -225,27 +225,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       <Opening />
       {preview && <Switcher current="b" />}
 
-      <header className="sticky top-0 z-40 border-b border-black/10 backdrop-blur-md" style={{ background: "rgba(243,238,226,0.82)" }}>
-        <div className="mx-auto flex max-w-[1240px] items-center justify-between px-6 py-3.5">
-          <Link href="/" className="group flex items-center pt-2" title="Everything starts from a dot">
-            <Logo className="text-[1.8rem]" />
-          </Link>
-          <nav className="hidden gap-7 font-mono text-[11px] uppercase tracking-wider sm:flex" style={{ color: MUTED }}>
-            {[
-              ["Work", "/project"],
-              ["Research", "/research"],
-              ["Resume", "/resume"],
-            ].map(([l, h]) => (
-              <Link key={l} href={h} className="underline-offset-4 transition-colors hover:text-black hover:underline">
-                {l}
-              </Link>
-            ))}
-          </nav>
-          <p className="hidden font-mono text-[11px] uppercase tracking-wider md:block" style={{ color: MUTED }}>
-            Philadelphia · UPenn M:IPD
-          </p>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* hero */}
       <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">

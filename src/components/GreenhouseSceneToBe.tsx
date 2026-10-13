@@ -1049,60 +1049,90 @@ export default function GreenhouseSceneToBe() {
     // a low white table with black legs by the hidden-space side
     rect(228, 485, 280, 500, 0.03, 0xf4f4f1, 0.45, 0.4);
     for (const [lx, ly] of [[231, 488], [277, 488], [231, 497], [277, 497]] as [number, number][]) cy(0.012, 0.45, 0x1d1b18, lx, ly, 0, 0.5, 6);
-    // east end (IMG_9104): brown leather lounge chair on a light wood frame with an orange round pillow,
-    // a round brown pouf in front, and a wicker tray table on thin black legs
+    // To-Be: a one-person reading station in the south-east corner, in place of the brown lounge chair (see the reference photo):
+    // a boucle bean bag, a tall white side panel, an overhead white ledge that screens the view from outside,
+    // a small side table and the plants next to it. The reader sits with the glass behind and looks into the room.
     {
-      const [cx, cz] = toWorld(640, 462);
-      const chairG = new THREE.Group();
-      const oak = mat(0xd1a672, 0.6);
-      const leather = new THREE.MeshStandardMaterial({ color: 0x6e4f4a, roughness: 0.45, side: THREE.DoubleSide });
-      const bits: THREE.Mesh[] = [];
-      for (const [lx, lz] of [[-0.28, -0.24], [0.28, -0.24], [-0.28, 0.24], [0.28, 0.24]]) {
-        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.38, 0.045), oak);
-        leg.position.set(lx, 0.19, lz);
-        bits.push(leg);
+      const white = mat(0xeeece7, 0.85);
+      const panelH = 1.45;
+      // side panel (west of the seat): a thin white slab standing on the floor, ending under the ledge
+      rect(588, 467, 594, 507, panelH, 0xeeece7, 0, 0.85);
+      // a white screen along the glass behind the seat, floor to canopy, so nothing of the reader shows from outside
+      rect(588, 502, 674, 507, panelH, 0xeeece7, 0, 0.85);
+      // overhead canopy: deep enough to cover the whole seat down to the feet, at the height of the side panel
+      rect(588, 412, 674, 507, 0.045, 0xf1efea, panelH, 0.8);
+      for (const [qx, qy] of [[588, 412], [674, 412]] as [number, number][]) rect(qx - 1, qy, qx + 1, qy + 2, panelH, 0xeeece7, 0, 0.85); // front posts
+      // bean bag
+      {
+        const [bx2, bz2] = toWorld(627, 478);
+        const boucle = new THREE.MeshStandardMaterial({ color: 0xf1eee7, roughness: 1 });
+        const seatG = new THREE.SphereGeometry(0.48, 22, 14);
+        const backG = new THREE.SphereGeometry(0.38, 18, 12);
+        const seatM = new THREE.Mesh(seatG, boucle);
+        seatM.scale.set(1, 0.55, 1);
+        seatM.position.set(bx2, 0.26, bz2);
+        const backM = new THREE.Mesh(backG, boucle);
+        backM.scale.set(1.15, 1.0, 0.65);
+        backM.position.set(bx2, 0.52, bz2 + 0.34); // slumps against the glass side
+        for (const m of [seatM, backM]) { m.castShadow = true; scene.add(m); }
+        disposables.push(seatG, backG, boucle);
+        // a cushion on the lap
+        const cushG = new THREE.SphereGeometry(0.2, 14, 10);
+        const cush = new THREE.Mesh(cushG, mat(0x58634a, 0.9));
+        cush.scale.set(1.25, 0.45, 0.9);
+        cush.position.set(bx2 + 0.02, 0.58, bz2 - 0.08);
+        scene.add(cush);
+        disposables.push(cushG);
       }
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.05, 0.56), oak);
-      rail.position.y = 0.38;
-      bits.push(rail);
-      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.14, 0.56), leather);
-      seat.position.y = 0.47;
-      bits.push(seat);
-      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.34, 0.5, 24, 1, true, Math.PI / 2, Math.PI), leather);
-      barrel.position.set(0, 0.72, 0);
-      bits.push(barrel);
-      const pillowG = new THREE.Mesh(new THREE.SphereGeometry(0.15, 18, 10), mat(0xd9783f, 0.6));
-      pillowG.scale.y = 0.35;
-      pillowG.rotation.x = Math.PI / 2;
-      pillowG.position.set(0, 0.72, -0.2);
-      bits.push(pillowG);
-      for (const b of bits) { b.castShadow = true; chairG.add(b); disposables.push(b.geometry); }
-      chairG.position.set(cx, 0, cz);
-      chairG.rotation.y = -(3 * Math.PI) / 4; // in the south-east corner, angled 45° toward the room (north-west)
-      scene.add(chairG);
-      disposables.push(leather);
-
-      const [px, pz] = toWorld(612, 438);
-      const pouf = new THREE.Mesh(new THREE.CylinderGeometry(0.27, 0.27, 0.4, 24), mat(0x5f4540, 0.5));
-      pouf.position.set(px, 0.2, pz);
-      pouf.castShadow = true;
-      scene.add(pouf);
-      disposables.push(pouf.geometry);
-
-      const [tx, tz] = toWorld(640, 425);
-      const wicker = mat(0xb98a56, 0.9);
-      const tray = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.17, 0.08, 20, 1, true), new THREE.MeshStandardMaterial({ color: 0xb98a56, roughness: 0.9, side: THREE.DoubleSide }));
-      tray.position.set(tx, 0.52, tz);
-      const trayBase = new THREE.Mesh(new THREE.CylinderGeometry(0.17, 0.17, 0.015, 20), wicker);
-      trayBase.position.set(tx, 0.49, tz);
-      scene.add(tray, trayBase);
-      disposables.push(tray.geometry, trayBase.geometry, tray.material);
-      for (let k = 0; k < 3; k++) {
-        const ang = (k / 3) * Math.PI * 2 + 0.4;
-        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.5, 6), mat(0x1d1b18, 0.5));
-        leg.position.set(tx + Math.cos(ang) * 0.14, 0.25, tz + Math.sin(ang) * 0.14);
-        scene.add(leg);
-        disposables.push(leg.geometry);
+      // small round side table on a wooden leg, to the east
+      {
+        const [tx2, tz2] = toWorld(654, 466);
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.025, 24), white);
+        top.position.set(tx2, 0.52, tz2);
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.5, 10), mat(0xc79a66, 0.6));
+        leg.position.set(tx2, 0.26, tz2);
+        top.castShadow = true;
+        scene.add(top, leg);
+        disposables.push(top.geometry, leg.geometry);
+      }
+    }
+    // To-Be: a second reading station against the east glass, facing west (back to the glass), panel on its south side
+    {
+      const white = mat(0xeeece7, 0.85);
+      const panelH = 1.45;
+      rect(646, 446, 685, 452, panelH, 0xeeece7, 0, 0.85);
+      rect(680, 366, 685, 452, panelH, 0xeeece7, 0, 0.85); // screen along the glass
+      rect(590, 366, 685, 452, 0.045, 0xf1efea, panelH, 0.8); // canopy over the whole seat down to the feet
+      for (const [qx, qy] of [[590, 366], [590, 452]] as [number, number][]) rect(qx, qy - 1, qx + 2, qy + 1, panelH, 0xeeece7, 0, 0.85); // front posts
+      {
+        const [bx2, bz2] = toWorld(657, 410);
+        const boucle = new THREE.MeshStandardMaterial({ color: 0xf1eee7, roughness: 1 });
+        const seatG = new THREE.SphereGeometry(0.48, 22, 14);
+        const backG = new THREE.SphereGeometry(0.38, 18, 12);
+        const seatM = new THREE.Mesh(seatG, boucle);
+        seatM.scale.set(1, 0.55, 1);
+        seatM.position.set(bx2, 0.26, bz2);
+        const backM = new THREE.Mesh(backG, boucle);
+        backM.scale.set(0.65, 1.0, 1.15);
+        backM.position.set(bx2 + 0.34, 0.52, bz2); // slumps against the glass side
+        for (const m of [seatM, backM]) { m.castShadow = true; scene.add(m); }
+        disposables.push(seatG, backG, boucle);
+        const cushG = new THREE.SphereGeometry(0.2, 14, 10);
+        const cush = new THREE.Mesh(cushG, mat(0xb4465a, 0.9));
+        cush.scale.set(0.9, 0.45, 1.25);
+        cush.position.set(bx2 - 0.08, 0.58, bz2 + 0.02);
+        scene.add(cush);
+        disposables.push(cushG);
+      }
+      {
+        const [tx2, tz2] = toWorld(646, 380);
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.025, 24), white);
+        top.position.set(tx2, 0.52, tz2);
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 0.5, 10), mat(0xc79a66, 0.6));
+        leg.position.set(tx2, 0.26, tz2);
+        top.castShadow = true;
+        scene.add(top, leg);
+        disposables.push(top.geometry, leg.geometry);
       }
     }
     for (const [px, py, s, t] of [
@@ -1551,12 +1581,13 @@ export default function GreenhouseSceneToBe() {
       [98, 200, 285, 225], [287, 200, 325, 225], [98, 257, 272, 300], [98, 318, 325, 350], [22, 336, 98, 350], // kitchen
       [490, 256, 664, 336], [327, 277, 360, 296], [327, 196, 358, 224], [327, 338, 358, 352], // social table
       [226, 483, 282, 502], // the low table
+      [588, 467, 594, 507], [588, 502, 674, 507], [646, 446, 685, 452], [680, 366, 685, 452], // reading stations: side panels and back screens
       [160, 463, 204, 513], // hidden space notch
       [387, 355, 513, 397], // sofa
     ];
     const DISCS: Disc[] = [
       [628, 180, 14], [350, 320, 26], [306, 304, 12], [370, 382, 11], [190, 392, 22], [188, 440, 22], [212, 416, 11], [228, 474, 22], [310, 372, 17],
-      [640, 462, 22], [612, 438, 16], [640, 425, 10], [308, 479, 18], [338, 491, 14], [575, 487, 18], [662, 487, 22],
+      [627, 478, 24], [654, 466, 10], [657, 410, 24], [646, 380, 10], [308, 479, 18], [338, 491, 14], [575, 487, 18], [662, 487, 22],
       [655, 360, 22], [250, 503, 12],
     ];
     const R = 10;
@@ -1670,9 +1701,10 @@ export default function GreenhouseSceneToBe() {
       { x: 190, y: 392, face: 1.73, eye: 0.98, out: [35, -5] },
       { x: 188, y: 440, face: 2.07, eye: 0.98, out: [35, 5] },
       { x: 228, y: 474, face: 2.45, eye: 0.98, out: [35, -12] },
-      // brown lounge chair at the east end, and the pouf in front of it
-      { x: 640, y: 462, face: -(3 * Math.PI) / 4, eye: 1.08, out: [-40, -40] },
-      { x: 612, y: 438, face: -(3 * Math.PI) / 4, eye: 0.95, out: [-30, -30] },
+      // the reading station's bean bag in the south-east corner
+      { x: 627, y: 478, face: Math.PI, eye: 0.95, out: [0, -46] },
+      // and the one against the east glass
+      { x: 657, y: 410, face: -Math.PI / 2, eye: 0.95, out: [-46, 0] },
       // the white bean bag
       { x: 350, y: 320, face: Math.PI / 2, eye: 0.92, out: [40, 0] },
     ];

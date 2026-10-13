@@ -171,49 +171,118 @@ export default function GreenhouseScene() {
       return m;
     };
 
-    const cyl = (px: number, py: number, r: number, h: number, color: number, base = 0) => {
-      const [wx, wz] = toWorld(px, py);
-      const g = new THREE.CylinderGeometry(r * S, r * S, h, 28);
-      disposables.push(g);
-      const m = new THREE.Mesh(g, mat(color));
-      m.position.set(wx, base + h / 2, wz);
-      m.castShadow = true;
-      m.receiveShadow = true;
-      scene.add(m);
-      return m;
-    };
 
+    // Boston fern (arching fronds in a cream pot) or, when tall, the artificial olive tree (black pot, moss, thin trunk)
     const plant = (px: number, py: number, scale = 1, tall = false, baseY = 0) => {
       const [wx, wz] = toWorld(px, py);
       const grp = new THREE.Group();
-      const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.2 * scale, 0.16 * scale, 0.34 * scale, 16), mat(0x26241f));
-      pot.position.y = 0.17 * scale;
-      pot.castShadow = true;
-      grp.add(pot);
-      const leafMat = mat(0x5f8a4a, 0.9);
-      const n = tall ? 4 : 3;
-      for (let i = 0; i < n; i++) {
-        const r = (tall ? 0.34 : 0.44) * scale * (1 - i * 0.16);
-        const s = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 1), i % 2 ? mat(0x6f9a55, 0.9) : leafMat);
-        s.position.set((i % 2 ? 0.1 : -0.08) * scale, (0.45 + i * (tall ? 0.42 : 0.22)) * scale, (i % 2 ? -0.06 : 0.07) * scale);
-        s.castShadow = true;
-        grp.add(s);
+      const add = (geo: THREE.BufferGeometry, m: THREE.Material, x: number, y: number, z: number) => {
+        disposables.push(geo);
+        const o = new THREE.Mesh(geo, m);
+        o.position.set(x, y, z);
+        o.castShadow = true;
+        grp.add(o);
+        return o;
+      };
+      if (tall) {
+        add(new THREE.CylinderGeometry(0.24, 0.2, 0.42, 18), mat(0x1d1b18, 0.8), 0, 0.21, 0);
+        add(new THREE.CylinderGeometry(0.225, 0.225, 0.02, 18), mat(0x4f7a2a, 1), 0, 0.42, 0);
+        const bark = mat(0x8a6a48, 0.9);
+        const trunk = add(new THREE.CylinderGeometry(0.02, 0.035, 1.5, 6), bark, 0, 1.1, 0);
+        trunk.rotation.z = 0.04;
+        for (const [bx, bz, ry] of [[0.18, 0.05, -0.5], [-0.16, -0.08, 0.5], [0.04, 0.2, 0]] as [number, number, number][]) {
+          const br = add(new THREE.CylinderGeometry(0.012, 0.02, 0.7, 5), bark, bx * 0.5, 1.45, bz * 0.5);
+          br.rotation.z = ry;
+          br.rotation.x = bz * 1.4;
+        }
+        const leaf = mat(0x93ab72, 0.85);
+        const leaf2 = mat(0x7b9a5c, 0.85);
+        for (let i = 0; i < 26; i++) {
+          const a2 = i * 2.4;
+          const h = 1.15 + (i % 9) * 0.1;
+          const r = 0.12 + ((i * 37) % 10) * 0.035;
+          const g = add(new THREE.SphereGeometry(0.1, 8, 6), i % 3 ? leaf : leaf2, Math.cos(a2) * r, h, Math.sin(a2) * r);
+          g.scale.set(1.6, 0.35, 0.8);
+          g.rotation.y = a2;
+          g.rotation.z = (i % 2 ? 1 : -1) * 0.3;
+        }
+        grp.scale.setScalar(scale);
+      } else {
+        add(new THREE.CylinderGeometry(0.2, 0.15, 0.3, 16), mat(0xe9e0cc, 0.8), 0, 0.15, 0);
+        const fr1 = mat(0x5c9140, 0.9);
+        const fr2 = mat(0x6fa84a, 0.9);
+        // each frond is three tapered segments, each bent further down than the last, so it arches and droops
+        for (let i = 0; i < 20; i++) {
+          const a2 = (i / 20) * Math.PI * 2 + (i % 2) * 0.1;
+          const m = i % 2 ? fr1 : fr2;
+          const root = new THREE.Group();
+          root.position.set(0, 0.3, 0);
+          root.rotation.order = "YXZ";
+          root.rotation.y = a2;
+          root.rotation.x = 0.55 + (i % 4) * 0.1;
+          let parent: THREE.Object3D = root;
+          const segLen = 0.3 + (i % 3) * 0.05;
+          for (let k = 0; k < 3; k++) {
+            const holder = new THREE.Group();
+            holder.position.set(0, k === 0 ? 0 : segLen, 0);
+            holder.rotation.x = k === 0 ? 0 : 0.55;
+            const geo = new THREE.ConeGeometry(0.08 * (1 - k * 0.25), segLen, 3);
+            geo.translate(0, segLen / 2, 0);
+            disposables.push(geo);
+            const seg = new THREE.Mesh(geo, m);
+            seg.scale.set(1, 1, 0.3);
+            seg.castShadow = true;
+            holder.add(seg);
+            parent.add(holder);
+            parent = holder;
+          }
+          grp.add(root);
+        }
+        grp.scale.setScalar(scale);
       }
       grp.position.set(wx, baseY, wz);
       scene.add(grp);
     };
-
+    // small helpers: a box centred on a plan position, sizes in metres
+    const bx = (w: number, h: number, d: number, color: number, px: number, py: number, y0 = 0, rough = 0.7, rotY = 0, cast = true) => {
+      const [wx, wz] = toWorld(px, py);
+      const g = new THREE.BoxGeometry(w, h, d);
+      disposables.push(g);
+      const m = new THREE.Mesh(g, mat(color, rough));
+      m.position.set(wx, y0 + h / 2, wz);
+      m.rotation.y = rotY;
+      m.castShadow = cast;
+      m.receiveShadow = true;
+      scene.add(m);
+      return m;
+    };
+    const cy = (r: number, h: number, color: number, px: number, py: number, y0 = 0, rough = 0.7, seg = 20) => {
+      const [wx, wz] = toWorld(px, py);
+      const g = new THREE.CylinderGeometry(r, r, h, seg);
+      disposables.push(g);
+      const m = new THREE.Mesh(g, mat(color, rough));
+      m.position.set(wx, y0 + h / 2, wz);
+      m.castShadow = true;
+      scene.add(m);
+      return m;
+    };
+    // the red stacking chairs (IMG_9214): moulded shell, slightly raked back, slim light legs
     const chair = (px: number, py: number, rot: number) => {
       const [wx, wz] = toWorld(px, py);
       const grp = new THREE.Group();
-      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.06, 0.42), mat(0xc8431f, 0.6));
-      seat.position.y = 0.45;
-      const back = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.45, 0.06), mat(0xc8431f, 0.6));
-      back.position.set(0, 0.7, -0.2);
-      grp.add(seat, back);
-      for (const [lx, lz] of [[-0.17, -0.17], [0.17, -0.17], [-0.17, 0.17], [0.17, 0.17]]) {
-        const leg = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.45, 0.04), mat(0xd9d4c8));
-        leg.position.set(lx, 0.22, lz);
+      const red = mat(0xe03a2a, 0.45);
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.045, 0.44), red);
+      seat.position.y = 0.46;
+      const back = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.34, 0.04), red);
+      back.position.set(0, 0.68, -0.21);
+      back.rotation.x = -0.14;
+      const lumbar = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.08, 0.05), red);
+      lumbar.position.set(0, 0.5, -0.2);
+      grp.add(seat, back, lumbar);
+      for (const [lx, lz, tilt] of [[-0.18, -0.18, 0.06], [0.18, -0.18, -0.06], [-0.19, 0.19, 0.05], [0.19, 0.19, -0.05]] as [number, number, number][]) {
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.01, 0.46, 6), mat(0xc9ccd0, 0.35));
+        leg.position.set(lx, 0.23, lz);
+        leg.rotation.z = tilt;
         grp.add(leg);
       }
       grp.traverse((o) => { if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).castShadow = true; });
@@ -266,7 +335,6 @@ export default function GreenhouseScene() {
     // kitchen / social table wall, with a doorway (sliding door) between y 232 and 276
     wall(325, 197, 329, 232);
     wall(325, 276, 329, 354);
-    rect(322, 200, 325, 244, 2.0, 0xc79a66, 0, 0.7); // wooden sliding door, pushed open to the north
     rect(323, 229, 331, 232, 2.0, 0xc79a66, 0, 0.7); // door jambs
     rect(323, 276, 331, 279, 2.0, 0xc79a66, 0, 0.7);
 
@@ -539,31 +607,163 @@ export default function GreenhouseScene() {
       scene.add(g);
     }
 
-    // kitchen
-    rect(98, 200, 285, 225, 0.9, 0x3a5470); // sink counter
-    rect(287, 200, 325, 225, 1.8, 0xeceae2); // fridge
-    rect(98, 257, 272, 300, 0.9, 0x3a5470); // island
-    rect(98, 318, 325, 352, 0.9, 0x3a5470); // hood / microwave counter
-    rect(20, 336, 98, 352, 0.6, 0x536b82); // A/C
+    // kitchen (IMG_9217, IMG_9216): maple cabinets with white stone tops, a white two-door fridge,
+    // an island on two maple end panels, white drum pendants with red undersides
+    const maple = 0xd2a469;
+    const stone = 0xf1f0ec;
+    // sink run along the north wall
+    rect(98, 200, 285, 225, 0.86, maple, 0, 0.6);
+    rect(96, 199, 287, 227, 0.035, stone, 0.86, 0.35);
+    for (let i = 0; i < 6; i++) bx(0.28, 0.5, 0.012, 0xb98c56, 112 + i * 29, 226.4, 0.18, 0.6); // cabinet doors
+    cy(0.012, 0.16, 0xd8dde0, 172, 205, 0.895, 0.2);
+    {
+      const [fx, fz] = toWorld(172, 207);
+      const hook = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.012, 6, 14, Math.PI), mat(0xd8dde0, 0.2));
+      hook.position.set(fx, 1.06, fz + 0.0);
+      hook.rotation.z = Math.PI / 2;
+      scene.add(hook);
+      disposables.push(hook.geometry);
+    }
+    bx(0.42, 0.01, 0.34, 0x9aa0a5, 172, 213, 0.865, 0.3); // sink basin
+    bx(0.22, 0.27, 0.14, 0x1a1c1f, 128, 200.8, 1.05, 0.4); // paper towel dispenser
+    bx(0.1, 0.18, 0.08, 0xe9e5da, 200, 200.8, 1.05, 0.5); // soap dispenser
+    // fridge: white, split into freezer and fridge doors, with vertical handles
+    bx(0.74, 1.72, 0.7, 0xf4f4f1, 306, 212, 0, 0.35);
+    bx(0.74, 0.012, 0.012, 0xc8cbce, 306, 226.4, 1.15, 0.3);
+    bx(0.025, 0.4, 0.03, 0xb9bdc1, 292, 226.8, 1.25, 0.2);
+    bx(0.025, 0.55, 0.03, 0xb9bdc1, 292, 226.8, 0.45, 0.2);
+    // island: white top on two maple end panels
+    rect(98, 257, 272, 300, 0.035, stone, 0.9, 0.35);
+    rect(104, 258, 112, 299, 0.9, maple, 0, 0.6);
+    rect(258, 258, 266, 299, 0.9, maple, 0, 0.6);
+    // counter with the microwave, toaster, kettle and induction hob (south side of the kitchen)
+    rect(98, 318, 325, 350, 0.86, maple, 0, 0.6);
+    rect(96, 316, 327, 350, 0.035, stone, 0.86, 0.35);
+    bx(0.5, 0.3, 0.36, 0xf4f4f1, 130, 334, 0.895, 0.4);
+    bx(0.3, 0.2, 0.18, 0xc7ccd1, 178, 336, 0.895, 0.25);
+    bx(0.2, 0.22, 0.16, 0x1d1b18, 208, 336, 0.895, 0.4);
+    bx(0.55, 0.012, 0.45, 0x14161a, 255, 334, 0.895, 0.25);
+    rect(20, 336, 98, 350, 0.6, 0xd9d6cc, 0, 0.6); // A/C unit
+    // blue recycling bin by the door and a black waste bin
+    bx(0.46, 0.84, 0.46, 0x2b5aa6, 306, 270, 0, 0.6);
+    bx(0.3, 0.3, 0.012, 0xf4f4f1, 306, 281.5, 0.35, 0.5);
+    // pendant lamps: white drums with a red underside, hung on thin cables
+    for (const [lx, ly] of [[150, 280], [225, 280]] as [number, number][]) {
+      const [px2, pz2] = toWorld(lx, ly);
+      const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.2, 28), mat(0xf4f4f1, 0.5));
+      drum.position.set(px2, 1.85, pz2);
+      const under = new THREE.Mesh(new THREE.CircleGeometry(0.28, 28), new THREE.MeshBasicMaterial({ color: 0xd8483f }));
+      under.rotation.x = Math.PI / 2;
+      under.position.set(px2, 1.745, pz2);
+      const glow = new THREE.Mesh(new THREE.CircleGeometry(0.18, 24), new THREE.MeshBasicMaterial({ color: 0xfff6e0 }));
+      glow.rotation.x = Math.PI / 2;
+      glow.position.set(px2, 1.742, pz2);
+      const cab = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.6, 5), mat(0x1d1b18, 0.6));
+      cab.position.set(px2, 2.25, pz2);
+      scene.add(drum, under, glow, cab);
+      disposables.push(drum.geometry, under.geometry, under.material, glow.geometry, glow.material, cab.geometry);
+    }
 
-    // social table
-    rect(574, 222, 628, 276, 0.75, 0x3a5470);
-    rect(574, 288, 628, 342, 0.75, 0x3a5470);
+    // social table (IMG_9214): white tables on grey legs with casters, red chairs, navy laundry carts,
+    // a white boucle bean bag, black metal shelving with baskets and an orange mushroom lamp
+    const whiteTable = (x0: number, y0: number, x1: number, y1: number, h = 0.74) => {
+      rect(x0, y0, x1, y1, 0.035, 0xf4f4f1, h - 0.035, 0.35);
+      for (const [lx, ly] of [[x0 + 3, y0 + 3], [x1 - 3, y0 + 3], [x0 + 3, y1 - 3], [x1 - 3, y1 - 3]] as [number, number][]) {
+        cy(0.022, h - 0.07, 0xa9aeb3, lx, ly, 0.06, 0.3, 8);
+        cy(0.03, 0.05, 0x2b2b2b, lx, ly, 0, 0.6, 8); // caster
+      }
+    };
+    whiteTable(574, 222, 628, 276);
+    whiteTable(574, 288, 628, 342);
     for (const [px, py, r] of [
       [552, 249, Math.PI / 2], [650, 249, -Math.PI / 2], [601, 212, 0],
       [552, 315, Math.PI / 2], [650, 315, -Math.PI / 2], [601, 352, Math.PI],
     ] as [number, number, number][]) chair(px, py, r);
-    cyl(347, 320, 17, 0.5, 0x3a5470);
-    rect(329, 280, 358, 293, 0.45, 0x3a5470);
-    rect(327, 196, 357, 222, 1.6, 0x536b82);
-    rect(327, 338, 357, 352, 1.6, 0x536b82);
+    // small pot of flowers on the table
+    cy(0.05, 0.08, 0xe6a1b8, 590, 232, 0.775, 0.5, 12);
+    {
+      const [fx, fz] = toWorld(590, 232);
+      for (let i = 0; i < 6; i++) {
+        const a2 = i * 1.05;
+        const fl = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 6), mat(i % 2 ? 0xf3c5d4 : 0xfaf1f4, 0.6));
+        fl.position.set(fx + Math.cos(a2) * 0.05, 0.9 + (i % 3) * 0.03, fz + Math.sin(a2) * 0.05);
+        scene.add(fl);
+        disposables.push(fl.geometry);
+      }
+    }
+    // navy laundry carts along the mosaic wall
+    for (const cyc of [248, 300] as number[]) {
+      bx(0.5, 0.86, 0.95, 0x1b2b45, 668, cyc, 0.1, 0.7);
+      bx(0.01, 0.2, 0.3, 0xf4f4f1, 643.2, cyc, 0.45, 0.5); // label
+      cy(0.04, 0.06, 0x14161a, 660, cyc - 17, 0, 0.6, 8);
+      cy(0.04, 0.06, 0x14161a, 660, cyc + 17, 0, 0.6, 8);
+    }
+    // white boucle bean bag (the "couch" circle on the map)
+    {
+      const [bxw, bzw] = toWorld(350, 320);
+      const boucle = new THREE.MeshStandardMaterial({ color: 0xf6f3ec, roughness: 1 });
+      const seatG = new THREE.SphereGeometry(0.46, 20, 14);
+      const backG = new THREE.SphereGeometry(0.36, 18, 12);
+      const seatM = new THREE.Mesh(seatG, boucle);
+      seatM.scale.set(1, 0.58, 1);
+      seatM.position.set(bxw, 0.26, bzw);
+      const backM = new THREE.Mesh(backG, boucle);
+      backM.scale.set(1, 1.05, 0.7);
+      backM.position.set(bxw - 0.25, 0.55, bzw);
+      for (const m of [seatM, backM]) { m.castShadow = true; scene.add(m); }
+      disposables.push(seatG, backG, boucle);
+    }
+    // black metal open shelving with woven baskets, and the orange mushroom lamp on top
+    const metalShelf = (px: number, py: number, withLamp: boolean) => {
+      const [sx, sz] = toWorld(px, py);
+      const g = new THREE.Group();
+      const blk = mat(0x1a1a1a, 0.5);
+      const wood = mat(0x7a5a3a, 0.8);
+      for (const [lx, lz] of [[-0.3, -0.13], [0.3, -0.13], [-0.3, 0.13], [0.3, 0.13]]) {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.03, 1.5, 0.03), blk);
+        post.position.set(lx, 0.75, lz);
+        g.add(post);
+      }
+      for (const y of [0.04, 0.42, 0.8, 1.18, 1.5]) {
+        const board = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.03, 0.3), y > 1.4 ? blk : wood);
+        board.position.y = y;
+        g.add(board);
+      }
+      const basketCols = [0x8aa890, 0x1f3a52, 0x2a2a2a, 0x8aa890, 0x1f3a52];
+      [0.1, 0.48, 0.86].forEach((y, row) => {
+        for (let i = 0; i < 2; i++) {
+          const b = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.22, 0.25), mat(basketCols[(row + i) % 5], 0.95));
+          b.position.set(-0.15 + i * 0.3, y + 0.13, 0);
+          g.add(b);
+        }
+      });
+      if (withLamp) {
+        const dome = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xf26b1d, roughness: 0.5 }));
+        dome.position.set(0, 1.52, 0);
+        const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.1, 8), mat(0xf4f4f1, 0.6));
+        stem.position.set(0, 1.56, 0);
+        g.add(dome, stem);
+        disposables.push(dome.geometry, dome.material, stem.geometry);
+      }
+      g.traverse((o) => { if ((o as THREE.Mesh).isMesh) { (o as THREE.Mesh).castShadow = true; disposables.push((o as THREE.Mesh).geometry); } });
+      g.position.set(sx, 0, sz);
+      scene.add(g);
+    };
+    metalShelf(342, 346, true);
+    metalShelf(342, 209, false);
+    // low wooden bench with a brochure rack next to the sliding door
+    bx(0.56, 0.38, 0.3, 0xc99a5b, 345, 286, 0, 0.7);
+    bx(0.4, 0.28, 0.07, 0xf4f4f1, 345, 286, 0.38, 0.5, 0.2);
+    // the wooden sliding door, pushed open along the wall
+    bx(0.07, 2.05, 0.9, 0xd9b27a, 319, 222, 0, 0.6);
+    bx(0.06, 0.05, 1.0, 0x3a3a3a, 316, 222, 2.05, 0.4);
     // mosaic wall: the whole east wall of the social table is covered in the mosaic
     const mosaicTex = (() => {
       const c = document.createElement("canvas");
       c.width = 896; c.height = 640;
       const g = c.getContext("2d")!;
-      g.fillStyle = "#d6a35a"; g.fillRect(0, 0, c.width, c.height);
-      const pal = ["#c8431f", "#24386b", "#e8c36a", "#5f8a4a", "#7aa9b8", "#f2ddd0", "#3a5470", "#b9552e"];
+      g.fillStyle = "#c98f86"; g.fillRect(0, 0, c.width, c.height);
+      const pal = ["#d8b23a", "#2f7f86", "#24386b", "#e8c36a", "#b9552e", "#f2ddd0", "#5f8a4a", "#d8b23a", "#e3a79b"];
       for (let i = 0; i < 1500; i++) {
         g.fillStyle = pal[(Math.random() * pal.length) | 0];
         g.beginPath();
@@ -606,11 +806,97 @@ export default function GreenhouseScene() {
       disposables.push(face);
     }
 
-    // greenhouse
-    rect(255, 405, 575, 443, 0.01, 0xe99a8a, 0.04, 1, false).scale.set(1, 1, 1); // rug band (flattened)
-    rect(368, 473, 556, 497, 0.5, 0x3d3b40, 0, 0.9); // sofa base
-    rect(368, 495, 556, 503, 0.95, 0x3d3b40, 0, 0.9); // sofa back (window side, seat faces the room)
-    rect(228, 485, 280, 500, 0.75, 0x3a5470);
+    // greenhouse (IMG_9107, IMG_2650): a charcoal fabric sofa with round pleated pillows, a blob rug,
+    // a wicker tray on a black stand, cream-potted ferns along the windows
+    {
+      const [sx, sz] = toWorld(468, 478);
+      const g = new THREE.Group();
+      const fabric = mat(0x6b6c72, 0.95);
+      const fabricD = mat(0x56575c, 0.95);
+      const part = (w: number, h: number, d: number, m: THREE.Material, x: number, y: number, z: number) => {
+        const geo = new THREE.BoxGeometry(w, h, d);
+        disposables.push(geo);
+        const o = new THREE.Mesh(geo, m);
+        o.position.set(x, y, z);
+        o.castShadow = true;
+        o.receiveShadow = true;
+        g.add(o);
+      };
+      const L = 2.5;
+      part(L, 0.2, 0.84, fabricD, 0, 0.28, 0); // base
+      part(L - 0.5, 0.17, 0.68, fabric, 0, 0.47, -0.06); // seat cushions
+      part(L - 0.5, 0.42, 0.18, fabric, 0, 0.7, 0.33); // back, on the window side
+      part(0.25, 0.5, 0.84, fabricD, -L / 2 + 0.125, 0.5, 0); // arms
+      part(0.25, 0.5, 0.84, fabricD, L / 2 - 0.125, 0.5, 0);
+      for (const lx of [-L / 2 + 0.1, L / 2 - 0.1]) for (const lz of [-0.34, 0.34]) part(0.05, 0.18, 0.05, mat(0x5a4632, 0.8), lx, 0.09, lz);
+      // round pleated pillows: crimson, two sage greens, and a tan one at the left end
+      const pillows: [number, number, number, number][] = [[-0.85, 0.66, 0.2, 0xb4465a], [-0.35, 0.62, 0.15, 0x7a9a6a], [0.2, 0.62, 0.15, 0x6b8e5a], [-1.0, 0.6, -0.12, 0xd9a05b]];
+      for (const [x, y, z, c] of pillows) {
+        const pg = new THREE.CylinderGeometry(0.2, 0.2, 0.09, 24);
+        disposables.push(pg);
+        const pm = new THREE.Mesh(pg, mat(c, 0.7));
+        pm.position.set(x, y, z);
+        pm.rotation.x = Math.PI / 2 + 0.3;
+        pm.castShadow = true;
+        g.add(pm);
+      }
+      g.position.set(sx, 0, sz);
+      scene.add(g);
+    }
+    // blob rug: a salmon shape with a lighter peach inner shape (IMG_9107)
+    {
+      const c = document.createElement("canvas");
+      c.width = 1024; c.height = 640;
+      const g = c.getContext("2d")!;
+      const blob = (cx: number, cy2: number, rx: number, ry: number, col: string, wob: number) => {
+        g.fillStyle = col;
+        g.beginPath();
+        for (let i = 0; i <= 64; i++) {
+          const t = (i / 64) * Math.PI * 2;
+          const r = 1 + Math.sin(t * 3 + wob) * 0.07 + Math.sin(t * 2 + wob * 2) * 0.05;
+          const x = cx + Math.cos(t) * rx * r;
+          const y = cy2 + Math.sin(t) * ry * r;
+          if (i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+        }
+        g.closePath();
+        g.fill();
+      };
+      blob(520, 330, 470, 290, "#d98a78", 0.4);
+      blob(560, 350, 330, 190, "#ecaa94", 1.7);
+      blob(610, 330, 190, 110, "#f4c4ac", 2.6);
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      disposables.push(tex);
+      const [rx, rz] = toWorld(450, 422);
+      const geo = new THREE.PlaneGeometry(3.4, 2.1);
+      disposables.push(geo);
+      const rug = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: tex, transparent: true, roughness: 1 }));
+      rug.rotation.x = -Math.PI / 2;
+      rug.position.set(rx, 0.05, rz);
+      rug.receiveShadow = true;
+      scene.add(rug);
+      disposables.push(rug.material);
+    }
+    // wicker tray on a black stand next to the sofa
+    {
+      const [wx, wz] = toWorld(392, 452);
+      const tray = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.2, 0.09, 22, 1, true), new THREE.MeshStandardMaterial({ color: 0xb98a56, roughness: 0.9, side: THREE.DoubleSide }));
+      tray.position.set(wx, 0.6, wz);
+      const bottom = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.015, 22), mat(0xb98a56, 0.9));
+      bottom.position.set(wx, 0.56, wz);
+      scene.add(tray, bottom);
+      disposables.push(tray.geometry, tray.material, bottom.geometry);
+      for (let k = 0; k < 4; k++) {
+        const ang = (k / 4) * Math.PI * 2 + 0.4;
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.58, 6), mat(0x1d1b18, 0.5));
+        leg.position.set(wx + Math.cos(ang) * 0.17, 0.29, wz + Math.sin(ang) * 0.17);
+        scene.add(leg);
+        disposables.push(leg.geometry);
+      }
+    }
+    // a low white table with black legs by the hidden-space side
+    rect(228, 485, 280, 500, 0.03, 0xf4f4f1, 0.45, 0.4);
+    for (const [lx, ly] of [[231, 488], [277, 488], [231, 497], [277, 497]] as [number, number][]) cy(0.012, 0.45, 0x1d1b18, lx, ly, 0, 0.5, 6);
     // east end (IMG_9104): brown leather lounge chair on a light wood frame with an orange round pillow,
     // a round brown pouf in front, and a wicker tray table on thin black legs
     {
@@ -667,13 +953,79 @@ export default function GreenhouseScene() {
         disposables.push(leg.geometry);
       }
     }
-    cyl(300, 405, 20, 0.04, 0xe99a8a, 0.04);
     for (const [px, py, s, t] of [
       [308, 479, 1.0, false], [338, 491, 0.8, false], [575, 487, 1.0, false], [662, 487, 1.2, true],
       [240, 366, 1.1, true], [655, 360, 1.1, true], [250, 503, 0.7, false],
     ] as [number, number, number, boolean][]) plant(px, py, s, t);
+    // window details (IMG_9107, IMG_9215, IMG_9108)
+    const radiator = (x0: number, x1: number, y: number) => {
+      rect(x0, y, x1, y + 8, 0.28, 0xeeeeea, 0, 0.5);
+      for (let i = 0; i < 10; i++) {
+        const sx = x0 + 4 + (i * (x1 - x0 - 8)) / 9;
+        bx(0.02, 0.14, 0.012, 0xb7bbc0, sx, y + 8.5, 0.07, 0.4);
+      }
+    };
+    radiator(200, 390, 495);
+    radiator(560, 680, 495);
+    radiator(80, 190, 355);
+    // ledge along the south glass with small terracotta pots
+    rect(200, 499, 683, 507, 0.03, 0x2a2826, 0.9, 0.7);
+    for (let i = 0; i < 18; i++) {
+      const px2 = 210 + i * 26 + (i % 3) * 3;
+      cy(0.05 + (i % 2) * 0.012, 0.09 + (i % 3) * 0.02, [0xcf6a3a, 0x3f78a8, 0xe0a36a, 0xb4573a][i % 4], px2, 503, 0.93, 0.8, 12);
+      if (i % 2 === 0) {
+        const [qx, qz] = toWorld(px2, 503);
+        const lf = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), mat(0x6a9a4a, 0.9));
+        lf.position.set(qx, 1.1 + (i % 3) * 0.02, qz);
+        scene.add(lf);
+        disposables.push(lf.geometry);
+      }
+    }
+    // framed botanical prints, a camera track and two cameras on the grey wall
+    {
+      const wallZ = toWorld(0, 354.5)[1];
+      for (const [fx, fy2, col] of [[205, 1.55, 0x4f8a4a], [226, 1.55, 0xe7a7b8], [247, 1.55, 0x4f8a4a]] as [number, number, number][]) {
+        const [wx] = toWorld(fx, 0);
+        const frameG = new THREE.BoxGeometry(0.3, 0.4, 0.025);
+        const picG = new THREE.PlaneGeometry(0.24, 0.34);
+        disposables.push(frameG, picG);
+        const frame = new THREE.Mesh(frameG, mat(0x1d1b18, 0.5));
+        frame.position.set(wx, fy2, wallZ + 0.01);
+        const pic = new THREE.Mesh(picG, mat(col, 0.9));
+        pic.position.set(wx, fy2, wallZ + 0.03);
+        const paper = new THREE.Mesh(picG, mat(0xf4f1e8, 0.9));
+        paper.scale.set(1.04, 1.04, 1);
+        paper.position.set(wx, fy2, wallZ + 0.027);
+        scene.add(frame, paper, pic);
+      }
+      const [tx0] = toWorld(120, 0);
+      const [tx1] = toWorld(300, 0);
+      const trackG = new THREE.BoxGeometry(tx1 - tx0, 0.03, 0.03);
+      disposables.push(trackG);
+      const track = new THREE.Mesh(trackG, mat(0xf4f4f1, 0.5));
+      track.position.set((tx0 + tx1) / 2, 2.0, wallZ + 0.05);
+      scene.add(track);
+      for (const cx2 of [150, 255]) {
+        const [qx] = toWorld(cx2, 0);
+        const camG = new THREE.CylinderGeometry(0.045, 0.045, 0.1, 12);
+        disposables.push(camG);
+        const cam = new THREE.Mesh(camG, mat(0xf4f4f1, 0.4));
+        cam.rotation.x = Math.PI / 2;
+        cam.position.set(qx, 1.95, wallZ + 0.13);
+        scene.add(cam);
+      }
+    }
+    // hanging Boston ferns under the roof
+    for (const [hx, hy] of [[330, 470], [610, 485], [500, 495]] as [number, number][]) {
+      const [qx, qz] = toWorld(hx, hy);
+      const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.5, 5), mat(0x1d1b18, 0.6));
+      chain.position.set(qx, 2.0, qz);
+      scene.add(chain);
+      disposables.push(chain.geometry);
+      plant(hx, hy, 0.8, false, 1.5);
+    }
     // hidden space
-    rect(70, 355, 193, 372, 0.6, 0x536b82);
+    rect(70, 355, 193, 372, 0.6, 0xd9d6cc);
     // papasan corner (IMG_9215, IMG_9105): saucer chairs on woven bases, a spindle side table, a white sculpture
     const papasan = (px: number, py: number, tx: number, ty: number, pillow: number) => {
       const [wx, wz] = toWorld(px, py);
@@ -940,11 +1292,12 @@ export default function GreenhouseScene() {
       [519, -9, 610, -3], [665, -9, 685, -3], // lobby door set (right leaf is open)
       [98, 200, 285, 225], [287, 200, 325, 225], [98, 257, 272, 300], [98, 318, 325, 350], [22, 336, 98, 350], // kitchen
       [546, 206, 656, 360], [327, 277, 360, 296], [327, 196, 358, 224], [327, 338, 358, 352], // social table
+      [660, 220, 685, 322], [226, 483, 282, 502], // laundry carts and the low table
       [20, 452, 75, 513], [85, 484, 190, 497], // hidden space notch and long table
-      [366, 470, 558, 506], // sofa
+      [400, 452, 538, 500], // sofa
     ];
     const DISCS: Disc[] = [
-      [628, 180, 14], [347, 320, 22], [50, 392, 26], [50, 432, 26], [60, 412, 12], [40, 368, 12], [240, 366, 18],
+      [628, 180, 14], [350, 320, 26], [306, 270, 12], [392, 452, 11], [50, 392, 26], [50, 432, 26], [60, 412, 12], [40, 368, 12], [240, 366, 18],
       [640, 462, 22], [612, 438, 16], [640, 425, 10], [308, 479, 18], [338, 491, 14], [575, 487, 18], [662, 487, 22],
       [655, 360, 22], [250, 503, 12],
     ];

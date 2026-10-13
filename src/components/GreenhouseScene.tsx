@@ -833,6 +833,8 @@ export default function GreenhouseScene() {
     }
 
     // ---------- social space: tiled ceiling, grey header over the opening, recessed lights, track and cameras ----------
+    // (hidden in the outside view, so the room stays readable from above; shown in first person)
+    const ceilingStart = scene.children.length;
     // (IMG_9213, IMG_9218): the social room has a lower white tile ceiling; the glass roof of the greenhouse meets
     // a grey header wall above the opening, with a white track carrying spot lights and cameras
     {
@@ -940,6 +942,14 @@ export default function GreenhouseScene() {
       fix(cx1 - 0.4, true);
     }
 
+    const ceilingObjs = scene.children.slice(ceilingStart);
+    let ceilingShown = true;
+    const showCeiling = (v: boolean) => {
+      if (v === ceilingShown) return;
+      ceilingShown = v;
+      for (const o of ceilingObjs) o.visible = v;
+    };
+    showCeiling(false);
     // greenhouse (IMG_9107, IMG_2650): a charcoal fabric sofa with round pleated pillows, a blob rug,
     // a wicker tray on a black stand, cream-potted ferns along the windows
     {
@@ -1782,6 +1792,7 @@ export default function GreenhouseScene() {
     let raf = 0;
     const tick = () => {
       stepYou(performance.now());
+      showCeiling(mode !== "orbit");
       if (mode === "orbit") controls.update();
       if (guardHead && !reduced) guardHead.rotation.y = Math.sin(performance.now() / 2600) * 0.45;
       renderer.render(scene, camera);

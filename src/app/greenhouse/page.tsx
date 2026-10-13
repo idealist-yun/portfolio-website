@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Eyebrow } from "@/components/ui";
 import GreenhouseScene from "@/components/GreenhouseScene";
+import GreenhouseSceneToBe from "@/components/GreenhouseSceneToBe";
 
 export const metadata: Metadata = {
   title: "The Greenhouse — Ian Lee",
@@ -24,8 +25,27 @@ export default function GreenhousePage() {
           </p>
         </div>
       </header>
+      <div className="px-6 pb-3">
+        <div className="mx-auto max-w-5xl">
+          <Eyebrow>As-Is</Eyebrow>
+        </div>
+      </div>
       <section className="relative h-[72vh] min-h-[420px] w-full overflow-hidden border-y border-border">
         <GreenhouseScene />
+        <p className="pointer-events-none absolute bottom-4 left-6 text-xs text-muted">
+          Drag to rotate · scroll to zoom · tap a red dot for a photo · not to scale
+        </p>
+      </section>
+      <div className="px-6 pb-3 pt-12">
+        <div className="mx-auto max-w-5xl">
+          <Eyebrow>To-Be</Eyebrow>
+          <p className="mt-2 max-w-xl text-sm text-foreground/70">
+            The redesign. Starts as a copy of the As-Is model.
+          </p>
+        </div>
+      </div>
+      <section className="relative h-[72vh] min-h-[420px] w-full overflow-hidden border-y border-border">
+        <GreenhouseSceneToBe />
         <p className="pointer-events-none absolute bottom-4 left-6 text-xs text-muted">
           Drag to rotate · scroll to zoom · tap a red dot for a photo · not to scale
         </p>

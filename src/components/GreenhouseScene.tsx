@@ -58,7 +58,7 @@ const SPOTS: Spot[] = [
     label: "Papasan corner",
     caption: "A quiet corner by the window with two papasan chairs.",
     photo: "/images/greenhouse/9215.jpg",
-    x: 80,
+    x: 215,
     y: 410,
     h: 1.6,
   },
@@ -78,7 +78,7 @@ const ZONES: { name: string; x: number; y: number; h?: number }[] = [
   { name: "Kitchen", x: 95, y: 260 },
   { name: "Social Table", x: 440, y: 270 },
   { name: "Greenhouse", x: 330, y: 430 },
-  { name: "Hidden space", x: 105, y: 440 },
+  { name: "Hidden space", x: 240, y: 445 },
   { name: "Guard", x: 628, y: 180, h: 1.75 },
 ];
 
@@ -301,9 +301,10 @@ export default function GreenhouseScene() {
     ground.position.y = -0.21;
     ground.receiveShadow = true;
     scene.add(ground);
-    rect(14, 28, 692, 458, 0.2, 0xe7dfcc, -0.2, 1, false);
+    rect(14, 28, 692, 352, 0.2, 0xe7dfcc, -0.2, 1, false);
+    rect(160, 352, 692, 463.3, 0.2, 0xe7dfcc, -0.2, 1, false);
     rect(514, -58, 692, 28, 0.2, 0xe7dfcc, -0.2, 1, false);
-    rect(69, 458, 692, 513, 0.2, 0xe7dfcc, -0.2, 1, false);
+    rect(203.8, 463.3, 692, 513, 0.2, 0xe7dfcc, -0.2, 1, false);
 
     // ---------- floors by zone ----------
     const floor = (x0: number, y0: number, x1: number, y1: number, c: number) =>
@@ -312,12 +313,13 @@ export default function GreenhouseScene() {
     floor(20, 95, 685, 197, 0xf1c867); // aisle
     floor(20, 197, 325, 352, 0xf2c3a8); // kitchen
     floor(325, 197, 685, 352, 0xa9d0ea); // social table
-    floor(195, 352, 685, 507, 0xa6cadc); // greenhouse
-    floor(20, 352, 195, 451.6, 0xcfe8f6); // hidden space
-    floor(75.4, 451.6, 195, 507, 0xcfe8f6); // (south-west corner notched by one glass bay)
+    floor(325, 352, 685, 507, 0xa6cadc); // greenhouse
+    floor(160, 352, 325, 463.3, 0xcfe8f6); // hidden space: from the west glass to the corner where the kitchen wall turns
+    floor(203.8, 463.3, 325, 507, 0xcfe8f6); // (south-west corner notched by one glass bay)
 
     // ---------- walls (low cutaway, so the plan stays readable) ----------
     const wallMeshes: { m: THREE.Mesh; h: number }[] = [];
+    const wallHung: { m: THREE.Mesh; low: number; high: number }[] = []; // things hung on the walls follow them up and down
     const wall = (x0: number, y0: number, x1: number, y1: number, h = 1.15) => {
       const m = rect(x0, y0, x1, y1, h, 0xf8f4e8, 0.04, 0.9);
       wallMeshes.push({ m, h });
@@ -345,7 +347,7 @@ export default function GreenhouseScene() {
       side: THREE.DoubleSide, depthWrite: false,
     });
     const frameMat = new THREE.MeshBasicMaterial({ color: 0x1d1b18, transparent: true, opacity: 0.38 });
-    const [gx0, gz0] = toWorld(20, 352);
+    const [gx0, gz0] = toWorld(160, 352); // the glass ends here; nothing is built west of it
     const [gx1, gz1] = toWorld(685, 507);
     const gw = gx1 - gx0;
     const gd = gz1 - gz0;
@@ -441,6 +443,16 @@ export default function GreenhouseScene() {
     for (let j = 0; j <= 3; j++) {
       const z = gz0 + ((nzm - gz0) * j) / 3;
       postAt(gx0, z, roofH(z));
+    }
+    // frosted panel at the north end of the west glass, next to the grey wall (IMG_9215, IMG_9617)
+    {
+      const fg = new THREE.PlaneGeometry(BAY - 0.05, 2.1);
+      const fm = new THREE.MeshStandardMaterial({ color: 0xf4f6f4, roughness: 0.9, transparent: true, opacity: 0.94, side: THREE.DoubleSide });
+      disposables.push(fg, fm);
+      const fp = new THREE.Mesh(fg, fm);
+      fp.rotation.y = Math.PI / 2;
+      fp.position.set(gx0 + 0.015, 0.4 + 1.05, gz0 + BAY / 2);
+      scene.add(fp);
     }
     // the notch: a step glass facing south, then a pane facing west
     const step = glassWall(NOTCH, roofH(nzm));
@@ -647,8 +659,8 @@ export default function GreenhouseScene() {
     bx(0.55, 0.012, 0.45, 0x14161a, 255, 334, 0.895, 0.25);
     rect(20, 336, 98, 350, 0.6, 0xd9d6cc, 0, 0.6); // A/C unit
     // blue recycling bin by the door and a black waste bin
-    bx(0.46, 0.84, 0.46, 0x2b5aa6, 306, 270, 0, 0.6);
-    bx(0.3, 0.3, 0.012, 0xf4f4f1, 306, 281.5, 0.35, 0.5);
+    bx(0.46, 0.84, 0.46, 0x2b5aa6, 306, 304, 0, 0.6);
+    bx(0.3, 0.3, 0.012, 0xf4f4f1, 306, 315.5, 0.35, 0.5);
     // pendant lamps: white drums with a red underside, hung on thin cables
     for (const [lx, ly] of [[150, 280], [225, 280]] as [number, number][]) {
       const [px2, pz2] = toWorld(lx, ly);
@@ -1099,7 +1111,7 @@ export default function GreenhouseScene() {
     }
     for (const [px, py, s, t] of [
       [308, 479, 1.0, false], [338, 491, 0.8, false], [575, 487, 1.0, false], [662, 487, 1.2, true],
-      [240, 366, 1.1, true], [655, 360, 1.1, true], [250, 503, 0.7, false],
+      [312, 368, 1.1, true], [655, 360, 1.1, true], [250, 503, 0.7, false],
     ] as [number, number, number, boolean][]) plant(px, py, s, t);
     // window details (IMG_9107, IMG_9215, IMG_9108)
     const radiator = (x0: number, x1: number, y: number) => {
@@ -1111,9 +1123,12 @@ export default function GreenhouseScene() {
     };
     radiator(200, 390, 495);
     radiator(560, 680, 495);
-    radiator(80, 190, 355);
+    // floor radiator under the grey wall (IMG_9215, IMG_9617): a white cabinet with a slotted top, running east from the corner
+    rect(176, 355, 305, 369, 0.46, 0xf1f1ee, 0, 0.5);
+    rect(182, 357, 298, 366, 0.012, 0x8a8f94, 0.46, 0.6);
+    bx(0.34, 0.17, 0.03, 0x9aa0a6, 262, 355.4, 1.9, 0.4); // wall vent above the prints
     // ledge along the south glass with small terracotta pots
-    rect(200, 499, 683, 507, 0.03, 0x2a2826, 0.9, 0.7);
+    rect(206, 499, 683, 507, 0.03, 0x2a2826, 0.9, 0.7);
     for (let i = 0; i < 18; i++) {
       const px2 = 210 + i * 26 + (i % 3) * 3;
       cy(0.05 + (i % 2) * 0.012, 0.09 + (i % 3) * 0.02, [0xcf6a3a, 0x3f78a8, 0xe0a36a, 0xb4573a][i % 4], px2, 503, 0.93, 0.8, 12);
@@ -1128,7 +1143,7 @@ export default function GreenhouseScene() {
     // framed botanical prints, a camera track and two cameras on the grey wall
     {
       const wallZ = toWorld(0, 354.5)[1];
-      for (const [fx, fy2, col] of [[205, 1.55, 0x4f8a4a], [226, 1.55, 0xe7a7b8], [247, 1.55, 0x4f8a4a]] as [number, number, number][]) {
+      for (const [fx, fy2, col] of [[222, 1.55, 0x4f8a4a], [252, 1.55, 0xe7a7b8], [282, 1.55, 0x4f8a4a]] as [number, number, number][]) {
         const [wx] = toWorld(fx, 0);
         const frameG = new THREE.BoxGeometry(0.3, 0.4, 0.025);
         const picG = new THREE.PlaneGeometry(0.24, 0.34);
@@ -1142,14 +1157,14 @@ export default function GreenhouseScene() {
         paper.position.set(wx, fy2, wallZ + 0.027);
         scene.add(frame, paper, pic);
       }
-      const [tx0] = toWorld(120, 0);
+      const [tx0] = toWorld(165, 0);
       const [tx1] = toWorld(300, 0);
       const trackG = new THREE.BoxGeometry(tx1 - tx0, 0.03, 0.03);
       disposables.push(trackG);
       const track = new THREE.Mesh(trackG, mat(0xf4f4f1, 0.5));
       track.position.set((tx0 + tx1) / 2, 2.0, wallZ + 0.05);
       scene.add(track);
-      for (const cx2 of [150, 255]) {
+      for (const cx2 of [200, 275]) {
         const [qx] = toWorld(cx2, 0);
         const camG = new THREE.CylinderGeometry(0.045, 0.045, 0.1, 12);
         disposables.push(camG);
@@ -1160,7 +1175,7 @@ export default function GreenhouseScene() {
       }
     }
     // hanging Boston ferns under the roof
-    for (const [hx, hy] of [[330, 470], [610, 485], [500, 495]] as [number, number][]) {
+    for (const [hx, hy] of [[330, 470], [610, 485], [500, 495], [205, 452]] as [number, number][]) {
       const [qx, qz] = toWorld(hx, hy);
       const chain = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.5, 5), mat(0x1d1b18, 0.6));
       chain.position.set(qx, 2.0, qz);
@@ -1169,7 +1184,6 @@ export default function GreenhouseScene() {
       plant(hx, hy, 0.8, false, 1.5);
     }
     // hidden space
-    rect(70, 355, 193, 372, 0.6, 0xd9d6cc);
     // papasan corner (IMG_9215, IMG_9105): saucer chairs on woven bases, a spindle side table, a white sculpture
     const papasan = (px: number, py: number, tx: number, ty: number, pillow: number) => {
       const [wx, wz] = toWorld(px, py);
@@ -1210,17 +1224,12 @@ export default function GreenhouseScene() {
       scene.add(grp);
       disposables.push(baseGeo, shellGeo, padGeo, rimGeo, pillowGeo, shell.material, pad.material, pil.material);
     };
-    papasan(50, 388, 150, 402, 0xd9825b);
-    papasan(50, 441, 150, 426, 0xb4465a);
-    // long white table along the south glass with small potted plants on it (IMG_9105)
-    rect(85, 484, 190, 497, 0.04, 0xf4f2ee, 0.16, 0.6);
-    for (const [lx, ly] of [[88, 486], [185, 486], [88, 494], [185, 494]] as [number, number][]) rect(lx - 1, ly - 1, lx + 1, ly + 1, 0.16, 0x1d1b18);
-    plant(110, 490, 0.38, false, 0.2);
-    plant(140, 490, 0.34, false, 0.2);
-    plant(170, 490, 0.4, false, 0.2);
+    // IMG_9617, IMG_9623, IMG_9215: burgundy cushion by the frosted panel, orange cushion by the clear glass
+    papasan(188, 388, 250, 424, 0xb4465a);
+    papasan(188, 441, 250, 418, 0xd9825b);
     {
       // spindle side table between the chairs
-      const [tx, tz] = toWorld(60, 414.5);
+      const [tx, tz] = toWorld(206, 414);
       const wood = mat(0x4a2f20, 0.6);
       const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 20), wood);
       top.position.set(tx, 0.53, tz);
@@ -1230,7 +1239,7 @@ export default function GreenhouseScene() {
       foot.position.set(tx, 0.013, tz);
       for (const m of [top, stem, foot]) { m.castShadow = true; scene.add(m); disposables.push(m.geometry); }
       // white coral sculpture on a white cube: a smaller piece (about 0.8 m tall), tucked beside the chairs by the window
-      const [sx, sz] = toWorld(84, 463);
+      const [sx, sz] = toWorld(216, 462);
       const white = mat(0xf4f2ee, 0.7);
       const sculpt = new THREE.Group();
       const cube = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.5, 0.36), white);
@@ -1246,6 +1255,8 @@ export default function GreenhouseScene() {
         sculpt.add(m);
         disposables.push(g);
       }
+      cy(0.13, 0.2, 0xc9663a, 230, 472, 0, 0.8, 16);
+      plant(230, 472, 0.5, false, 0.2);
       sculpt.scale.setScalar(0.62);
       sculpt.position.set(sx, 0, sz);
       scene.add(sculpt);
@@ -1325,7 +1336,7 @@ export default function GreenhouseScene() {
       rect(641, gateY - 6, 665, gateY + 6, 0.08, 0x8a949c, 1.0, 0.35);
       rect(638, gateY - 9, 644, gateY - 7, 0.18, 0x14161a, 0.95, 0.4);
 
-      // HOUSE STAFF board on the east wall (teal, with a title)
+      // HOUSE STAFF board on the west wall of the lobby, opposite the guard's side (teal, with a title)
       const boardTex = (() => {
         const c = document.createElement("canvas");
         c.width = 512; c.height = 256;
@@ -1342,12 +1353,13 @@ export default function GreenhouseScene() {
         disposables.push(t);
         return t;
       })();
-      const [bx, bz] = toWorld(685, 78);
+      const [bx, bz] = toWorld(521, 78); // the east face of the lobby's west wall
       const boardGeo = new THREE.PlaneGeometry(1.5, 0.75);
       const board = new THREE.Mesh(boardGeo, new THREE.MeshStandardMaterial({ map: boardTex, roughness: 0.8 }));
-      board.rotation.y = -Math.PI / 2;
-      board.position.set(bx - 0.01, 1.55, bz);
+      board.rotation.y = Math.PI / 2;
+      board.position.set(bx + 0.012, 0.76, bz);
       scene.add(board);
+      wallHung.push({ m: board, low: 0.76, high: 1.55 }); // under the top of the low cutaway wall, and at eye height once the walls are raised
       disposables.push(boardGeo, board.material);
 
     }
@@ -1415,6 +1427,15 @@ export default function GreenhouseScene() {
       const xW = wx0 - 0.2;
       flat(xW - 12, xW, zN - 4, zS + 4, 0xd7d1c1); // sidewalk
       flat(xW - 12, xW - 3.4, zN - 4, zS + 4, 0x8a8a88); // street
+      // where the hidden space used to stand: the same sidewalk, running up to the glass
+      {
+        const [pxa, pza] = toWorld(14, 352);
+        const [pxb, pzb] = toWorld(160, 513);
+        const [pxc] = toWorld(203.8, 513);
+        const [, pzc] = toWorld(160, 463.3);
+        flat(pxa, pxb, pza, pzb, 0xd7d1c1);
+        flat(pxb, pxc, pzc, pzb, 0xd7d1c1); // the notch
+      }
       for (let i = 0; i < 12; i++) blob(xW - 0.4 - rnd() * 0.5, 0.2 + rnd() * 0.35, wx0 * 0 + zN + 1 + rnd() * (zS - zN + 2), 0.2 + rnd() * 0.15, greens[(rnd() * greens.length) | 0]);
       // --- east: a path along the park and a few shrubs
       const xE = wx1 + 0.2;
@@ -1431,7 +1452,7 @@ export default function GreenhouseScene() {
     type Disc = [number, number, number];
     const WALK: Rect[] = [
       [523, -50, 683, 99], [22, 99, 683, 195], [40, 193, 77, 201], [22, 199, 323, 350], [323, 232, 331, 276],
-      [331, 199, 683, 352], [453, 193, 490, 201], [197, 352, 683, 505], [22, 352, 197, 505],
+      [331, 199, 683, 352], [453, 193, 490, 201], [162, 352, 683, 505],
     ];
     const BLOCK: Rect[] = [
       [100, 98, 130, 118], [143, 98, 173, 118], [186, 98, 214, 118], // bins
@@ -1441,11 +1462,11 @@ export default function GreenhouseScene() {
       [98, 200, 285, 225], [287, 200, 325, 225], [98, 257, 272, 300], [98, 318, 325, 350], [22, 336, 98, 350], // kitchen
       [546, 206, 656, 360], [327, 277, 360, 296], [327, 196, 358, 224], [327, 338, 358, 352], // social table
       [660, 220, 685, 322], [226, 483, 282, 502], // laundry carts and the low table
-      [20, 452, 75, 513], [85, 484, 190, 497], // hidden space notch and long table
+      [160, 463, 204, 513], // hidden space notch
       [400, 452, 538, 500], // sofa
     ];
     const DISCS: Disc[] = [
-      [628, 180, 14], [350, 320, 26], [306, 270, 12], [392, 452, 11], [50, 388, 22], [50, 441, 22], [60, 414, 11], [84, 463, 8], [240, 366, 18],
+      [628, 180, 14], [350, 320, 26], [306, 304, 12], [392, 452, 11], [188, 388, 22], [188, 441, 22], [206, 414, 11], [216, 462, 8], [312, 368, 16],
       [640, 462, 22], [612, 438, 16], [640, 425, 10], [308, 479, 18], [338, 491, 14], [575, 487, 18], [662, 487, 22],
       [655, 360, 22], [250, 503, 12],
     ];
@@ -1491,7 +1512,7 @@ export default function GreenhouseScene() {
     const [yx0, yz0] = toWorld(545, 140);
     you.position.set(yx0, 0, yz0);
     scene.add(you);
-    const me = { x: 545, y: 140, face: Math.PI, moving: false, tx: null as number | null, ty: null as number | null };
+    const me = { x: 565, y: 14, face: 0.36, moving: false, tx: null as number | null, ty: null as number | null };
 
     // first person: the camera sits at YOU's eyes
     let mode: "orbit" | "enter" | "play" | "exit" = "orbit";
@@ -1532,8 +1553,8 @@ export default function GreenhouseScene() {
       { x: 468, y: 473, face: Math.PI, eye: 1.12, out: [0, -50] },
       { x: 506, y: 473, face: Math.PI, eye: 1.12, out: [0, -50] },
       // papasan chairs in the hidden space
-      { x: 50, y: 388, face: 1.43, eye: 0.98, out: [40, 0] },
-      { x: 50, y: 441, face: 1.72, eye: 0.98, out: [40, 0] },
+      { x: 188, y: 388, face: 1.05, eye: 0.98, out: [35, -5] },
+      { x: 188, y: 441, face: 1.92, eye: 0.98, out: [35, 10] },
       // brown lounge chair at the east end, and the pouf in front of it
       { x: 640, y: 462, face: -(3 * Math.PI) / 4, eye: 1.08, out: [-40, -40] },
       { x: 612, y: 438, face: -(3 * Math.PI) / 4, eye: 0.95, out: [-30, -30] },
@@ -1582,6 +1603,7 @@ export default function GreenhouseScene() {
       eyeQuat.setFromEuler(eul);
     };
     const raiseWalls = (up: boolean) => {
+      for (const h of wallHung) h.m.position.y = up ? h.high : h.low;
       for (const { m, h } of wallMeshes) {
         const k = up ? 2.3 / h : 1;
         m.scale.y = k;

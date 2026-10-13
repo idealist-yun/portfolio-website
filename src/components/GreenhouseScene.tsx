@@ -94,8 +94,9 @@ export default function GreenhouseScene() {
   const activeRef = useRef<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [hint, setHint] = useState<"sit" | "stand" | null>(null);
   const youRef = useRef<HTMLDivElement | null>(null);
-  const api = useRef<{ start: () => void; stop: () => void; press: (k: string, down: boolean) => void } | null>(null);
+  const api = useRef<{ start: () => void; stop: () => void; press: (k: string, down: boolean) => void; sit: () => void } | null>(null);
 
   useEffect(() => {
     activeRef.current = active?.id ?? null;
@@ -353,9 +354,10 @@ export default function GreenhouseScene() {
     const roofH = (z: number) => ridge - ((ridge - eave) * (z - gz0)) / gd;
     const nx = 12;
     const BAY = gw / nx; // one glass bay
+    const NOTCH = BAY; // the south-west corner of the hidden space is cut back by one glass bay
     // the south-west corner of the hidden space is notched by one bay in both directions
-    const nxm = gx0 + BAY;
-    const nzm = gz1 - BAY;
+    const nxm = gx0 + NOTCH;
+    const nzm = gz1 - NOTCH;
 
     const glassWall = (w: number, h: number) => {
       const g = new THREE.PlaneGeometry(w, h);
@@ -441,10 +443,10 @@ export default function GreenhouseScene() {
       postAt(gx0, z, roofH(z));
     }
     // the notch: a step glass facing south, then a pane facing west
-    const step = glassWall(BAY, roofH(nzm));
+    const step = glassWall(NOTCH, roofH(nzm));
     step.position.set((gx0 + nxm) / 2, roofH(nzm) / 2, nzm);
     scene.add(step);
-    const inner = glassSlope(BAY, eave, roofH(nzm));
+    const inner = glassSlope(NOTCH, eave, roofH(nzm));
     inner.position.set(nxm, 0, gz1);
     scene.add(inner);
     postAt(nxm, nzm, roofH(nzm));
@@ -1032,15 +1034,15 @@ export default function GreenhouseScene() {
       const [twx, twz] = toWorld(tx, ty);
       const grp = new THREE.Group();
       const dark = mat(0x1f1d1b, 0.95);
-      const R = 0.5;
-      const baseGeo = new THREE.CylinderGeometry(0.2, 0.3, 0.42, 14);
+      const R = 0.42; // about 33 in across, like a real papasan
+      const baseGeo = new THREE.CylinderGeometry(0.17, 0.26, 0.32, 14);
       const base = new THREE.Mesh(baseGeo, dark);
-      base.position.y = 0.21;
+      base.position.y = 0.16;
       base.castShadow = true;
       grp.add(base);
       const bowl = new THREE.Group();
-      bowl.position.y = 0.62;
-      bowl.rotation.x = 0.55; // tilted back, opening toward the room
+      bowl.position.y = 0.46;
+      bowl.rotation.x = 0.42; // tilted back, opening toward the room
       const shellGeo = new THREE.SphereGeometry(R, 28, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
       const shell = new THREE.Mesh(shellGeo, new THREE.MeshStandardMaterial({ color: 0x2a2826, roughness: 0.95, side: THREE.DoubleSide }));
       shell.scale.y = 0.62;
@@ -1066,8 +1068,8 @@ export default function GreenhouseScene() {
       scene.add(grp);
       disposables.push(baseGeo, shellGeo, padGeo, rimGeo, pillowGeo, shell.material, pad.material, pil.material);
     };
-    papasan(50, 392, 150, 400, 0xd9825b);
-    papasan(50, 432, 150, 410, 0xb4465a);
+    papasan(50, 388, 150, 402, 0xd9825b);
+    papasan(50, 441, 150, 426, 0xb4465a);
     // long white table along the south glass with small potted plants on it (IMG_9105)
     rect(85, 484, 190, 497, 0.04, 0xf4f2ee, 0.16, 0.6);
     for (const [lx, ly] of [[88, 486], [185, 486], [88, 494], [185, 494]] as [number, number][]) rect(lx - 1, ly - 1, lx + 1, ly + 1, 0.16, 0x1d1b18);
@@ -1076,31 +1078,35 @@ export default function GreenhouseScene() {
     plant(170, 490, 0.4, false, 0.2);
     {
       // spindle side table between the chairs
-      const [tx, tz] = toWorld(60, 412);
+      const [tx, tz] = toWorld(60, 414.5);
       const wood = mat(0x4a2f20, 0.6);
-      const top = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.03, 20), wood);
-      top.position.set(tx, 0.62, tz);
-      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.05, 0.6, 10), wood);
-      stem.position.set(tx, 0.3, tz);
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.03, 20), wood);
+      top.position.set(tx, 0.53, tz);
+      const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.045, 0.52, 10), wood);
+      stem.position.set(tx, 0.26, tz);
       const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.025, 20), wood);
       foot.position.set(tx, 0.013, tz);
       for (const m of [top, stem, foot]) { m.castShadow = true; scene.add(m); disposables.push(m.geometry); }
-      // white coral sculpture on a white cube
-      const [sx, sz] = toWorld(40, 368);
+      // white coral sculpture on a white cube: a smaller piece (about 0.8 m tall), tucked beside the chairs by the window
+      const [sx, sz] = toWorld(84, 463);
       const white = mat(0xf4f2ee, 0.7);
+      const sculpt = new THREE.Group();
       const cube = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.5, 0.36), white);
-      cube.position.set(sx, 0.25, sz);
+      cube.position.set(0, 0.25, 0);
       cube.castShadow = true;
-      scene.add(cube);
+      sculpt.add(cube);
       disposables.push(cube.geometry);
       for (const [dx, dy, dz, r] of [[0, 0.72, 0, 0.17], [0.1, 0.92, 0.02, 0.13], [-0.1, 1.0, -0.03, 0.12], [0.02, 1.15, 0.05, 0.1], [-0.12, 0.75, 0.08, 0.1]] as [number, number, number, number][]) {
         const g = new THREE.IcosahedronGeometry(r, 1);
         const m = new THREE.Mesh(g, white);
-        m.position.set(sx + dx, dy, sz + dz);
+        m.position.set(dx, dy, dz);
         m.castShadow = true;
-        scene.add(m);
+        sculpt.add(m);
         disposables.push(g);
       }
+      sculpt.scale.setScalar(0.62);
+      sculpt.position.set(sx, 0, sz);
+      scene.add(sculpt);
     }
 
     // ---------- entrance lobby (from the walk-through video) ----------
@@ -1297,7 +1303,7 @@ export default function GreenhouseScene() {
       [400, 452, 538, 500], // sofa
     ];
     const DISCS: Disc[] = [
-      [628, 180, 14], [350, 320, 26], [306, 270, 12], [392, 452, 11], [50, 392, 26], [50, 432, 26], [60, 412, 12], [40, 368, 12], [240, 366, 18],
+      [628, 180, 14], [350, 320, 26], [306, 270, 12], [392, 452, 11], [50, 388, 22], [50, 441, 22], [60, 414, 11], [84, 463, 8], [240, 366, 18],
       [640, 462, 22], [612, 438, 16], [640, 425, 10], [308, 479, 18], [338, 491, 14], [575, 487, 18], [662, 487, 22],
       [655, 360, 22], [250, 503, 12],
     ];
@@ -1350,25 +1356,86 @@ export default function GreenhouseScene() {
     const saved = { pos: new THREE.Vector3(), quat: new THREE.Quaternion(), target: new THREE.Vector3(), fov: 36 };
     const keys = new Set<string>();
     const EYE = 1.35;
+    let eye = EYE;
     let pitch = 0;
     const KEYS = new Set(["w", "a", "s", "d", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"]);
     const keyName = (e: KeyboardEvent) => (e.code.startsWith("Key") ? e.code.slice(3).toLowerCase() : e.key);
     const onKeyDown = (e: KeyboardEvent) => {
       if (mode !== "play" && mode !== "enter") return;
       const k = keyName(e);
-      if (KEYS.has(k)) { keys.add(k); e.preventDefault(); }
+      if (KEYS.has(k)) {
+        keys.add(k);
+        e.preventDefault();
+        if (sitting && (k === "w" || k === "ArrowUp" || k === "s" || k === "ArrowDown") && !e.repeat) toggleSit();
+      }
+      if (k === "e" || e.code === "Space") { e.preventDefault(); if (!e.repeat) toggleSit(); }
       if (e.key === "Escape") api.current?.stop();
     };
     const onKeyUp = (e: KeyboardEvent) => { keys.delete(keyName(e)); };
     window.addEventListener("keydown", onKeyDown);
     window.addEventListener("keyup", onKeyUp);
 
+    // seats you can sit on: position and facing (plan units / radians), eye height when seated, and where you stand up
+    type Seat = { x: number; y: number; face: number; eye: number; out: [number, number] };
+    const SEATS: Seat[] = [
+      // red chairs around the white tables (facing the table); stand up on the outer side
+      { x: 552, y: 249, face: Math.PI / 2, eye: 1.08, out: [-34, 0] },
+      { x: 650, y: 249, face: -Math.PI / 2, eye: 1.08, out: [34, 0] },
+      { x: 601, y: 212, face: 0, eye: 1.08, out: [0, -34] },
+      { x: 552, y: 315, face: Math.PI / 2, eye: 1.08, out: [-34, 0] },
+      { x: 650, y: 315, face: -Math.PI / 2, eye: 1.08, out: [34, 0] },
+      { x: 601, y: 352, face: Math.PI, eye: 1.08, out: [0, 34] },
+      // sofa: three places, facing the room
+      { x: 430, y: 473, face: Math.PI, eye: 1.12, out: [0, -50] },
+      { x: 468, y: 473, face: Math.PI, eye: 1.12, out: [0, -50] },
+      { x: 506, y: 473, face: Math.PI, eye: 1.12, out: [0, -50] },
+      // papasan chairs in the hidden space
+      { x: 50, y: 388, face: 1.43, eye: 0.98, out: [40, 0] },
+      { x: 50, y: 441, face: 1.72, eye: 0.98, out: [40, 0] },
+      // brown lounge chair at the east end, and the pouf in front of it
+      { x: 640, y: 462, face: -(3 * Math.PI) / 4, eye: 1.08, out: [-40, -40] },
+      { x: 612, y: 438, face: -(3 * Math.PI) / 4, eye: 0.95, out: [-30, -30] },
+      // the white bean bag
+      { x: 350, y: 320, face: Math.PI / 2, eye: 0.92, out: [40, 0] },
+    ];
+    let sitting: Seat | null = null;
+    let sitT = 0;
+    let shownHint: "sit" | "stand" | null = null;
+    const angDiff = (a: number, b: number) => Math.atan2(Math.sin(a - b), Math.cos(a - b));
+    const nearestSeat = () => {
+      let best: Seat | null = null;
+      let bd = 48;
+      for (const st of SEATS) { const d = Math.hypot(me.x - st.x, me.y - st.y); if (d < bd) { bd = d; best = st; } }
+      return best;
+    };
+    const findFree = (x: number, y: number): [number, number] => {
+      for (let r = 0; r <= 90; r += 8) {
+        for (let k = 0; k < 12; k++) {
+          const a = (k / 12) * Math.PI * 2;
+          const px = x + Math.cos(a) * r, py = y + Math.sin(a) * r;
+          if (canStand(px, py)) return [px, py];
+        }
+      }
+      return [x, y];
+    };
+    const toggleSit = () => {
+      if (mode !== "play") return;
+      if (sitting) {
+        const [fx, fy] = findFree(sitting.x + sitting.out[0], sitting.y + sitting.out[1]);
+        me.x = fx; me.y = fy;
+        sitting = null;
+      } else {
+        const st = nearestSeat();
+        if (st) { sitting = st; sitT = 0; }
+      }
+    };
+
     const eyeQuat = new THREE.Quaternion();
     const eul = new THREE.Euler(0, 0, 0, "YXZ");
     const eyePos = new THREE.Vector3();
     const setEyePose = () => {
       const [wx, wz] = toWorld(me.x, me.y);
-      eyePos.set(wx, EYE, wz);
+      eyePos.set(wx, eye, wz);
       eul.set(pitch, me.face + Math.PI, 0, "YXZ");
       eyeQuat.setFromEuler(eul);
     };
@@ -1394,9 +1461,12 @@ export default function GreenhouseScene() {
       mode = "enter";
       setPlaying(true);
       capture();
+      // bring the whole view on screen so the on-screen hints and the pad are not below the fold
+      mount.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "center" });
     };
     const stopPlay = () => {
       if (mode !== "play" && mode !== "enter") return;
+      if (sitting) { const [fx, fy] = findFree(sitting.x + sitting.out[0], sitting.y + sitting.out[1]); me.x = fx; me.y = fy; sitting = null; }
       keys.clear();
       you.visible = true;
       raiseWalls(false);
@@ -1407,6 +1477,7 @@ export default function GreenhouseScene() {
     api.current = {
       start: startPlay,
       stop: stopPlay,
+      sit: toggleSit,
       press: (k, down) => { if (down) keys.add(k); else keys.delete(k); },
     };
 
@@ -1457,8 +1528,8 @@ export default function GreenhouseScene() {
         // arrows left/right turn, W/S and up/down walk, A/D strafe
         if (keys.has("ArrowLeft")) me.face += 1.9 * dt;
         if (keys.has("ArrowRight")) me.face -= 1.9 * dt;
-        const fwd = (keys.has("w") || keys.has("ArrowUp") ? 1 : 0) - (keys.has("s") || keys.has("ArrowDown") ? 1 : 0);
-        const str = (keys.has("d") ? 1 : 0) - (keys.has("a") ? 1 : 0);
+        const fwd = sitting ? 0 : (keys.has("w") || keys.has("ArrowUp") ? 1 : 0) - (keys.has("s") || keys.has("ArrowDown") ? 1 : 0);
+        const str = sitting ? 0 : (keys.has("d") ? 1 : 0) - (keys.has("a") ? 1 : 0);
         let dx = Math.sin(me.face) * fwd - Math.cos(me.face) * str;
         let dy = Math.cos(me.face) * fwd + Math.sin(me.face) * str;
         const len = Math.hypot(dx, dy);
@@ -1474,6 +1545,24 @@ export default function GreenhouseScene() {
       } else {
         me.moving = false;
       }
+      // settle into a seat, and keep the view within a comfortable range while seated
+      if (sitting) {
+        const k = Math.min(1, dt * 6);
+        me.x += (sitting.x - me.x) * k;
+        me.y += (sitting.y - me.y) * k;
+        sitT += dt;
+        if (sitT < 0.5) me.face += angDiff(sitting.face, me.face) * Math.min(1, dt * 8);
+        const rel = angDiff(me.face, sitting.face);
+        const lim = 1.9;
+        if (rel > lim) me.face = sitting.face + lim;
+        else if (rel < -lim) me.face = sitting.face - lim;
+        me.moving = false;
+      }
+      eye += ((sitting ? sitting.eye : EYE) - eye) * Math.min(1, dt * 6);
+      if (mode === "play") {
+        const want: "sit" | "stand" | null = sitting ? "stand" : nearestSeat() ? "sit" : null;
+        if (want !== shownHint) { shownHint = want; setHint(want); }
+      } else if (shownHint !== null) { shownHint = null; setHint(null); }
       const [wx, wz] = toWorld(me.x, me.y);
       you.position.x = wx;
       you.position.z = wz;
@@ -1496,7 +1585,7 @@ export default function GreenhouseScene() {
         if (camera.position.distanceTo(eyePos) < 0.15) mode = "play";
       } else if (mode === "play") {
         setEyePose();
-        const bob = me.moving ? Math.sin(now / 120) * 0.025 : 0;
+        const bob = me.moving && !sitting ? Math.sin(now / 120) * 0.025 : 0;
         camera.position.set(eyePos.x, eyePos.y + bob, eyePos.z);
         camera.quaternion.copy(eyeQuat);
         // photo card pops up near a photo spot
@@ -1655,10 +1744,18 @@ export default function GreenhouseScene() {
         )}
         {playing && (
           <p className="max-w-[220px] rounded-md bg-surface/90 px-3 py-2 text-right text-[11px] leading-relaxed text-muted shadow">
-            W A S D or arrows to move · move the mouse / trackpad to look · walk up to a spot for its photo
+            W A S D or arrows to move · mouse / trackpad to look · E to sit on a chair or sofa · walk up to a spot for its photo
           </p>
         )}
       </div>
+      {playing && hint && (
+        <button
+          onClick={() => api.current?.sit()}
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-foreground/90 px-5 py-2.5 text-sm font-medium text-white shadow-lg transition-colors hover:bg-accent"
+        >
+          {hint === "sit" ? "Press E to sit" : "Press E to stand up"}
+        </button>
+      )}
       {playing && (
         <div className="absolute bottom-4 left-4 grid grid-cols-3 gap-1 sm:hidden" aria-hidden>
           {[["", ""], ["ArrowUp", "↑"], ["", ""], ["ArrowLeft", "↶"], ["ArrowDown", "↓"], ["ArrowRight", "↷"]].map(([k, label], i) =>

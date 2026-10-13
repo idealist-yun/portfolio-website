@@ -1049,6 +1049,65 @@ export default function GreenhouseSceneToBe() {
     // a low white table with black legs by the hidden-space side
     rect(228, 485, 280, 500, 0.03, 0xf4f4f1, 0.45, 0.4);
     for (const [lx, ly] of [[231, 488], [277, 488], [231, 497], [277, 497]] as [number, number][]) cy(0.012, 0.45, 0x1d1b18, lx, ly, 0, 0.5, 6);
+    // To-Be: planting for the reading stations: foliage and pots on top of the canopy (it also screens the view from outside),
+    // vines trailing from its front edge, hanging pots under it, and floor plants around
+    const stationGarden = (x0: number, y0: number, x1: number, y1: number, front: "y0" | "x0", seed: number) => {
+      const CAN = 1.45; // underside of the canopy
+      const top = CAN + 0.045;
+      let sd = seed;
+      const rn = () => { sd = (sd * 16807) % 2147483647; return sd / 2147483647; };
+      const greens = [0x4f7d3a, 0x5d8a43, 0x6a9a4a, 0x3f6b34, 0x7aa45a];
+      const blob = (px: number, py: number, elev: number, rad: number, sy = 0.75) => {
+        const [wx, wz] = toWorld(px, py);
+        const g = new THREE.IcosahedronGeometry(rad, 0);
+        const m = new THREE.Mesh(g, mat(greens[(rn() * greens.length) | 0], 0.9));
+        m.scale.y = sy;
+        m.position.set(wx, elev, wz);
+        m.castShadow = true;
+        scene.add(m);
+        disposables.push(g);
+      };
+      const pots = [0xc9663a, 0xe8e2d4, 0x3f78a8, 0xb4573a];
+      // on top of the canopy: a row of pots with a thick mass of leaves around them
+      const nPots = Math.max(3, Math.round(((front === "y0" ? x1 - x0 : y1 - y0)) / 22));
+      for (let i = 0; i < nPots; i++) {
+        const u = (i + 0.5) / nPots;
+        const px = front === "y0" ? x0 + 6 + u * (x1 - x0 - 12) : x0 + 8 + rn() * (x1 - x0 - 16);
+        const py = front === "y0" ? y0 + 8 + rn() * (y1 - y0 - 16) : y0 + 6 + u * (y1 - y0 - 12);
+        cy(0.11, 0.17, pots[i % pots.length], px, py, top, 0.8, 14);
+        for (let k = 0; k < 4; k++) blob(px + (rn() - 0.5) * 8, py + (rn() - 0.5) * 8, top + 0.26 + rn() * 0.2, 0.12 + rn() * 0.09);
+      }
+      const nBlobs = Math.round(((x1 - x0) * (y1 - y0)) / 90);
+      for (let i = 0; i < nBlobs; i++) blob(x0 + 4 + rn() * (x1 - x0 - 8), y0 + 4 + rn() * (y1 - y0 - 8), top + 0.1 + rn() * 0.22, 0.1 + rn() * 0.11);
+      // vines trailing from the front edge (and a few from the sides)
+      const strand = (px: number, py: number, L: number, base: number) => {
+        cy(0.007, L, 0x4f7d3a, px, py, base - L, 0.9, 5);
+        for (let k = 1; k <= 3; k++) blob(px + (rn() - 0.5) * 2, py + (rn() - 0.5) * 2, base - (L * k) / 3.4, 0.045 + rn() * 0.03, 1.3);
+      };
+      const edgeLen = front === "y0" ? x1 - x0 : y1 - y0;
+      const nStr = Math.round(edgeLen / 7);
+      for (let i = 0; i < nStr; i++) {
+        const along = 3 + (i / Math.max(1, nStr - 1)) * (edgeLen - 6);
+        const L = 0.3 + rn() * 0.65;
+        if (front === "y0") strand(x0 + along, y0 + 0.5, L, CAN + 0.02);
+        else strand(x0 + 0.5, y0 + along, L, CAN + 0.02);
+      }
+      // hanging pots under the canopy, on short chains
+      for (let i = 0; i < 3; i++) {
+        const u = 0.2 + i * 0.3;
+        const px = front === "y0" ? x0 + 8 + u * (x1 - x0 - 16) : x0 + 14 + rn() * 10;
+        const py = front === "y0" ? y0 + 14 + rn() * 10 : y0 + 8 + u * (y1 - y0 - 16);
+        cy(0.004, 0.4, 0x1d1b18, px, py, CAN - 0.4, 0.5, 4);
+        cy(0.1, 0.13, pots[(i + 1) % pots.length], px, py, CAN - 0.52, 0.8, 14);
+        for (let k = 0; k < 4; k++) blob(px + (rn() - 0.5) * 5, py + (rn() - 0.5) * 5, CAN - 0.34 + rn() * 0.1, 0.09 + rn() * 0.05);
+        strand(px + 2, py + 2, 0.35 + rn() * 0.3, CAN - 0.44);
+      }
+    };
+    stationGarden(588, 412, 674, 507, "y0", 11);
+    stationGarden(590, 366, 685, 452, "x0", 23);
+    // floor plants around the two stations
+    for (const [qx, qy, sc] of [[600, 438, 0.7], [664, 436, 0.6], [602, 497, 0.45], [668, 497, 0.45], [600, 376, 0.7], [600, 440, 0.6], [674, 372, 0.5], [674, 446, 0.5]] as [number, number, number][]) plant(qx, qy, sc, false);
+
     // To-Be: a one-person reading station in the south-east corner, in place of the brown lounge chair (see the reference photo):
     // a boucle bean bag, a tall white side panel, an overhead white ledge that screens the view from outside,
     // a small side table and the plants next to it. The reader sits with the glass behind and looks into the room.
@@ -1587,7 +1646,7 @@ export default function GreenhouseSceneToBe() {
     ];
     const DISCS: Disc[] = [
       [628, 180, 14], [350, 320, 26], [306, 304, 12], [370, 382, 11], [190, 392, 22], [188, 440, 22], [212, 416, 11], [228, 474, 22], [310, 372, 17],
-      [627, 478, 24], [654, 466, 10], [657, 410, 24], [646, 380, 10], [308, 479, 18], [338, 491, 14], [575, 487, 18], [662, 487, 22],
+      [627, 478, 24], [654, 466, 10], [657, 410, 24], [646, 380, 10], [600, 438, 8], [664, 436, 8], [600, 376, 8], [600, 440, 8], [674, 372, 8], [674, 446, 8], [308, 479, 18], [338, 491, 14], [575, 487, 18], [662, 487, 22],
       [655, 360, 22], [250, 503, 12],
     ];
     const R = 10;

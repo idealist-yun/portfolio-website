@@ -350,7 +350,7 @@ export default function GreenhouseScene() {
     const gw = gx1 - gx0;
     const gd = gz1 - gz0;
     const eave = 2.2;
-    const ridge = 2.9;
+    const ridge = 3.2;
     const roofH = (z: number) => ridge - ((ridge - eave) * (z - gz0)) / gd;
     const nx = 12;
     const BAY = gw / nx; // one glass bay
@@ -793,19 +793,151 @@ export default function GreenhouseScene() {
     })();
     {
       const [mx0, mz0] = toWorld(685, 197);
-      const [, mz1] = toWorld(685, 352);
+      const [, mz1] = toWorld(685, 290);
       const depth = mz1 - mz0;
-      const g = new THREE.BoxGeometry(0.1, eave, depth);
+      const g = new THREE.BoxGeometry(0.1, 2.3, depth);
       disposables.push(g);
       const plain = mat(0xf8f4e8, 0.9);
       const face = new THREE.MeshStandardMaterial({ map: mosaicTex, roughness: 0.8 });
       // +x, -x (room side, mosaic), +y, -y, +z, -z
       const m = new THREE.Mesh(g, [plain, face, plain, plain, plain, plain]);
-      m.position.set(mx0 + 0.05, eave / 2, (mz0 + mz1) / 2);
+      m.position.set(mx0 + 0.05, 2.3 / 2, (mz0 + mz1) / 2);
       m.castShadow = true;
       m.receiveShadow = true;
       scene.add(m);
       disposables.push(face);
+      // the grey return at the south end of the east wall, with three framed prints (IMG_9213)
+      const [, rz1] = toWorld(685, 352);
+      const rg = new THREE.BoxGeometry(0.1, 2.3, rz1 - mz1);
+      disposables.push(rg);
+      const ret = new THREE.Mesh(rg, mat(0x8c8178, 0.9));
+      ret.position.set(mx0 + 0.05, 1.15, (mz1 + rz1) / 2);
+      ret.receiveShadow = true;
+      scene.add(ret);
+      for (let i = 0; i < 3; i++) {
+        const fz = mz1 + ((rz1 - mz1) * (i + 1)) / 4;
+        const fg = new THREE.BoxGeometry(0.025, 0.4, 0.3);
+        const pg = new THREE.PlaneGeometry(0.3, 0.24);
+        disposables.push(fg, pg);
+        const fr = new THREE.Mesh(fg, mat(0x1d1b18, 0.5));
+        fr.position.set(mx0 - 0.02, 1.5, fz);
+        const pic = new THREE.Mesh(pg, mat([0x4f8a4a, 0xe7a7b8, 0x4f8a4a][i], 0.9));
+        pic.rotation.y = -Math.PI / 2;
+        pic.position.set(mx0 - 0.04, 1.5, fz);
+        const bg = new THREE.Mesh(pg, mat(0xf4f1e8, 0.9));
+        bg.rotation.y = -Math.PI / 2;
+        bg.scale.set(1.05, 1.3, 1);
+        bg.position.set(mx0 - 0.034, 1.5, fz);
+        scene.add(fr, bg, pic);
+      }
+    }
+
+    // ---------- social space: tiled ceiling, grey header over the opening, recessed lights, track and cameras ----------
+    // (IMG_9213, IMG_9218): the social room has a lower white tile ceiling; the glass roof of the greenhouse meets
+    // a grey header wall above the opening, with a white track carrying spot lights and cameras
+    {
+      const CEIL = 2.3;
+      const [cx0, cz0] = toWorld(331, 199);
+      const [cx1, cz1] = toWorld(683, 352);
+      const tiles = (() => {
+        const c = document.createElement("canvas");
+        c.width = 128; c.height = 128;
+        const g = c.getContext("2d")!;
+        g.fillStyle = "#f4f4f1"; g.fillRect(0, 0, 128, 128);
+        g.strokeStyle = "#c7c7c1"; g.lineWidth = 3;
+        g.strokeRect(0, 0, 128, 128);
+        const t = new THREE.CanvasTexture(c);
+        t.colorSpace = THREE.SRGBColorSpace;
+        t.wrapS = t.wrapT = THREE.RepeatWrapping;
+        t.repeat.set((cx1 - cx0) / 0.6, (cz1 - cz0) / 0.6);
+        disposables.push(t);
+        return t;
+      })();
+      const cg = new THREE.PlaneGeometry(cx1 - cx0, cz1 - cz0);
+      disposables.push(cg);
+      const ceil = new THREE.Mesh(cg, new THREE.MeshStandardMaterial({ map: tiles, roughness: 1, emissive: new THREE.Color(0xa9a9a4), emissiveMap: tiles }));
+      ceil.rotation.x = Math.PI / 2; // faces down, so it is see-through from above
+      ceil.position.set((cx0 + cx1) / 2, CEIL, (cz0 + cz1) / 2);
+      scene.add(ceil);
+      disposables.push(ceil.material);
+
+      // recessed round lights on a grid, a linear slot diffuser and a smoke detector
+      const lightMat = new THREE.MeshBasicMaterial({ color: 0xfffaf0 });
+      disposables.push(lightMat);
+      for (let i = 0; i < 6; i++) {
+        for (let j = 0; j < 3; j++) {
+          const lg = new THREE.CircleGeometry(0.07, 18);
+          disposables.push(lg);
+          const lm = new THREE.Mesh(lg, lightMat);
+          lm.rotation.x = Math.PI / 2;
+          lm.position.set(cx0 + 0.6 + i * ((cx1 - cx0 - 1.2) / 5), CEIL - 0.004, cz0 + 0.5 + j * ((cz1 - cz0 - 1.0) / 2));
+          scene.add(lm);
+        }
+      }
+      const slotG = new THREE.PlaneGeometry(2.8, 0.1);
+      disposables.push(slotG);
+      const slot = new THREE.Mesh(slotG, new THREE.MeshBasicMaterial({ color: 0x4a4a48 }));
+      slot.rotation.x = Math.PI / 2;
+      slot.position.set((cx0 + cx1) / 2 + 0.4, CEIL - 0.005, cz1 - 0.35);
+      scene.add(slot);
+      disposables.push(slot.material);
+      const smokeG = new THREE.CircleGeometry(0.06, 16);
+      disposables.push(smokeG);
+      const smoke = new THREE.Mesh(smokeG, mat(0xd7d7d2, 0.6));
+      smoke.rotation.x = Math.PI / 2;
+      smoke.position.set((cx0 + cx1) / 2 - 0.6, CEIL - 0.006, (cz0 + cz1) / 2);
+      scene.add(smoke);
+
+      // grey header wall above the opening, from the ceiling up to the glass roof
+      const zH = cz1 - 0.06;
+      const hG = new THREE.BoxGeometry(cx1 - cx0 + 0.1, ridge - CEIL + 0.02, 0.12);
+      disposables.push(hG);
+      const header = new THREE.Mesh(hG, mat(0x8c8178, 0.9));
+      header.position.set((cx0 + cx1) / 2, CEIL + (ridge - CEIL) / 2, zH);
+      header.receiveShadow = true;
+      scene.add(header);
+      // soffit lip below the header
+      const lipG = new THREE.BoxGeometry(cx1 - cx0 + 0.1, 0.08, 0.14);
+      disposables.push(lipG);
+      const lip = new THREE.Mesh(lipG, mat(0xf4f4f1, 0.8));
+      lip.position.set((cx0 + cx1) / 2, CEIL - 0.04, zH);
+      scene.add(lip);
+
+      // white track along the header with three spot lights and a camera at each end
+      const white = mat(0xf4f4f1, 0.4);
+      const ty = ridge - 0.28;
+      const tz = zH + 0.1;
+      const trackG = new THREE.BoxGeometry(cx1 - cx0 - 0.5, 0.035, 0.035);
+      disposables.push(trackG);
+      const track = new THREE.Mesh(trackG, white);
+      track.position.set((cx0 + cx1) / 2, ty, tz);
+      scene.add(track);
+      const fix = (x: number, camera2: boolean) => {
+        const g = new THREE.Group();
+        const blockG = new THREE.BoxGeometry(0.16, 0.05, 0.07);
+        const headG = new THREE.CylinderGeometry(camera2 ? 0.05 : 0.04, camera2 ? 0.05 : 0.045, camera2 ? 0.14 : 0.12, 14);
+        disposables.push(blockG, headG);
+        const block = new THREE.Mesh(blockG, white);
+        const head = new THREE.Mesh(headG, white);
+        head.position.set(0, -0.08, 0.06);
+        head.rotation.x = Math.PI / 2 - 0.5;
+        g.add(block, head);
+        if (!camera2) {
+          const glowG = new THREE.CircleGeometry(0.032, 12);
+          disposables.push(glowG);
+          const glow = new THREE.Mesh(glowG, lightMat);
+          glow.position.set(0, -0.11, 0.115);
+          glow.rotation.x = -0.5;
+          g.add(glow);
+        }
+        g.position.set(x, ty, tz + 0.03);
+        scene.add(g);
+      };
+      fix(cx0 + 0.45, true);
+      fix(cx0 + (cx1 - cx0) * 0.38, false);
+      fix(cx0 + (cx1 - cx0) * 0.58, false);
+      fix(cx0 + (cx1 - cx0) * 0.8, false);
+      fix(cx1 - 0.4, true);
     }
 
     // greenhouse (IMG_9107, IMG_2650): a charcoal fabric sofa with round pleated pillows, a blob rug,

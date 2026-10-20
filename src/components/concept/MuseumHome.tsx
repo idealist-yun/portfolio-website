@@ -8,7 +8,9 @@ import ObservationRoom from "@/components/concept/ObservationRoom";
 import Switcher from "@/components/concept/Switcher";
 import ProjectBento from "@/components/concept/ProjectBento";
 import SiteHeader from "@/components/SiteHeader";
-import VipRobotSim from "@/components/VipRobotSim";
+import ClickInArrow from "@/components/concept/ClickInArrow";
+import HeroGreeter from "@/components/concept/HeroGreeter";
+import HowIWork from "@/components/concept/HowIWork";
 import { ClockPair, Piano } from "@/components/concept/widgets";
 import { journey, whyQuote } from "@/data/concept";
 import { profile } from "@/data/profile";
@@ -223,6 +225,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       style={{ background: PAPER, color: INK, backgroundImage: grain }}
     >
       <Opening />
+      <HeroGreeter />
       {preview && <Switcher current="b" />}
 
       <SiteHeader />
@@ -230,22 +233,23 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       {/* hero */}
       <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">
         <Stage>
-        <div className="relative md:min-h-[900px]">
+        <div className="relative md:min-h-[940px]">
+          <ClickInArrow />
           <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-dm)] text-[clamp(2.2rem,9vw,3.6rem)] leading-[1.04] tracking-[-0.01em] md:max-w-[540px] md:text-[56px]">
             <span className="block md:whitespace-nowrap">
-              Standing on the <em style={{ color: RED }}>edge.</em>
+              Designing <em style={{ color: RED }}>how</em>
             </span>
-            <span className="block md:whitespace-nowrap">Designing from it.</span>
+            <span className="block md:whitespace-nowrap">to design.</span>
           </h1>
           <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-7" style={{ color: MUTED }}>
-            Hi, I&rsquo;m Ian, a strategic, service &amp; experience designer across business, design and engineering. I turn research into strategy, and test it on simulated users (generative agents) before it reaches real ones.
+            Hi, I&rsquo;m Ian, a strategic, service &amp; experience designer standing on the edge of business, design and engineering. I turn research into strategy, and test it on simulated users (generative agents) before it reaches real ones.
           </p>
-          <p className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05]" style={{ color: INK }}>
+          <p data-greet-anchor className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05]" style={{ color: INK }}>
             Define personas from human data. Ideate and prototype the service. Test it with simulated persona agents.
           </p>
 
           <div className="mt-10 grid gap-5 sm:grid-cols-2 md:mt-0 md:block">
-            <DeskItem left="33.5%" top="30%" rot={-3} z={7} front={front} onFront={bump} className="max-md:max-w-[220px] md:w-[160px]">
+            <DeskItem left="30%" top="47%" rot={-3} z={7} front={front} onFront={bump} className="max-md:max-w-[220px] md:hidden">
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new Event("museum:enlarge"))}
@@ -263,7 +267,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               <style>{`@keyframes nudge{0%,100%{transform:translate(0,0)}50%{transform:translate(5px,-5px)}}`}</style>
             </DeskItem>
 
-            <DeskItem left="47%" top="0%" rot={0} z={3} front={front} onFront={bump} className="sm:col-span-2 md:w-[600px]">
+            <DeskItem left="41%" top="0%" rot={0} z={3} front={front} onFront={bump} className="sm:col-span-2 md:w-[700px]">
               <div
                 className="rounded-[4px] p-[10px] shadow-[0_22px_40px_-18px_rgba(29,27,24,0.7)]"
                 style={{ background: "linear-gradient(135deg,#9a6a38,#6e4520)", boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.18), 0 22px 40px -18px rgba(29,27,24,0.7)" }}
@@ -277,7 +281,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </p>
             </DeskItem>
 
-            <DeskItem left="76%" top="55%" rot={4} z={4} front={front} onFront={bump} className="md:w-[250px]">
+            <DeskItem left="78%" top="66%" rot={4} z={4} front={front} onFront={bump} className="md:w-[250px]">
               <div className="rounded-sm bg-white p-2 pb-8 shadow-[0_14px_30px_-14px_rgba(29,27,24,0.6)]">
                 <Image
                   src="/images/about-collage.png"
@@ -292,7 +296,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </div>
             </DeskItem>
 
-            <DeskItem left="27%" top="55%" rot={-3} z={5} front={front} onFront={bump} className="md:w-[250px]">
+            <DeskItem left="27%" top="69%" rot={-3} z={5} front={front} onFront={bump} className="md:w-[250px]">
               <PostIt color="#ffe9a0">
                 <p className="text-[1.5rem] leading-[1.1]" style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
                   &ldquo;{whyQuote}&rdquo;
@@ -303,7 +307,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="0%" top="40%" rot={-2} z={4} front={front} onFront={bump} className="md:w-[290px]">
+            <DeskItem left="0%" top="67%" rot={-2} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#bfe0ff">
                 <p className={noteLabel}>now</p>
                 <p className={`mt-1 text-[1.65rem] ${noteHand}`} style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
@@ -315,21 +319,21 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="3%" top="62%" rot={2} z={4} front={front} onFront={bump} className="md:w-[270px]">
+            <DeskItem left="3%" top="86%" rot={2} z={4} front={front} onFront={bump} className="md:w-[270px]">
               <PostIt color="#c4f1d2">
                 <p className={`mb-2 ${noteLabel}`}>time check</p>
                 <ClockPair tone="paper" />
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="21%" top="80%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
+            <DeskItem left="29%" top="90%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#ffd0dc">
                 <p className={`mb-2 ${noteLabel}`}>off hours · play me (a – k, w e t y u)</p>
                 <Piano tone="paper" />
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="46%" top="58%" rot={2} z={6} front={front} onFront={bump} className="md:w-[270px]">
+            <DeskItem left="52%" top="69%" rot={2} z={6} front={front} onFront={bump} className="md:w-[270px]">
               <PostIt color="#fff6d6" pin="#c8431f">
                 <p className={noteLabel}>how it branches</p>
                 <div className="mt-1">
@@ -338,7 +342,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="80%" top="84%" rot={3} z={6} front={front} onFront={bump} className="md:w-[190px]">
+            <DeskItem left="61%" top="93%" rot={3} z={6} front={front} onFront={bump} className="md:w-[190px]">
               <PostIt color="#fff3a8" pin="#2f6fdf">
                 <p className={noteLabel}>method</p>
                 <p className="mt-1 text-[1.5rem] leading-[1.05]" style={{ fontFamily: "var(--font-hand)", fontWeight: 700 }}>
@@ -359,25 +363,8 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
         <ProjectBento theme="paper" />
       </section>
 
-      {/* how I work: the VIP reception as a live service simulation */}
-      <section className="border-y border-black/15" style={{ background: "rgba(36,56,107,0.06)" }}>
-        <div className="mx-auto max-w-[1240px] px-6 py-14">
-          <div className="grid items-end gap-6 md:grid-cols-[1fr_1.2fr]">
-            <h2 className="font-[family-name:var(--font-instrument)] text-5xl leading-[1.02]">
-              This is how I <em style={{ color: INDIGO }}>work.</em>
-            </h2>
-            <p className="max-w-md text-[14px] leading-relaxed" style={{ color: MUTED }}>
-              A robot-run VIP reception for Sungkyunkwan University, designed as six steps borrowed from a 1817 album of the Crown Prince&rsquo;s entrance ceremony. This is the service blueprint, running: three robots, a guest, and the President. Press play, or hover a stop.
-            </p>
-          </div>
-          <div className="mt-10">
-            <VipRobotSim />
-          </div>
-          <Link href="/project/vip-concierge-robot" className="mt-8 inline-block font-mono text-[11px] uppercase tracking-wider underline underline-offset-4" style={{ color: RED }}>
-            Read the full project →
-          </Link>
-        </div>
-      </section>
+      {/* how I work: four steps, each shown by one representative project */}
+      <HowIWork />
 
       {/* journey */}
       <section className="py-16">

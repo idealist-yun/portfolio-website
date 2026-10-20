@@ -765,7 +765,7 @@ const PROPS = buildWorld();
 type Kind = YunId | "you";
 const SHIRT: Record<Kind, string> = { army: "#5b7a46", care: "#6a9bff", samsung: "#eef0ff", robots: "#ff8a66", mall: "#ffd24a", penn: "#2a3f7f", you: "#ff4d6d" };
 
-function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) {
+export function Person({ kind, face, bob, wave }: { kind: Kind; face: 1 | -1; bob: number; wave?: boolean }) {
   const shirt = SHIRT[kind];
   return (
     <g transform={`scale(${face} 1)`}>
@@ -780,6 +780,15 @@ function Person({ kind, face, bob }: { kind: Kind; face: 1 | -1; bob: number }) 
             <line x1="1.5" y1="-17" x2="0" y2="-11" stroke="#1f2a44" strokeWidth="0.9" />
             <rect x="-1.6" y="-11" width="3.2" height="3.8" rx="0.6" fill="#4a5bd8" />
           </>
+        )}
+        {wave && (
+          <g transform="translate(5.5 -15)">
+            <g>
+              <animateTransform attributeName="transform" type="rotate" values="-20;28;-20" dur="0.55s" repeatCount="indefinite" />
+              <rect x="-1.6" y="-10" width="3.2" height="11" rx="1.6" fill={shirt} />
+              <circle cx="0" cy="-11" r="2.3" fill="#ffe0c4" />
+            </g>
+          </g>
         )}
         <circle cx="0" cy="-23" r="6.2" fill="#ffe0c4" />
         <path d="M-6.2,-24 Q-6,-30 0,-30 Q6,-30 6.2,-24 Q2,-27 -1,-26 Q-5,-26 -6.2,-24 Z" fill="#1f2a44" />
@@ -836,7 +845,7 @@ function Docent({ t }: { t: number }) {
 
 
 // ------------------------------------------------------------ snapshot
-type SnapAgent = { id: YunId; pos: Pt; face: 1 | -1; mode: "walk" | "do"; frozen: boolean };
+type SnapAgent = { id: YunId; pos: Pt; face: 1 | -1; mode: "walk" | "do"; frozen: boolean; hide?: boolean };
 type Snap = {
   t: number;
   a: SnapAgent[];
@@ -845,6 +854,7 @@ type Snap = {
   near: string | null;
   follow: boolean;
   moved: boolean;
+  greet?: boolean;
   cam: { x: number; y: number; w: number; h: number };
 };
 
@@ -880,7 +890,7 @@ export default function ObservationRoom({
   const player = useRef<{ pos: Pt; face: 1 | -1; path: Pt[]; moving: boolean }>({ pos: START, face: 1, path: [], moving: false });
   const keys = useRef<Set<string>>(new Set());
   const cam = useRef({ x: 0, y: 0, w: VW, h: VH });
-  const st = useRef({ play: true, follow: false, moved: false, talkWho: null as string | null, clearSel: false, sel: null as string | null, dlg: null as { who: string; key: string } | null, near: null as string | null });
+  const st = useRef({ greetHold: false, greet: false, greetT: 0, play: true, follow: false, moved: false, talkWho: null as string | null, clearSel: false, sel: null as string | null, dlg: null as { who: string; key: string } | null, near: null as string | null });
   const svgRef = useRef<SVGSVGElement>(null);
   const last = useRef<number | null>(null);
 
@@ -949,6 +959,48 @@ export default function ObservationRoom({
     window.addEventListener("museum:enlarge", expand);
     return () => window.removeEventListener("museum:enlarge", expand);
   }, [expand]);
+  // the hero greeter (an Ian who waves from the intro text) walks to the gate and hands over to the map's own Penn Ian
+  useEffect(() => {
+    const hold = () => {
+      st.current.greetHold = true;
+    };
+    const cancel = () => {
+      st.current.greetHold = false;
+    };
+    const enter = () => {
+      const s = st.current;
+      s.greetHold = false;
+      const a = agents.current.find((x) => x.id === "penn");
+      if (!a) return;
+      a.pos = [...NODES.gate] as Pt;
+      a.path = route("gate", a.node);
+      a.seg = 0;
+      a.mode = "walk";
+      s.greet = true;
+      s.greetT = clock.current;
+    };
+    const gate = (e: Event) => {
+      const cb = (e as CustomEvent).detail?.cb as ((v: { x: number; y: number; k: number; left: number; top: number; bottom: number } | null) => void) | undefined;
+      const svg = svgRef.current;
+      const m = svg?.getScreenCTM();
+      if (!cb) return;
+      if (!svg || !m) return cb(null);
+      const g = P(NODES.gate[0], NODES.gate[1]);
+      const r = svg.getBoundingClientRect();
+      cb({ x: m.a * g[0] + m.e, y: m.d * g[1] + m.f, k: m.a, left: r.left, top: r.top, bottom: r.bottom });
+    };
+    window.addEventListener("museum:greet-hold", hold);
+    window.addEventListener("museum:greet-cancel", cancel);
+    window.addEventListener("museum:greet-enter", enter);
+    window.addEventListener("museum:greet-gate", gate);
+    return () => {
+      window.removeEventListener("museum:greet-hold", hold);
+      window.removeEventListener("museum:greet-cancel", cancel);
+      window.removeEventListener("museum:greet-enter", enter);
+      window.removeEventListener("museum:greet-gate", gate);
+    };
+  }, []);
+
   const collapse = useCallback(() => {
     setExpanded(false);
     setDlg(null);
@@ -1103,6 +1155,7 @@ export default function ObservationRoom({
       }
     }
     s.near = near;
+    if (s.greet && (pl.moving || pl.path.length > 0 || s.dlg || clock.current - s.greetT > 14)) s.greet = false;
 
     // the Ians
     agents.current.forEach((a) => {
@@ -1211,12 +1264,13 @@ export default function ObservationRoom({
     const s = st.current;
     return {
       t: clock.current,
-      a: agents.current.map((a) => ({ id: a.id, pos: [...a.pos] as Pt, face: a.face, mode: a.mode, frozen: s.near === a.id })),
+      a: agents.current.map((a) => ({ id: a.id, pos: [...a.pos] as Pt, face: a.face, mode: a.mode, frozen: s.near === a.id, hide: s.greetHold && a.id === "penn" })),
       p: { pos: [...player.current.pos] as Pt, face: player.current.face, moving: player.current.moving },
       doc: { pos: [...dc.pos] as Pt, face: dc.face, mode: dc.mode, hall: dc.hall, line: dc.hall ? hallOf(dc.hall).caption : WELCOME },
       near: s.near,
       follow: s.follow,
       moved: s.moved,
+      greet: s.greet,
       cam: { ...cam.current },
     };
   }, []);
@@ -1330,7 +1384,7 @@ export default function ObservationRoom({
   );
 
   const peopleItems: Item[] = [
-    ...snap.a.map((a): Item => {
+    ...snap.a.filter((a) => !a.hide).map((a): Item => {
       const sc = P(a.pos[0], a.pos[1]);
       const walking = a.mode === "walk";
       const bob = walking ? Math.sin(snap.t * 14 + a.id.length * 3) * 1.4 : 0;
@@ -1631,7 +1685,7 @@ export default function ObservationRoom({
           <g key={i}>{s.el}</g>
         ))}
 
-        {snap.doc.mode === "do" && !dlg && (() => {
+        {snap.doc.mode === "do" && !dlg && !snap.greet && (() => {
           const ls = lines(snap.doc.line, 32);
           const sc = P(snap.doc.pos[0], snap.doc.pos[1]);
           const w = Math.max(...ls.map((l) => l.length)) * 4.3 + 16;
@@ -1644,6 +1698,27 @@ export default function ObservationRoom({
               <rect x="-5" y="-1.5" width="10" height="3" fill="#fff" />
               {ls.map((l, i) => (
                 <text key={i} x="0" y={-h + 10 + i * 10 - 1} textAnchor="middle" fontSize="7.6" fill={INK} style={{ fontFamily: SANS }}>
+                  {l}
+                </text>
+              ))}
+            </g>
+          );
+        })()}
+
+        {snap.greet && !dlg && (() => {
+          const a = snap.a.find((x) => x.id === "penn");
+          if (!a) return null;
+          const ls = lines("Click the floor to walk around!", 22);
+          const sc = P(a.pos[0], a.pos[1]);
+          const w = Math.max(...ls.map((l) => l.length)) * 6.2 + 20;
+          const h = ls.length * 14 + 10;
+          return (
+            <g transform={`translate(${sc[0]} ${sc[1] - 52})`} pointerEvents="none">
+              <rect x={-w / 2} y={-h} width={w} height={h} rx="9" fill="#fff" stroke="#c23d8c" strokeWidth="2" />
+              <path d="M-5,0 L0,8 L5,0 Z" fill="#fff" stroke="#c23d8c" strokeWidth="2" />
+              <rect x="-6" y="-2" width="12" height="4" fill="#fff" />
+              {ls.map((l, i) => (
+                <text key={i} x="0" y={-h + 15 + i * 14 - 1} textAnchor="middle" fontSize="11" fontWeight={600} fill={INK} style={{ fontFamily: SANS }}>
                   {l}
                 </text>
               ))}

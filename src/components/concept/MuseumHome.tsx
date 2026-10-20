@@ -315,7 +315,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
                   Master of Integrated Product Design at UPenn
                 </p>
                 <p className="mt-1 text-[1.15rem] opacity-70" style={{ fontFamily: "var(--font-hand)" }}>
-                  engineering × design × Wharton · 2026 – 2028
+                  Engineering × Design × Wharton · 2026 – 2028
                 </p>
               </PostIt>
             </DeskItem>
@@ -325,8 +325,8 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
                 <p className={noteLabel}>past</p>
                 <ul className="mt-1 space-y-1.5" style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
                   {[
-                    ["B.B.A. & B.S. Data Science", "SKKU · 2017 – 2022"],
-                    ["Master of Service Design", "SKKU · 2022 – 2025"],
+                    ["B.B.A. & B.S. Data Science", "Sungkyunkwan Univ · 2017 – 2022"],
+                    ["Master of Service Design", "Sungkyunkwan Univ · 2022 – 2025"],
                     ["First Lieutenant, ROKA", "2022 – 2024"],
                     ["Samsung Electronics", "2025 – 2026"],
                   ].map(([t, m]) => (
@@ -369,7 +369,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
                   <span className="block">Basic Design Thinking →</span>
                   <span className="block">Data-driven Persona →</span>
                   <span className="block">
-                    <span style={{ color: RED }}>AI</span>-driven Simulation
+                    AI-driven <span style={{ color: RED }}>Simulation</span>
                   </span>
                 </p>
               </PostIt>

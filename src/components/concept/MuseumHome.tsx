@@ -233,18 +233,18 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
       {/* hero */}
       <section className="mx-auto max-w-[1240px] px-6 pb-16 pt-10 sm:pt-14">
         <Stage>
-        <div className="relative md:min-h-[940px]">
+        <div className="relative md:min-h-[960px]">
           <ClickInArrow />
-          <h1 className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-dm)] text-[clamp(2.2rem,9vw,3.6rem)] leading-[1.04] tracking-[-0.01em] md:max-w-[540px] md:text-[56px]">
+          <h1 data-greet-anchor className="relative z-[5] max-w-[22ch] font-[family-name:var(--font-dm)] text-[clamp(2.2rem,9vw,3.6rem)] leading-[1.04] tracking-[-0.01em] md:max-w-[540px] md:text-[68px]">
             <span className="block md:whitespace-nowrap">
               Designing <em style={{ color: RED }}>how</em>
             </span>
             <span className="block md:whitespace-nowrap">to design.</span>
           </h1>
-          <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-7" style={{ color: MUTED }}>
+          <p className="relative z-[5] mt-6 max-w-sm text-[15px] leading-relaxed md:mt-7 md:max-w-[440px] md:text-[18.5px] md:leading-[1.55]" style={{ color: MUTED }}>
             Hi, I&rsquo;m Ian, a strategic, service &amp; experience designer standing on the edge of business, design and engineering. I turn research into strategy, and test it on simulated users (generative agents) before it reaches real ones.
           </p>
-          <p data-greet-anchor className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05]" style={{ color: INK }}>
+          <p className="relative z-[5] mt-4 max-w-sm font-[family-name:var(--font-hand)] text-[1.6rem] leading-[1.05] md:mt-10 md:max-w-[440px] md:text-[1.7rem]" style={{ color: INK }}>
             Define personas from human data. Ideate and prototype the service. Test it with simulated persona agents.
           </p>
 
@@ -269,6 +269,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
 
             <DeskItem left="41%" top="0%" rot={0} z={3} front={front} onFront={bump} className="sm:col-span-2 md:w-[700px]">
               <div
+                data-museum-frame
                 className="rounded-[4px] p-[10px] shadow-[0_22px_40px_-18px_rgba(29,27,24,0.7)]"
                 style={{ background: "linear-gradient(135deg,#9a6a38,#6e4520)", boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.18), 0 22px 40px -18px rgba(29,27,24,0.7)" }}
               >
@@ -281,7 +282,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </p>
             </DeskItem>
 
-            <DeskItem left="78%" top="66%" rot={4} z={4} front={front} onFront={bump} className="md:w-[250px]">
+            <DeskItem left="78%" top="59%" rot={4} z={4} front={front} onFront={bump} className="md:w-[250px]">
               <div className="rounded-sm bg-white p-2 pb-8 shadow-[0_14px_30px_-14px_rgba(29,27,24,0.6)]">
                 <Image
                   src="/images/about-collage.png"
@@ -296,7 +297,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </div>
             </DeskItem>
 
-            <DeskItem left="27%" top="69%" rot={-3} z={5} front={front} onFront={bump} className="md:w-[250px]">
+            <DeskItem left="27%" top="58%" rot={-3} z={5} front={front} onFront={bump} className="md:w-[250px]">
               <PostIt color="#ffe9a0">
                 <p className="text-[1.5rem] leading-[1.1]" style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
                   &ldquo;{whyQuote}&rdquo;
@@ -307,7 +308,7 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="0%" top="67%" rot={-2} z={4} front={front} onFront={bump} className="md:w-[290px]">
+            <DeskItem left="0%" top="49%" rot={-2} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#bfe0ff">
                 <p className={noteLabel}>now</p>
                 <p className={`mt-1 text-[1.65rem] ${noteHand}`} style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
@@ -319,21 +320,40 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="3%" top="86%" rot={2} z={4} front={front} onFront={bump} className="md:w-[270px]">
+            <DeskItem left="0%" top="71%" rot={2} z={4} front={front} onFront={bump} className="md:w-[290px]">
+              <PostIt color="#e6dcff" pin="#7a5bd6">
+                <p className={noteLabel}>past</p>
+                <ul className="mt-1 space-y-1.5" style={{ fontFamily: "var(--font-hand)", fontWeight: 600 }}>
+                  {[
+                    ["B.B.A. & B.S. Data Science", "SKKU · 2017 – 2022"],
+                    ["Master of Service Design", "SKKU · 2022 – 2025"],
+                    ["First Lieutenant, ROKA", "2022 – 2024"],
+                    ["Samsung Electronics", "2025 – 2026"],
+                  ].map(([t, m]) => (
+                    <li key={t} className="leading-[1.05]">
+                      <span className="block text-[1.35rem]">{t}</span>
+                      <span className="block text-[1.05rem] opacity-70">{m}</span>
+                    </li>
+                  ))}
+                </ul>
+              </PostIt>
+            </DeskItem>
+
+            <DeskItem left="77%" top="84%" rot={2} z={4} front={front} onFront={bump} className="md:w-[270px]">
               <PostIt color="#c4f1d2">
                 <p className={`mb-2 ${noteLabel}`}>time check</p>
                 <ClockPair tone="paper" />
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="29%" top="90%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
+            <DeskItem left="26%" top="78%" rot={-1.5} z={4} front={front} onFront={bump} className="md:w-[290px]">
               <PostIt color="#ffd0dc">
                 <p className={`mb-2 ${noteLabel}`}>off hours · play me (a – k, w e t y u)</p>
                 <Piano tone="paper" />
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="52%" top="69%" rot={2} z={6} front={front} onFront={bump} className="md:w-[270px]">
+            <DeskItem left="51%" top="59%" rot={2} z={6} front={front} onFront={bump} className="md:w-[270px]">
               <PostIt color="#fff6d6" pin="#c8431f">
                 <p className={noteLabel}>how it branches</p>
                 <div className="mt-1">
@@ -342,11 +362,15 @@ export default function MuseumHome({ preview = false }: { preview?: boolean }) {
               </PostIt>
             </DeskItem>
 
-            <DeskItem left="61%" top="93%" rot={3} z={6} front={front} onFront={bump} className="md:w-[190px]">
+            <DeskItem left="52.5%" top="87%" rot={3} z={6} front={front} onFront={bump} className="md:w-[250px]">
               <PostIt color="#fff3a8" pin="#2f6fdf">
                 <p className={noteLabel}>method</p>
-                <p className="mt-1 text-[1.5rem] leading-[1.05]" style={{ fontFamily: "var(--font-hand)", fontWeight: 700 }}>
-                  Basic → Data → <span style={{ color: RED }}>AI</span>
+                <p className="mt-1 text-[1.45rem] leading-[1.1]" style={{ fontFamily: "var(--font-hand)", fontWeight: 700 }}>
+                  <span className="block">Basic Design Thinking →</span>
+                  <span className="block">Data-driven Persona →</span>
+                  <span className="block">
+                    <span style={{ color: RED }}>AI</span>-driven Simulation
+                  </span>
                 </p>
               </PostIt>
             </DeskItem>

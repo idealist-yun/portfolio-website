@@ -1,18 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { at, measureGreet, tangent, type XY } from "@/components/concept/greetPath";
+import { measureGreet, type XY } from "@/components/concept/greetPath";
 
 const INK = "#1d1b18";
 const RED = "#c8431f";
 
 type Geo = { d: string; head: string; tx: number; ty: number };
 
-// A long hand-drawn arrow from where the greeter first stands, along the foot of the intro text, up to the museum frame.
-// The greeter walks this same curve. The "Click in!" note rides on the arrow.
+// A short hand-drawn arrow above the museum frame. It comes in from the right and points down at the "M" of the museum label, stopping outside the frame.
 export default function ClickInArrow() {
   const box = useRef<HTMLDivElement>(null);
   const [geo, setGeo] = useState<Geo | null>(null);
+  // while the greeter is still on his way, the note stays hidden; it draws in when he lands
+  const [hold, setHold] = useState(false);
 
   useEffect(() => {
     const el = box.current;
@@ -23,20 +24,21 @@ export default function ClickInArrow() {
       const r = el.getBoundingClientRect();
       const sc = el.offsetWidth ? r.width / el.offsetWidth : 1;
       const loc = (p: XY): XY => ({ x: (p.x - r.left) / sc, y: (p.y - r.top) / sc });
-      const s = loc(m.start);
-      const c = loc(m.ctrl);
-      const g = loc(m.edge);
-      const t0 = 0.12;
-      const t1 = 1;
-      const pts: XY[] = [];
-      for (let i = 0; i <= 40; i++) pts.push(at(s, c, g, t0 + ((t1 - t0) * i) / 40));
-      const d = pts.map((p, i) => `${i ? "L" : "M"}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(" ");
-      const e = pts[pts.length - 1];
-      const tg = tangent(s, c, g, t1);
-      const ang = Math.atan2(tg.y, tg.x);
-      const wing = (a: number) => `M${e.x.toFixed(1)} ${e.y.toFixed(1)} L${(e.x - 15 * Math.cos(ang + a)).toFixed(1)} ${(e.y - 15 * Math.sin(ang + a)).toFixed(1)}`;
-      setGeo({ d, head: wing(0.5) + " " + wing(-0.5), tx: s.x + 48, ty: s.y - 24 });
+      // outside the frame: the tip stops just above its top-left corner
+      const tip = loc({ x: m.mX, y: m.frame.top - 5 });
+      const a = loc({ x: m.frame.left + 92, y: m.frame.top - 22 });
+      const c = { x: a.x - (a.x - tip.x) * 0.8, y: a.y - 10 };
+      const d = `M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${c.x.toFixed(1)} ${c.y.toFixed(1)} ${tip.x.toFixed(1)} ${tip.y.toFixed(1)}`;
+      const ang = Math.atan2(tip.y - c.y, tip.x - c.x);
+      const wing = (w: number) => `M${tip.x.toFixed(1)} ${tip.y.toFixed(1)} L${(tip.x - 14 * Math.cos(ang + w)).toFixed(1)} ${(tip.y - 14 * Math.sin(ang + w)).toFixed(1)}`;
+      setGeo({ d, head: wing(0.5) + " " + wing(-0.5), tx: a.x + 10, ty: a.y + 12 });
     };
+    setHold(document.documentElement.dataset.greeting === "1");
+    const show = () => setHold(false);
+    const hide = () => setHold(document.documentElement.dataset.greeting === "1");
+    window.addEventListener("museum:greet-enter", show);
+    window.addEventListener("museum:greet-cancel", show);
+    window.addEventListener("museum:greet-hold", hide);
     const ts = [0, 300, 900, 1800].map((ms) => window.setTimeout(measure, ms));
     const ro = new ResizeObserver(measure);
     ro.observe(el);
@@ -46,11 +48,16 @@ export default function ClickInArrow() {
       ts.forEach(clearTimeout);
       ro.disconnect();
       window.removeEventListener("resize", measure);
+      window.removeEventListener("museum:greet-enter", show);
+      window.removeEventListener("museum:greet-cancel", show);
+      window.removeEventListener("museum:greet-hold", hide);
     };
   }, []);
 
   return (
-    <div ref={box} aria-hidden={!geo} className="pointer-events-none absolute inset-0 z-[8] hidden md:block">
+    <div ref={box} aria-hidden={!geo} className="pointer-events-none absolute inset-0 z-[8] hidden transition-opacity duration-500 md:block"
+      style={{ opacity: hold ? 0 : 1 }}
+    >
       {geo && (
         <>
           <svg className="absolute inset-0 h-full w-full overflow-visible" fill="none" stroke={INK} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -61,17 +68,11 @@ export default function ClickInArrow() {
             type="button"
             onClick={() => window.dispatchEvent(new Event("museum:enlarge"))}
             aria-label="Open the museum"
-            className="group pointer-events-auto absolute w-[360px] text-left"
-            style={{ left: geo.tx, top: geo.ty, transform: "translateY(-100%) rotate(-3deg)", transformOrigin: "left bottom" }}
+            className="group pointer-events-auto absolute text-left"
+            style={{ left: geo.tx, top: geo.ty, transform: "translateY(-100%) rotate(-2deg)", transformOrigin: "left bottom" }}
           >
-            <span
-              className="block text-[1.55rem] leading-[1.05] transition-colors group-hover:text-[#c8431f]"
-              style={{ fontFamily: "var(--font-hand)", fontWeight: 700, color: INK }}
-            >
-              <span className="block whitespace-nowrap">
-                <span style={{ color: RED }}>Click in!</span> A docent will walk
-              </span>
-              <span className="block whitespace-nowrap">you through my journey.</span>
+            <span className="block whitespace-nowrap text-[1.4rem] leading-none transition-colors group-hover:text-[#c8431f]" style={{ fontFamily: "var(--font-hand)", fontWeight: 700, color: INK }}>
+              <span style={{ color: RED }}>Click in!</span> A docent will walk you through my journey.
             </span>
           </button>
         </>

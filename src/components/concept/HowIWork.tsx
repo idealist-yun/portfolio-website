@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import VipRobotSim from "@/components/VipRobotSim";
 
 const RED = "#c8431f";
@@ -11,6 +11,7 @@ const MUTED = "#6b655a";
 
 type Step = {
   n: string;
+  field: string;
   title: string;
   body: string;
   tools: string[];
@@ -24,36 +25,40 @@ type Step = {
 const steps: Step[] = [
   {
     n: "01",
-    title: "Understand people",
-    body: "Interviews, field observation, and surveys, combined into insights and a design direction.",
-    tools: ["Interviews", "Field studies", "Surveys", "Journey mapping", "Miro", "Figma"],
+    field: "Design thinking",
+    title: "Start by understanding people.",
+    body: "To understand what people actually want, I implement various mixed-methods approaches, including interviews, field studies, and surveys, and lay the findings out in visualizations such as journey maps and service blueprints. The patterns that emerge become a design direction the team can decide on.",
+    tools: ["Mixed methods", "Interviews", "Field studies", "Surveys", "Journey mapping", "Service blueprint", "Miro", "Figma"],
     project: "Disability service design · Military HR system",
     href: "/project/disability-as-market",
     linkLabel: "Read the project →",
   },
   {
     n: "02",
-    title: "Define personas from data",
-    body: "Behavioral and survey data are clustered into personas that are measured, not imagined.",
-    tools: ["Python", "R", "Clustering", "Network analysis", "Tableau", "Power BI"],
-    project: "Starfield, new branch",
-    href: "/project/starfield-new-branch-1",
+    field: "Data + Business",
+    title: "Back it with data.",
+    body: "To put a strategy on evidence, I turn behavior and market data into data-driven analysis and personas. I use traditional data analysis, such as demand forecasting, to read the market, and sociological and computational methods, such as network analysis, process mining, and heatmaps, to visualize how people actually move and choose. All of it follows research-based methodology drawn from the literature.",
+    tools: ["Network analysis", "Process mining", "Heatmap", "Data visualization", "Demand forecasting", "Research design", "Python", "R", "Tableau", "Power BI"],
+    project: "Starfield · Samsung life-log",
+    href: "/project/starfield-existing-branch",
     linkLabel: "Read the project →",
   },
   {
     n: "03",
-    title: "Design and simulate the service",
-    body: "Insights and personas become a service strategy, visualized and simulated before anything is built.",
-    tools: ["Service blueprint", "Figma", "Unity", "Rapid prototyping"],
-    project: "VIP concierge robot",
+    field: "Prototype",
+    title: "Design and simulate prototypes of products, services, systems, and strategy.",
+    body: "Once the strategy is set on that evidence, I prototype it quickly and lean, and test it. For products, that means 3D printing and laser cutting; for services, data visualization, simulation, and virtual prototypes in Unity; and for systems, a fully virtual environment where simulations produce a first draft and show where timing, routes, or hand-offs break. Each test checks a hypothesis about the prototype, keeping the strategic direction right.",
+    tools: ["3D printing", "Laser cutting", "Unity", "SolidWorks", "Figma", "Service blueprint", "Rapid prototyping"],
+    project: "VIP concierge robot · Raemian metaverse",
     href: "/project/vip-concierge-robot",
     linkLabel: "Read the project →",
   },
   {
     n: "04",
-    title: "Verify with agents",
-    body: "Data-driven personas become agents that run through the service, so it is tested before it reaches real people.",
-    tools: ["Python", "Generative agents"],
+    field: "Simulation",
+    title: "Test strategies on agentic simulation.",
+    body: "Finally, I verify with data how the strategy will land with real users. Where the small, lean prototypes of the previous step give a first read, I turn data-driven defined personas into generative agents and run them through service scenarios in simulated environments, 2D today and 3D in development, to see which step breaks and why.",
+    tools: ["Generative agents", "Data-driven personas", "Agent simulation", "Python", "2D / 3D environments"],
     status: "In progress",
     project: "IDD agent testbed",
     href: "/research/idd-agent-simulation",
@@ -80,16 +85,42 @@ function Visual({ i }: { i: number }) {
     );
   }
   if (i === 1) {
+    const tiles: [string, string, string][] = [
+      ["/images/full/starfield-existing-branch-01.jpg", "Network analysis", "object-contain"],
+      ["/images/full/starfield-existing-branch-04.jpg", "Process mining", "object-contain"],
+      ["/images/full/samsung-lifelog-minifridge-04.jpg", "Heatmap + network", "object-cover object-top"],
+      ["/images/full/starfield-existing-branch-02.jpg", "Persona model", "object-contain"],
+    ];
     return (
-      <div className="relative mx-auto aspect-[742/800] max-h-[520px] overflow-hidden rounded-lg border border-black/10 bg-white">
-        <Image src="/images/home/step2-personas.jpg" alt="Personas drawn from a customer-network graph" fill sizes="520px" className="object-contain" />
+      <div className="grid gap-3 md:grid-cols-[4fr_8fr]">
+        <div className="relative aspect-[742/800] overflow-hidden rounded-lg border border-black/10 bg-white">
+          <Image src="/images/home/step2-personas.jpg" alt="Personas drawn from a customer-network graph" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-contain" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {tiles.map(([src, label, fit]) => (
+            <div key={src} className="relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white">
+              <Image src={src} alt={label} fill sizes="(min-width: 768px) 30vw, 50vw" className={fit} />
+              <span className="absolute bottom-2 left-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
+                {label}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
   if (i === 2) {
     return (
-      <div data-nowheel className="overflow-hidden rounded-lg border border-black/10 bg-[#fbf8ef] p-4 sm:p-6">
-        <VipRobotSim />
+      <div className="grid gap-3">
+        <div className="overflow-hidden rounded-lg border border-black/10 bg-[#fbf8ef] p-4 sm:p-6">
+          <VipRobotSim />
+        </div>
+        <div className="relative aspect-[3/1] overflow-hidden rounded-lg border border-black/10 bg-white">
+          <Image src="/images/full/samsung-raemian-metaverse-04.jpg" alt="Metaverse scenarios prototyped in Unity and tested with students" fill sizes="(min-width: 768px) 90vw, 100vw" className="object-cover object-top" />
+          <span className="absolute bottom-2 left-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
+            Unity prototype · Raemian metaverse
+          </span>
+        </div>
       </div>
     );
   }
@@ -103,50 +134,11 @@ function Visual({ i }: { i: number }) {
 export default function HowIWork() {
   const [i, setI] = useState(0);
   const touch = useRef<number | null>(null);
-  const sec = useRef<HTMLElement>(null);
-  const cur = useRef(0);
   const go = (n: number) => setI((n + steps.length) % steps.length);
   const s = steps[i];
 
-  useEffect(() => {
-    cur.current = i;
-  }, [i]);
-
-  // wheel (or a horizontal trackpad swipe) turns the slides, one step at a time.
-  // It lets the page scroll normally before the first slide and after the last, when the section
-  // is not yet at the top of the screen, and over the live simulator.
-  useEffect(() => {
-    const el = sec.current;
-    if (!el) return;
-    let acc = 0;
-    let lastEvt = 0;
-    let lock = 0;
-    const onWheel = (e: WheelEvent) => {
-      if (e.ctrlKey || (e.target as Element).closest("[data-nowheel]")) return;
-      const r = el.getBoundingClientRect();
-      if (r.top > 150 || r.bottom < window.innerHeight * 0.55) return;
-      const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (!d) return;
-      const dir = d > 0 ? 1 : -1;
-      if ((dir > 0 && cur.current === steps.length - 1) || (dir < 0 && cur.current === 0)) return;
-      e.preventDefault();
-      const now = performance.now();
-      if (now - lastEvt > 220) acc = 0;
-      lastEvt = now;
-      if (now < lock) return;
-      acc += d;
-      if (Math.abs(acc) >= 50) {
-        acc = 0;
-        lock = now + 650;
-        setI(cur.current + dir);
-      }
-    };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  }, []);
-
   return (
-    <section ref={sec} className="border-y border-black/15" style={{ background: "rgba(36,56,107,0.06)" }}>
+    <section className="border-y border-black/15" style={{ background: "rgba(36,56,107,0.06)" }}>
       <div
         className="mx-auto max-w-[1240px] px-6 py-14"
         onTouchStart={(e) => (touch.current = e.touches[0].clientX)}
@@ -158,9 +150,14 @@ export default function HowIWork() {
         }}
       >
         <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 className="font-[family-name:var(--font-instrument)] text-5xl leading-[1.02]">
-            This is how I <em style={{ color: INDIGO }}>work.</em>
-          </h2>
+          <div>
+            <h2 className="font-[family-name:var(--font-instrument)] text-5xl leading-[1.02]">
+              This is how I <em style={{ color: INDIGO }}>work.</em>
+            </h2>
+            <p className="mt-3 max-w-xl text-[15px] leading-relaxed" style={{ color: MUTED }}>
+              Classic design thinking, data and business, and new methods, in one process.
+            </p>
+          </div>
           <div className="flex items-center gap-2 font-mono text-[11px]">
             {steps.map((st, k) => (
               <button
@@ -175,17 +172,6 @@ export default function HowIWork() {
                 {st.n}
               </button>
             ))}
-            {[-1, 1].map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => go(i + d)}
-                aria-label={d < 0 ? "Previous step" : "Next step"}
-                className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/25 transition-colors hover:bg-black hover:text-[#f3eee2]"
-              >
-                {d < 0 ? "←" : "→"}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -195,6 +181,9 @@ export default function HowIWork() {
               {s.n}
             </span>
             <div>
+              <p className="mb-1 font-mono text-[11px] uppercase tracking-[0.16em]" style={{ color: INDIGO }}>
+                {s.field}
+              </p>
               <h3 className="font-[family-name:var(--font-instrument)] text-3xl leading-tight">{s.title}</h3>
               <p className="mt-2 max-w-xl text-[15px] leading-relaxed" style={{ color: MUTED }}>
                 {s.body}
@@ -209,8 +198,19 @@ export default function HowIWork() {
             </ul>
           </div>
 
-          <div className="mt-6">
+          <div className="relative mt-6">
             <Visual i={i} />
+            {[-1, 1].map((d) => (
+              <button
+                key={d}
+                type="button"
+                onClick={() => go(i + d)}
+                aria-label={d < 0 ? "Previous step" : "Next step"}
+                className={`absolute top-[210px] z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-black/20 bg-[#f3eee2]/90 text-lg shadow-[0_6px_16px_-6px_rgba(29,27,24,0.5)] backdrop-blur transition-colors hover:bg-black hover:text-[#f3eee2] ${d < 0 ? "left-3" : "right-3"}`}
+              >
+                {d < 0 ? "←" : "→"}
+              </button>
+            ))}
           </div>
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">

@@ -3,6 +3,8 @@
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
+import Blueprint from "@/components/concept/Blueprint";
+import BixbyScene from "@/components/concept/BixbyScene";
 import VipRobotSim from "@/components/VipRobotSim";
 
 const RED = "#c8431f";
@@ -32,13 +34,21 @@ const steps: Step[] = [
   {
     n: "02",
     field: "Data + Business",
-    title: "Back it with data, build strategies.",
+    title: "Back it with data.",
     body: "To put a strategy on evidence, I turn behavior and market data into data-driven analysis and personas. I use traditional data analysis, such as demand forecasting, to read the market, and sociological and computational methods, such as network analysis, process mining, and heatmaps, to visualize how people actually move and choose. All of it follows research-based methodology drawn from the literature.",
     tools: ["Network analysis", "Process mining", "Heatmap", "Data visualization", "Demand forecasting", "Research design", "Python", "R", "Tableau", "Power BI"],
     projects: [{ label: "Starfield, existing branch", href: "/project/starfield-existing-branch" }, { label: "Starfield, new branch #1", href: "/project/starfield-new-branch-1" }, { label: "Starfield, new branch #2", href: "/project/starfield-new-branch-2" }, { label: "Samsung life-log", href: "/project/samsung-lifelog-minifridge" }, { label: "Samsung brand fandom", href: "/project/samsung-brand-fandom" }, { label: "Raemian metaverse", href: "/project/samsung-raemian-metaverse" }, { label: "Demand dashboard (AX)", href: "/project/samsung-ax-dashboard" }, { label: "Public communication", href: "/project/mcst-public-communication" }, { label: "Disability persona thesis", href: "/research/disability-persona-augmentation" }],
   },
   {
     n: "03",
+    field: "Strategy",
+    title: "Turn the evidence into a decision.",
+    body: "From segments, personas, and demand signals, I decide where to compete and what to build: which customers to move, which service to launch, and what it costs. The strategy is a decision with its evidence attached, ready to be prototyped.",
+    tools: ["Segmentation", "Competitive analysis", "Pricing analysis", "Service strategy", "Business model"],
+    projects: [{ label: "Samsung brand fandom", href: "/project/samsung-brand-fandom" }, { label: "Starfield, existing branch", href: "/project/starfield-existing-branch" }, { label: "Starfield, new branch #1", href: "/project/starfield-new-branch-1" }, { label: "Starfield, new branch #2", href: "/project/starfield-new-branch-2" }, { label: "Demand dashboard (AX)", href: "/project/samsung-ax-dashboard" }, { label: "Bixby cooking assistant", href: "/project/samsung-bixby-cooking-assistant" }, { label: "Raemian metaverse", href: "/project/samsung-raemian-metaverse" }, { label: "VIP concierge robot", href: "/project/vip-concierge-robot" }],
+  },
+  {
+    n: "04",
     field: "Prototype",
     title: "Design and simulate prototypes of products, services, systems, and strategy.",
     body: "Once the strategy is set on that evidence, I prototype it quickly and lean, and test it. For products, that means 3D printing and laser cutting; for services, data visualization, simulation, and virtual prototypes in Unity; and for systems, a fully virtual environment where simulations produce a first draft and show where timing, routes, or hand-offs break. Each test checks a hypothesis about the prototype, keeping the strategic direction right.",
@@ -46,7 +56,7 @@ const steps: Step[] = [
     projects: [{ label: "VIP concierge robot", href: "/project/vip-concierge-robot" }, { label: "3D battlefield mapping", href: "/project/military-3d-battlefield-mapping" }, { label: "Raemian metaverse", href: "/project/samsung-raemian-metaverse" }, { label: "Hospital inpatient app", href: "/project/saihst-hospital-metaverse" }, { label: "Manufacturing digital twin", href: "/project/manufacturing-worker-training-ai" }, { label: "Bixby cooking assistant", href: "/project/samsung-bixby-cooking-assistant" }, { label: "The Greenhouse", href: "/greenhouse" }],
   },
   {
-    n: "04",
+    n: "05",
     field: "Simulation",
     title: "Test strategies on agentic simulation.",
     body: "Finally, I verify with data how the strategy will land with real users. Where the small, lean prototypes of the previous step give a first read, I turn data-driven defined personas into generative agents and run them through service scenarios in simulated environments, 2D today and 3D in development, to see which step breaks and why.",
@@ -202,7 +212,7 @@ function Visual({ i }: { i: number }) {
       ["/images/full/starfield-existing-branch-01.jpg", "Network analysis", "object-contain"],
       ["/images/full/starfield-existing-branch-08.jpg", "Process mining", "object-contain"],
       ["/images/home/step2-heatmap.jpg", "Heatmap + network", "object-contain"],
-      ["/images/home/step2-strategy-matrix-b.jpg", "Strategy matrix", "object-contain p-3"],
+      ["/images/full/starfield-existing-branch-07.jpg", "Brand personality", "object-contain p-2"],
     ];
     return (
       <div className="grid gap-3 md:grid-cols-[8fr_4fr]">
@@ -210,7 +220,7 @@ function Visual({ i }: { i: number }) {
           {tiles.map(([src, label, fit]) => (
             <div key={src} className="relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white md:aspect-auto md:min-h-[170px]">
               <Image src={src} alt={label} fill sizes="(min-width: 768px) 30vw, 50vw" className={fit} />
-              <span className="absolute bottom-2 right-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider md:bottom-2 md:left-2 md:right-auto" style={{ color: MUTED }}>
+              <span className="absolute bottom-2 left-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
                 {label}
               </span>
             </div>
@@ -231,6 +241,31 @@ function Visual({ i }: { i: number }) {
     );
   }
   if (i === 2) {
+    const cell = "relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white";
+    const tag = "absolute right-2 top-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider";
+    return (
+      <div className="grid gap-3">
+        <div className="grid gap-3 md:grid-cols-4">
+          <div className={cell}>
+            <Image src="/images/home/step2-strategy-matrix-b.jpg" alt="A fan by owner matrix with three strategies" fill sizes="(min-width: 768px) 25vw, 100vw" className="object-contain p-3" />
+            <span className={tag} style={{ color: MUTED }}>Strategy matrix</span>
+          </div>
+          <div className={cell}>
+            <Image src="/images/full/starfield-existing-branch-09.jpg" alt="Customer routes across the floors of a mall, added brands and existing brands" fill sizes="(min-width: 768px) 25vw, 100vw" className="object-contain p-3" />
+            <span className={tag} style={{ color: MUTED }}>Where the added brands go</span>
+          </div>
+          <div className="relative aspect-[1500/803] overflow-hidden rounded-lg border border-black/10 bg-[#fbf8ef] md:col-span-2 md:aspect-auto md:min-h-0">
+            <div className="flex h-full w-full items-center"><BixbyScene /></div>
+          </div>
+        </div>
+        <div className="relative overflow-hidden rounded-lg border border-black/10 bg-white p-3 sm:p-5">
+          <span className="absolute bottom-3 left-3 z-10 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider sm:bottom-4 sm:left-5" style={{ color: MUTED }}>Service blueprint · VIP reception</span>
+          <div className="overflow-x-auto"><div className="min-w-[760px]"><Blueprint /></div></div>
+        </div>
+      </div>
+    );
+  }
+  if (i === 3) {
     return (
       <div className="grid items-stretch gap-3 md:grid-cols-[1.1fr_1fr]">
         <div className="overflow-hidden rounded-lg border border-black/10 bg-[#fbf8ef] p-3">

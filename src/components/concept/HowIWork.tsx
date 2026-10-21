@@ -294,7 +294,26 @@ export default function HowIWork() {
   const s = steps[i];
 
   return (
-    <section className="border-y border-black/15" style={{ background: "rgba(36,56,107,0.06)" }}>
+    <section className="relative border-y border-black/15" style={{ background: "rgba(36,56,107,0.06)" }}>
+      {/* on wide screens the arrows sit outside the content, in the side margins, and follow the scroll */}
+      {[-1, 1].map((d) => {
+        const t = steps[(i + d + steps.length) % steps.length];
+        return (
+          <div key={d} className={`pointer-events-none absolute inset-y-0 hidden w-[calc((100%-1240px)/2)] min-[1360px]:block ${d < 0 ? "left-0" : "right-0"}`}>
+            <div className="sticky top-[44vh] flex justify-center">
+              <button
+                type="button"
+                onClick={() => go(i + d)}
+                aria-label={d < 0 ? `Previous step: ${t.field}` : `Next step: ${t.field}`}
+                title={`${d < 0 ? "Previous" : "Next"}: ${t.n} ${t.field}`}
+                className="pointer-events-auto inline-flex h-12 w-12 items-center justify-center rounded-full border border-black/30 bg-[#f3eee2] text-xl shadow-[0_8px_18px_-8px_rgba(29,27,24,0.5)] transition-colors hover:bg-black hover:text-[#f3eee2]"
+              >
+                {d < 0 ? "←" : "→"}
+              </button>
+            </div>
+          </div>
+        );
+      })}
       <div
         className="mx-auto max-w-[1240px] px-6 py-14"
         onTouchStart={(e) => (touch.current = e.touches[0].clientX)}
@@ -356,17 +375,6 @@ export default function HowIWork() {
 
           <div className="relative mt-6">
             <Visual i={i} />
-            {[-1, 1].map((d) => (
-              <button
-                key={d}
-                type="button"
-                onClick={() => go(i + d)}
-                aria-label={d < 0 ? "Previous step" : "Next step"}
-                className={`absolute top-[210px] z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-black/20 bg-[#f3eee2]/90 text-lg shadow-[0_6px_16px_-6px_rgba(29,27,24,0.5)] backdrop-blur transition-colors hover:bg-black hover:text-[#f3eee2] ${d < 0 ? "left-3" : "right-3"}`}
-              >
-                {d < 0 ? "←" : "→"}
-              </button>
-            ))}
           </div>
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
@@ -381,6 +389,27 @@ export default function HowIWork() {
             <Link href={s.href} className="font-mono text-[11px] uppercase tracking-wider underline underline-offset-4" style={{ color: RED }}>
               {s.linkLabel}
             </Link>
+          </div>
+
+          <div className="mt-8 flex items-center justify-between gap-3 border-t border-black/15 pt-5 min-[1360px]:hidden">
+            {[-1, 1].map((d) => {
+              const t = steps[(i + d + steps.length) % steps.length];
+              return (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => go(i + d)}
+                  aria-label={d < 0 ? `Previous step: ${t.field}` : `Next step: ${t.field}`}
+                  className={`group inline-flex items-center gap-3 rounded-full border border-black/30 bg-[#f3eee2] px-4 py-2.5 transition-colors hover:bg-black hover:text-[#f3eee2] ${d < 0 ? "" : "flex-row-reverse"}`}
+                >
+                  <span className="text-xl leading-none">{d < 0 ? "←" : "→"}</span>
+                  <span className="text-left">
+                    <span className="block font-mono text-[10px] uppercase tracking-wider opacity-60">{d < 0 ? "Previous" : "Next"} · {t.n}</span>
+                    <span className="block font-[family-name:var(--font-instrument)] text-lg leading-tight">{t.field}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </article>
       </div>

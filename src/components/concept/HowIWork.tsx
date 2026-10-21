@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import VipRobotSim from "@/components/VipRobotSim";
@@ -17,9 +16,7 @@ type Step = {
   body: string;
   tools: string[];
   status?: string;
-  project: string;
-  href: string;
-  linkLabel: string;
+  projects: { label: string; href: string }[];
 };
 
 // Four steps of one method. Each slide has the method on top and one worked example below.
@@ -30,9 +27,7 @@ const steps: Step[] = [
     title: "Start by understanding people.",
     body: "To understand what people actually want, I implement various mixed-methods approaches, including interviews, field studies, and surveys, and lay the findings out in visualizations such as journey maps and service blueprints. The patterns that emerge become a design direction the team can decide on.",
     tools: ["Mixed methods", "Interviews", "Field studies", "Surveys", "Journey mapping", "Service blueprint", "Miro", "Figma"],
-    project: "Disability service design · Military HR system",
-    href: "/project/disability-as-market",
-    linkLabel: "Read the project →",
+    projects: [{ label: "Disability service design", href: "/project/disability-as-market" }, { label: "Military HR system", href: "/project/military-hr-big-data" }, { label: "Hospital inpatient app", href: "/project/saihst-hospital-metaverse" }, { label: "Veterans reintegration", href: "/project/veterans-reintegration" }, { label: "Public communication", href: "/project/mcst-public-communication" }, { label: "Undergraduate works", href: "/project/undergraduate-works" }, { label: "VIP concierge robot", href: "/project/vip-concierge-robot" }],
   },
   {
     n: "02",
@@ -40,9 +35,7 @@ const steps: Step[] = [
     title: "Back it with data, build strategies.",
     body: "To put a strategy on evidence, I turn behavior and market data into data-driven analysis and personas. I use traditional data analysis, such as demand forecasting, to read the market, and sociological and computational methods, such as network analysis, process mining, and heatmaps, to visualize how people actually move and choose. All of it follows research-based methodology drawn from the literature.",
     tools: ["Network analysis", "Process mining", "Heatmap", "Data visualization", "Demand forecasting", "Research design", "Python", "R", "Tableau", "Power BI"],
-    project: "Starfield · Samsung life-log · Samsung brand fandom · Disability persona thesis",
-    href: "/project/starfield-existing-branch",
-    linkLabel: "Read the project →",
+    projects: [{ label: "Starfield, existing branch", href: "/project/starfield-existing-branch" }, { label: "Starfield, new branch #1", href: "/project/starfield-new-branch-1" }, { label: "Starfield, new branch #2", href: "/project/starfield-new-branch-2" }, { label: "Samsung life-log", href: "/project/samsung-lifelog-minifridge" }, { label: "Samsung brand fandom", href: "/project/samsung-brand-fandom" }, { label: "Raemian metaverse", href: "/project/samsung-raemian-metaverse" }, { label: "Demand dashboard (AX)", href: "/project/samsung-ax-dashboard" }, { label: "Public communication", href: "/project/mcst-public-communication" }, { label: "Disability persona thesis", href: "/research/disability-persona-augmentation" }],
   },
   {
     n: "03",
@@ -50,9 +43,7 @@ const steps: Step[] = [
     title: "Design and simulate prototypes of products, services, systems, and strategy.",
     body: "Once the strategy is set on that evidence, I prototype it quickly and lean, and test it. For products, that means 3D printing and laser cutting; for services, data visualization, simulation, and virtual prototypes in Unity; and for systems, a fully virtual environment where simulations produce a first draft and show where timing, routes, or hand-offs break. Each test checks a hypothesis about the prototype, keeping the strategic direction right.",
     tools: ["3D printing", "Laser cutting", "Unity", "SolidWorks", "Figma", "Service blueprint", "Rapid prototyping"],
-    project: "VIP concierge robot · Gregory Greenhouse · Army terrain prototype",
-    href: "/project/vip-concierge-robot",
-    linkLabel: "Read the project →",
+    projects: [{ label: "VIP concierge robot", href: "/project/vip-concierge-robot" }, { label: "3D battlefield mapping", href: "/project/military-3d-battlefield-mapping" }, { label: "Raemian metaverse", href: "/project/samsung-raemian-metaverse" }, { label: "Hospital inpatient app", href: "/project/saihst-hospital-metaverse" }, { label: "Manufacturing digital twin", href: "/project/manufacturing-worker-training-ai" }, { label: "Bixby cooking assistant", href: "/project/samsung-bixby-cooking-assistant" }, { label: "The Greenhouse", href: "/greenhouse" }],
   },
   {
     n: "04",
@@ -61,9 +52,7 @@ const steps: Step[] = [
     body: "Finally, I verify with data how the strategy will land with real users. Where the small, lean prototypes of the previous step give a first read, I turn data-driven defined personas into generative agents and run them through service scenarios in simulated environments, 2D today and 3D in development, to see which step breaks and why.",
     tools: ["Generative agents", "Data-driven personas", "Agent simulation", "Python", "2D / 3D environments"],
     status: "In progress",
-    project: "IDD agent testbed",
-    href: "/research/idd-agent-simulation",
-    linkLabel: "Read the research →",
+    projects: [{ label: "IDD agent testbed", href: "/research/idd-agent-simulation" }, { label: "Disability persona thesis", href: "/research/disability-persona-augmentation" }, { label: "Manufacturing digital twin", href: "/project/manufacturing-worker-training-ai" }],
   },
 ];
 
@@ -193,15 +182,15 @@ function LabPanel() {
 function Visual({ i }: { i: number }) {
   if (i === 0) {
     return (
-      <div className="grid gap-3 md:grid-cols-[7fr_5fr]">
+      <div className="grid items-stretch gap-3 md:grid-cols-[7fr_5fr]">
         <div className="relative aspect-[3/2] overflow-hidden rounded-lg border border-black/10 bg-white">
           <Image src="/images/full/disability-as-market-04.jpg" alt="An interview in progress with a map on the table" fill sizes="(min-width: 768px) 58vw, 100vw" className="object-cover" />
         </div>
-        <div className="grid gap-3">
+        <div className="flex flex-col gap-3">
           <div className="relative aspect-[3/1] overflow-hidden rounded-lg border border-black/10 bg-white">
             <Image src="/images/full/disability-as-market-05.jpg" alt="Insights grouped on sticky notes during a hackathon" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover" />
           </div>
-          <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-black/10 bg-white">
+          <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-black/10 bg-white md:aspect-auto md:min-h-0 md:flex-1">
             <Image src="/images/full/military-hr-big-data-03.jpg" alt="Interview coding results for 18 participants" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-cover object-top" />
           </div>
         </div>
@@ -377,18 +366,21 @@ export default function HowIWork() {
             <Visual i={i} />
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-baseline gap-3">
-              <p className="font-[family-name:var(--font-instrument)] text-xl leading-tight">{s.project}</p>
-              {s.status && (
-                <span className="font-mono text-[10px] uppercase tracking-wider" style={{ color: RED }}>
-                  {s.status}
-                </span>
-              )}
-            </div>
-            <Link href={s.href} className="font-mono text-[11px] uppercase tracking-wider underline underline-offset-4" style={{ color: RED }}>
-              {s.linkLabel}
-            </Link>
+          <div className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1.5 border-t border-black/10 pt-4">
+            <span className="mr-1 font-mono text-[10px] uppercase tracking-[0.16em]" style={{ color: MUTED }}>
+              Where I did this{s.status ? ` · ${s.status}` : ""}
+            </span>
+            {s.projects.map((pr) => (
+              <a
+                key={pr.href + pr.label}
+                href={pr.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-black/20 px-2.5 py-1 text-[12.5px] leading-none transition-colors hover:border-[#c8431f] hover:text-[#c8431f]"
+              >
+                {pr.label} ↗
+              </a>
+            ))}
           </div>
 
           <div className="mt-8 flex items-center justify-between gap-3 border-t border-black/15 pt-5 min-[1360px]:hidden">

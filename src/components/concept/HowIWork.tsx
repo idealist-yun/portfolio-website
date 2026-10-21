@@ -4,7 +4,7 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import Blueprint from "@/components/concept/Blueprint";
-import BixbyScene from "@/components/concept/BixbyScene";
+import BixbyStrategyBoard from "@/components/concept/BixbyStrategyBoard";
 import VipRobotSim from "@/components/VipRobotSim";
 
 const RED = "#c8431f";
@@ -255,7 +255,7 @@ function Visual({ i }: { i: number }) {
             <span className={tag} style={{ color: MUTED }}>Where the added brands go</span>
           </div>
           <div className="relative aspect-[1500/803] overflow-hidden rounded-lg border border-black/10 bg-[#fbf8ef] md:col-span-2 md:aspect-auto md:min-h-0">
-            <div className="flex h-full w-full items-center"><BixbyScene /></div>
+            <div className="flex h-full w-full items-center"><BixbyStrategyBoard /></div>
           </div>
         </div>
         <div className="relative overflow-hidden rounded-lg border border-black/10 bg-white p-3 sm:p-5">

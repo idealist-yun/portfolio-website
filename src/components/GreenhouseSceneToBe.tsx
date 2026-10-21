@@ -86,7 +86,7 @@ function toWorld(px: number, py: number): [number, number] {
   return [(px - CX) * S, (py - CZ) * S];
 }
 
-export default function GreenhouseSceneToBe() {
+export default function GreenhouseSceneToBe({ embed = false }: { embed?: boolean } = {}) {
   const mountRef = useRef<HTMLDivElement>(null);
   const pinRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const zoneRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -2149,7 +2149,7 @@ export default function GreenhouseSceneToBe() {
         ))}
       </div>
 
-      {!playing && (
+      {!playing && !embed && (
         <div className="absolute left-4 top-4 flex flex-col items-start gap-2">
           {[["hidden", "Hidden space curtain"], ["guard", "Guard curtain"]].map(([id, label]) => (
             <button
@@ -2166,18 +2166,18 @@ export default function GreenhouseSceneToBe() {
       <div className="absolute right-4 top-4 flex flex-col items-end gap-2">
         <button
           onClick={() => (playing ? api.current?.stop() : api.current?.start())}
-          className="rounded-full border border-border bg-surface/95 px-4 py-2 text-sm font-medium text-foreground shadow transition-colors hover:border-accent hover:text-accent"
+          className={`rounded-full border border-border bg-surface/95 font-medium text-foreground shadow transition-colors hover:border-accent hover:text-accent ${embed ? "px-3 py-1.5 text-[12px]" : "px-4 py-2 text-sm"}`}
         >
-          {playing ? "Exit  ·  Esc" : "Take control of YOU"}
+          {playing ? "Exit  ·  Esc" : embed ? "Explore in first person" : "Take control of YOU"}
         </button>
         {playing && !locked && (
-          <p className="max-w-[220px] rounded-md bg-accent px-3 py-2 text-right text-[11px] font-medium leading-relaxed text-white shadow">
-            Click the view to capture the mouse, then look around with your trackpad
+          <p className={`rounded-md bg-accent text-right font-medium text-white shadow ${embed ? "px-2.5 py-1 text-[10.5px]" : "max-w-[220px] px-3 py-2 text-[11px] leading-relaxed"}`}>
+            {embed ? "Click to look around" : "Click the view to capture the mouse, then look around with your trackpad"}
           </p>
         )}
         {playing && (
-          <p className="max-w-[220px] rounded-md bg-surface/90 px-3 py-2 text-right text-[11px] leading-relaxed text-muted shadow">
-            W A S D or arrows to move · mouse / trackpad to look · E to sit on a chair or sofa, or to draw the curtain · walk up to a spot for its photo
+          <p className={`rounded-md bg-surface/90 text-right text-muted shadow ${embed ? "px-2.5 py-1 text-[10.5px]" : "max-w-[220px] px-3 py-2 text-[11px] leading-relaxed"}`}>
+            {embed ? "WASD move · mouse look · E sit" : "W A S D or arrows to move · mouse / trackpad to look · E to sit on a chair or sofa, or to draw the curtain · walk up to a spot for its photo"}
           </p>
         )}
       </div>

@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
 import VipRobotSim from "@/components/VipRobotSim";
 
 const RED = "#c8431f";
@@ -36,10 +37,10 @@ const steps: Step[] = [
   {
     n: "02",
     field: "Data + Business",
-    title: "Back it with data.",
+    title: "Back it with data, build strategies.",
     body: "To put a strategy on evidence, I turn behavior and market data into data-driven analysis and personas. I use traditional data analysis, such as demand forecasting, to read the market, and sociological and computational methods, such as network analysis, process mining, and heatmaps, to visualize how people actually move and choose. All of it follows research-based methodology drawn from the literature.",
     tools: ["Network analysis", "Process mining", "Heatmap", "Data visualization", "Demand forecasting", "Research design", "Python", "R", "Tableau", "Power BI"],
-    project: "Starfield · Samsung life-log",
+    project: "Starfield · Samsung life-log · Samsung brand fandom · Disability persona thesis",
     href: "/project/starfield-existing-branch",
     linkLabel: "Read the project →",
   },
@@ -49,7 +50,7 @@ const steps: Step[] = [
     title: "Design and simulate prototypes of products, services, systems, and strategy.",
     body: "Once the strategy is set on that evidence, I prototype it quickly and lean, and test it. For products, that means 3D printing and laser cutting; for services, data visualization, simulation, and virtual prototypes in Unity; and for systems, a fully virtual environment where simulations produce a first draft and show where timing, routes, or hand-offs break. Each test checks a hypothesis about the prototype, keeping the strategic direction right.",
     tools: ["3D printing", "Laser cutting", "Unity", "SolidWorks", "Figma", "Service blueprint", "Rapid prototyping"],
-    project: "VIP concierge robot · Raemian metaverse",
+    project: "VIP concierge robot · Gregory Greenhouse · Army terrain prototype",
     href: "/project/vip-concierge-robot",
     linkLabel: "Read the project →",
   },
@@ -65,6 +66,129 @@ const steps: Step[] = [
     linkLabel: "Read the research →",
   },
 ];
+
+// The Greenhouse model is a heavy three.js scene, so it only loads when asked.
+const GreenhouseToBe = dynamic(() => import("@/components/GreenhouseSceneToBe"), { ssr: false });
+
+// Renders its child at a fixed design width and scales it down to the column.
+function Scaled({ width, children }: { width: number; children: React.ReactNode }) {
+  const outer = useRef<HTMLDivElement>(null);
+  const inner = useRef<HTMLDivElement>(null);
+  const [k, setK] = useState(1);
+  const [h, setH] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    const o = outer.current;
+    const n = inner.current;
+    if (!o || !n) return;
+    const upd = () => {
+      const sc = Math.min(1, o.clientWidth / width);
+      setK(sc);
+      setH(n.offsetHeight * sc);
+    };
+    const ro = new ResizeObserver(upd);
+    ro.observe(o);
+    ro.observe(n);
+    upd();
+    return () => ro.disconnect();
+  }, [width]);
+  return (
+    <div ref={outer} style={{ height: h }} className="overflow-hidden">
+      <div ref={inner} style={{ width, transform: `scale(${k})`, transformOrigin: "top left" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function GreenhousePanel() {
+  return (
+    <div className="relative overflow-hidden rounded-lg border border-black/10 bg-[#fbf8ef] max-md:h-[340px] md:min-h-[260px] md:flex-[3]">
+      <GreenhouseToBe embed />
+    </div>
+  );
+}
+
+// The agent lab boots a Python runtime in the browser (about 10 MB), so it only starts when asked.
+// It then plays a ready-made run (one agent, the baseline daily-living scenario) right inside the tile.
+function LabPanel() {
+  const [on, setOn] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const frame = useRef<HTMLIFrameElement>(null);
+
+  const started = useRef(false);
+  const start = () => {
+    const f = frame.current;
+    const d = f?.contentDocument;
+    const w = f?.contentWindow as (Window & { toggleAgent?: (id: string) => void; toggleScen?: (file: string) => void; runExperiment?: () => void }) | null | undefined;
+    if (!f || !d || !w || started.current) return;
+    started.current = true;
+    let tries = 0;
+    const iv = window.setInterval(() => {
+      tries += 1;
+      const pill = d.getElementById("engine-pill");
+      if (tries > 240) return window.clearInterval(iv);
+      if (!pill || !/ready/i.test(pill.textContent || "")) return;
+      window.clearInterval(iv);
+      // pick by the lab's own functions, only when not already picked
+      ["hana"].forEach((name) => {
+        const card = [...d.querySelectorAll("#roster > *")].find((e) => (e as HTMLElement).innerText.trim().toLowerCase().startsWith(name));
+        const id = card?.getAttribute("onclick")?.match(/toggleAgent\('([^']+)'\)/)?.[1];
+        if (card && id && !card.classList.contains("on") && !card.classList.contains("sel")) w.toggleAgent?.(id);
+      });
+      const chip = [...d.querySelectorAll("#scenchips > *")].find((e) => (e as HTMLElement).innerText.includes("Baseline ADL/IADL"));
+      const file = chip?.getAttribute("onclick")?.match(/toggleScen\('([^']+)'\)/)?.[1];
+      if (chip && file && !chip.classList.contains("on")) w.toggleScen?.(file);
+      window.setTimeout(() => {
+        w.runExperiment?.();
+        window.setTimeout(() => {
+          // follow the single agent, a step closer than the default
+          (d.getElementById("zoomInBtn") as HTMLButtonElement | null)?.click();
+          setPlaying(true);
+        }, 800);
+      }, 300);
+    }, 250);
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-lg border border-black/10 bg-[#0b1210] max-md:h-[340px] md:min-h-[360px] md:flex-[3]">
+      {!on && (
+        <>
+          <Image src="/images/home/step4-agents.jpg" alt="Three agents moving through a simulated town" fill sizes="(min-width: 768px) 58vw, 100vw" className="object-cover" />
+          <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 bg-gradient-to-t from-black/70 to-transparent p-4">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-white/80">IDD agent lab · runs in your browser</span>
+            <button
+              type="button"
+              onClick={() => setOn(true)}
+              className="rounded-full px-4 py-2 font-mono text-[11px] uppercase tracking-wider"
+              style={{ background: "#f3eee2", color: "#1d1b18" }}
+            >
+              Run the simulation
+            </button>
+          </div>
+        </>
+      )}
+      {on && (
+        <>
+          <iframe ref={frame} src="/lab/index.html?embed=1" title="IDD agent lab, live simulator" onLoad={start} className="absolute inset-0 h-full w-full" allow="fullscreen" />
+          {!playing && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#0b1210] font-mono text-[11px] uppercase tracking-wider text-white/70">
+              Starting the simulation…
+            </div>
+          )}
+          <a
+            href="/lab/index.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute right-3 top-3 z-10 rounded-full bg-[#f3eee2]/90 px-3 py-1 font-mono text-[10.5px] uppercase tracking-wider"
+            style={{ color: "#1d1b18" }}
+          >
+            Open the full lab ↗
+          </a>
+        </>
+      )}
+    </div>
+  );
+}
 
 function Visual({ i }: { i: number }) {
   if (i === 0) {
@@ -87,46 +211,78 @@ function Visual({ i }: { i: number }) {
   if (i === 1) {
     const tiles: [string, string, string][] = [
       ["/images/full/starfield-existing-branch-01.jpg", "Network analysis", "object-contain"],
-      ["/images/full/starfield-existing-branch-04.jpg", "Process mining", "object-contain"],
-      ["/images/full/samsung-lifelog-minifridge-04.jpg", "Heatmap + network", "object-cover object-top"],
-      ["/images/full/starfield-existing-branch-02.jpg", "Persona model", "object-contain"],
+      ["/images/full/starfield-existing-branch-08.jpg", "Process mining", "object-contain"],
+      ["/images/home/step2-heatmap.jpg", "Heatmap + network", "object-contain"],
+      ["/images/home/step2-strategy-matrix-b.jpg", "Strategy matrix", "object-contain p-3"],
     ];
     return (
-      <div className="grid gap-3 md:grid-cols-[4fr_8fr]">
-        <div className="relative aspect-[742/800] overflow-hidden rounded-lg border border-black/10 bg-white">
-          <Image src="/images/home/step2-personas.jpg" alt="Personas drawn from a customer-network graph" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-contain" />
-        </div>
-        <div className="grid grid-cols-2 gap-3">
+      <div className="grid gap-3 md:grid-cols-[8fr_4fr]">
+        <div className="grid grid-cols-2 gap-3 md:grid-rows-2">
           {tiles.map(([src, label, fit]) => (
-            <div key={src} className="relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white">
+            <div key={src} className="relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white md:aspect-auto md:min-h-[170px]">
               <Image src={src} alt={label} fill sizes="(min-width: 768px) 30vw, 50vw" className={fit} />
-              <span className="absolute bottom-2 left-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
+              <span className="absolute bottom-2 right-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider md:bottom-2 md:left-2 md:right-auto" style={{ color: MUTED }}>
                 {label}
               </span>
             </div>
           ))}
+        </div>
+        <div className="flex flex-col gap-3">
+          <div className="relative aspect-[1/0.88] overflow-hidden rounded-lg border border-black/10 bg-white md:aspect-auto md:min-h-[200px] md:flex-1">
+            <Image src="/images/home/step2-personas-en.jpg" alt="Personas drawn from a customer-network graph, labeled by industry" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-contain p-2" />
+          </div>
+          <div className="relative aspect-[1400/600] overflow-hidden rounded-lg border border-black/10 bg-white">
+            <Image src="/images/full/disability-persona-augmentation-04.jpg" alt="Persona pipeline" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-contain" />
+            <span className="absolute bottom-2 left-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
+              Persona pipeline
+            </span>
+          </div>
         </div>
       </div>
     );
   }
   if (i === 2) {
     return (
-      <div className="grid gap-3">
-        <div className="overflow-hidden rounded-lg border border-black/10 bg-[#fbf8ef] p-4 sm:p-6">
-          <VipRobotSim />
+      <div className="grid items-stretch gap-3 md:grid-cols-[1.1fr_1fr]">
+        <div className="overflow-hidden rounded-lg border border-black/10 bg-[#fbf8ef] p-3">
+          <Scaled width={900}>
+            <VipRobotSim />
+          </Scaled>
         </div>
-        <div className="relative aspect-[3/1] overflow-hidden rounded-lg border border-black/10 bg-white">
-          <Image src="/images/full/samsung-raemian-metaverse-04.jpg" alt="Metaverse scenarios prototyped in Unity and tested with students" fill sizes="(min-width: 768px) 90vw, 100vw" className="object-cover object-top" />
-          <span className="absolute bottom-2 left-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
-            Unity prototype · Raemian metaverse
-          </span>
+        <div className="flex flex-col gap-3">
+          <GreenhousePanel />
+          <div className="relative overflow-hidden rounded-lg border border-black/10 bg-white max-md:aspect-[824/462] md:min-h-[180px] md:flex-[2]">
+            <Image src="/images/home/step3-clay-terrain.jpg" alt="Two terrain models made quickly by hand for training before an exercise" fill sizes="(min-width: 768px) 45vw, 100vw" className="object-cover" />
+          </div>
         </div>
       </div>
     );
   }
   return (
-    <div className="relative mx-auto aspect-[1042/744] max-h-[520px] overflow-hidden rounded-lg border border-black/10 bg-white">
-      <Image src="/images/home/step4-agents.jpg" alt="Three agents moving through a simulated town" fill sizes="720px" className="object-cover" />
+    <div className="grid items-stretch gap-3 md:grid-cols-[5fr_7fr]">
+      <div className="flex flex-col gap-3">
+        <div className="relative aspect-[1400/1055] overflow-hidden rounded-lg border border-black/10 bg-white">
+          <Image src="/images/full/disability-persona-augmentation-03.jpg" alt="Reference: generative agents built from interview transcripts are compared with the people they simulate" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-contain p-2" />
+          <span className="absolute bottom-2 left-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
+            Reference · 2024 Stanford study, generative agents
+          </span>
+        </div>
+        <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-black/10 bg-white md:aspect-auto md:min-h-[300px] md:flex-1">
+          <Image src="/images/full/disability-persona-augmentation-18.jpg" alt="Reference: AI agents in a 3D Minecraft world, from Altera's research" fill sizes="(min-width: 768px) 40vw, 100vw" className="object-contain p-3" />
+          <span className="absolute bottom-2 left-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
+            Reference · Altera, agents in 3D Minecraft
+          </span>
+        </div>
+      </div>
+      <div className="flex flex-col gap-3">
+        <LabPanel />
+        <div className="relative aspect-[1516/728] overflow-hidden rounded-lg border border-black/10 bg-[#0b1210]">
+          <Image src="/images/home/step4-results.jpg" alt="A results grid showing which action each agent completed" fill sizes="(min-width: 768px) 58vw, 100vw" className="object-contain" />
+          <span className="absolute bottom-2 left-2 rounded-full bg-[#f3eee2]/95 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>
+            Which step breaks, and why
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
@@ -176,7 +332,7 @@ export default function HowIWork() {
         </div>
 
         <article key={s.n} className="how-slide mt-8">
-          <div className="grid gap-5 md:grid-cols-[auto_1fr_auto] md:items-start md:gap-8">
+          <div className="flex items-start gap-5 md:gap-8">
             <span className="font-[family-name:var(--font-instrument)] text-6xl leading-none" style={{ color: RED }}>
               {s.n}
             </span>
@@ -185,18 +341,18 @@ export default function HowIWork() {
                 {s.field}
               </p>
               <h3 className="font-[family-name:var(--font-instrument)] text-3xl leading-tight">{s.title}</h3>
-              <p className="mt-2 max-w-xl text-[15px] leading-relaxed" style={{ color: MUTED }}>
-                {s.body}
-              </p>
             </div>
-            <ul className="flex max-w-[320px] flex-wrap gap-1.5 md:justify-end">
-              {s.tools.map((t) => (
-                <li key={t} className="rounded-full border border-black/20 px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-wider" style={{ color: MUTED }}>
-                  {t}
-                </li>
-              ))}
-            </ul>
           </div>
+          <p className="mt-4 text-[16px] leading-relaxed" style={{ color: MUTED }}>
+            {s.body}
+          </p>
+          <ul className="mt-4 flex flex-wrap gap-1.5">
+            {s.tools.map((t) => (
+              <li key={t} className="rounded-full border border-black/20 px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-wider" style={{ color: MUTED }}>
+                {t}
+              </li>
+            ))}
+          </ul>
 
           <div className="relative mt-6">
             <Visual i={i} />

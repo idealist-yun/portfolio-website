@@ -190,6 +190,17 @@ td.cell.fail { background: color-mix(in srgb, var(--bad) 60%, var(--panel)); }
   .scenario-head { align-items: flex-start; }
   .action-node { width: 112px; }
 }
+
+/* embed mode (?embed=1): only the map, the controls and the live caption, filling its frame */
+body.embed .intro, body.embed .stagebtns, body.embed .maptools, body.embed .stagegrid > .card,
+body.embed #lab-credit, body.embed #engine-pill, body.embed .toast { display: none !important; }
+html:has(body.embed), body.embed { height: 100%; margin: 0; overflow: hidden; background: #0f1a12; }
+body.embed .wrap { padding: 0 !important; max-width: none !important; margin: 0 !important; height: 100%; }
+body.embed .stagegrid { display: block; height: 100%; margin: 0; }
+body.embed .stagecard { height: 100%; display: flex; flex-direction: column; border: 0; border-radius: 0; }
+body.embed .mapwrap { flex: 1 1 0; min-height: 0; width: 100%; max-height: none; aspect-ratio: auto; margin: 0; }
+body.embed .hud { flex: none; padding: .4rem .7rem; }
+body.embed .caption { flex: none; padding: .2rem .8rem .5rem; }
 </style>
 </head>
 <body>
@@ -585,7 +596,7 @@ function openResultDetail(cellKey) {
 /* ---------- replay stage (shared logic with dashboard) ---------- */
 let replay = null, layout = null, frameKeys = [], maxFrame = 0;
 let frame = 0, playing = true, speedIdx = 0;
-let cameraFollow = true, cameraZoom = 2.5;
+let cameraFollow = true, cameraZoom = 2.5; const EMBED = /[?&]embed\b/.test(location.search); if (EMBED) document.body.classList.add('embed');
 const speeds = [1, 2, 4, 8], BASE_SPS = 6;
 const canvas = document.getElementById('stageCanvas');
 const ctx = canvas.getContext('2d');
@@ -632,7 +643,7 @@ function drawStage() {
     entries.find(([name]) => !name.endsWith('(support)'))?.[0];
   const focus = entries.find(([name]) => name === focusName)?.[1];
   const zoom = cameraFollow && focus ? cameraZoom : 1;
-  const viewW = mazeW / zoom, viewH = mazeH / zoom;
+  const viewW = mazeW / zoom, viewH = EMBED ? viewW * rect.height / rect.width : mazeH / zoom;
   const cameraX = focus ? Math.max(0, Math.min(mazeW - viewW, focus.x - viewW / 2)) : 0;
   const cameraY = focus ? Math.max(0, Math.min(mazeH - viewH, focus.y - viewH / 2)) : 0;
   const sx = v => (v + 0.5 - cameraX) / viewW * rect.width;
